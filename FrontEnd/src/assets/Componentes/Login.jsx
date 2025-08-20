@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import '../Estilos/Login.css';
+import { toast } from "react-toastify";
+
 
 const Login = () => {
   const [activeTab, setActiveTab] = useState('login');
@@ -133,12 +135,35 @@ const Login = () => {
       return;
     }
 
+    // Aquí iría la lógica real de login (API call, etc.)
+        fetch('http://localhost:3000/api/login', {
+      method : 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(loginData),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Error en la creación del cliente');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Cliente creado:', data);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+
+    toast.success("✅ Login exitoso");
+
+
     console.log('Login exitoso:', loginData);
     setModalMessage('Inicio de sesión exitoso. Redirigiendo al dashboard...');
     setShowModal(true);
-    
-    // Aquí iría la lógica real de login (API call, etc.)
   };
+
 
   const register = () => {
     if (!validateRegister()) {
@@ -152,6 +177,26 @@ const Login = () => {
     setShowModal(true);
     
     // Aquí iría la lógica real de registro (API call, etc.)
+
+    fetch('http://localhost:3000/api/register', {
+      method : 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(registerData),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Error en la creación del cliente');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Cliente creado:', data);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
   };
 
   const closeDemoModal = () => {

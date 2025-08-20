@@ -1,19 +1,22 @@
-const mysql = require("mysql2");
+const mysql = require("mysql2/promise");
 
-const db = mysql.createConnection({
+const pool = mysql.createPool({
   host: "127.0.0.1",      
   user: "root",           
   password: "usal2025",
   database: "pantoneMercedesDB" 
 });
 
-// Verificar conexión
-db.connect(err => {
-  if (err) {
-    console.error("❌ Error conectando a MySQL:", err);
-    return;
-  }
-  console.log("✅ Conectado a la base de datos MySQL");
-});
+async function login(email, password) {
+  const query = "SELECT * FROM Clientes WHERE mail = ? AND contraseña = ?";
+  const [rows] = await pool.query(query, [email, password]);
+  return rows;
+}
 
-module.exports = db;
+async function register(firstName, lastName, cel, email, password) {
+  const query = "INSERT INTO Clientes (nombre, apellido, telefono, mail, contraseña) VALUES (?, ?, ?, ?, ?)";
+  const [result] = await pool.query(query, [firstName, lastName, cel, email, password]);
+  return result;
+}
+
+module.exports = { pool, login, register };

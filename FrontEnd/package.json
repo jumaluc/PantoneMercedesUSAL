@@ -13,6 +13,8 @@
     "framer-motion": "^12.23.12",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-hot-toast": "^2.6.0",
+    "react-toastify": "^11.0.5",
     "shadcn-ui": "^0.9.5"
   },
   "devDependencies": {
