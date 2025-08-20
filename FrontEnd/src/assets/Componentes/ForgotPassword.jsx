@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react'; // ✅ Agregar useEffect
+import React, { useState, useEffect } from 'react';
 import '../Estilos/Login.css';
 
 const ForgotPassword = ({ onClose }) => {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState('email');
   const [timeLeft, setTimeLeft] = useState(0);
   const [resendCooldown, setResendCooldown] = useState(false);
-  const [timer, setTimer] = useState(null); // ✅ Guardar referencia del timer
-
+  const [timer, setTimer] = useState(null);
+  const [idResetPassword, setIdResetPassword] = useState(0);
   const startTimer = () => {
-    // Limpiar timer existente
     if (timer) clearInterval(timer);
     
     const newTimer = setInterval(() => {
@@ -28,7 +29,6 @@ const ForgotPassword = ({ onClose }) => {
     setTimer(newTimer);
   };
 
-  // Limpiar timer al desmontar
   useEffect(() => {
     return () => {
       if (timer) clearInterval(timer);
@@ -92,7 +92,7 @@ const ForgotPassword = ({ onClose }) => {
   const handleVerifyCode = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log(code, email)
+    
     try {
       const response = await fetch('http://localhost:3000/api/verify-reset-code', {
         method: 'POST',
@@ -103,12 +103,59 @@ const ForgotPassword = ({ onClose }) => {
       });
 
       const data = await response.json();
+      setIdResetPassword(data.id);
+      console.log("SET ID PASSWORD 1 : ", idResetPassword)
+      if (response.ok && data.valid) {
+        console.log("ENTRO AL SET STEP")
+        setStep('newPassword');
+        setMessage('');
+      } else {
+        setMessage(data.message || 'Código inválido');
+      }
+    } catch (error) {
+      setMessage('Error de conexión con el servidor');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    
+    // Validaciones
+    if (newPassword.length < 6) {
+      setMessage('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      setMessage('Las contraseñas no coinciden');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      console.log("id reser password", idResetPassword)
+      const response = await fetch('http://localhost:3000/api/reset-password', {    
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email, 
+          idResetPassword,
+          newPassword 
+        }),
+      });
+
+      const data = await response.json();
       
       if (response.ok) {
         setStep('success');
-        setMessage('Código verificado correctamente');
+        setMessage('Contraseña actualizada correctamente');
       } else {
-        setMessage(data.message || 'Código inválido');
+        setMessage(data.message || 'Error al actualizar la contraseña');
       }
     } catch (error) {
       setMessage('Error de conexión con el servidor');
@@ -233,6 +280,68 @@ const ForgotPassword = ({ onClose }) => {
           </>
         )}
 
+        {step === 'newPassword' && (
+          <>
+            <div className="modal-icon">
+              <svg className="modal-check" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 5.5V7H9V5.5L3 7V9L9 10.5V12L3 13.5V15.5L9 14V16H15V14L21 15.5V13.5L15 12V10.5L21 9Z"/>
+              </svg>
+            </div>
+
+            <h3 className="modal-title">Nueva Contraseña</h3>
+            <p className="modal-message">Crea una nueva contraseña para tu cuenta</p>
+
+            <form onSubmit={handleResetPassword} className="form">
+              <div className="form-group">
+                <label className="form-label">Nueva Contraseña</label>
+                <input 
+                  type="password" 
+                  className="form-input"
+                  placeholder="Mínimo 6 caracteres"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Confirmar Contraseña</label>
+                <input 
+                  type="password" 
+                  className="form-input"
+                  placeholder="Repite tu contraseña"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+
+              {message && <p className="modal-message error">{message}</p>}
+
+              <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                <button 
+                  type="submit" 
+                  className="submit-button" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Actualizando...' : 'Actualizar Contraseña'}
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => setStep('code')}
+                  className="modal-button"
+                >
+                  ↶ Volver al código
+                </button>
+              </div>
+            </form>
+          </>
+        )}
+
         {step === 'success' && (
           <>
             <div className="modal-icon success">
@@ -241,14 +350,14 @@ const ForgotPassword = ({ onClose }) => {
               </svg>
             </div>
 
-            <h3 className="modal-title">¡Código Verificado!</h3>
-            <p className="modal-message">Ahora puedes crear una nueva contraseña</p>
+            <h3 className="modal-title">¡Contraseña Actualizada!</h3>
+            <p className="modal-message">Tu contraseña ha sido cambiada exitosamente</p>
 
             <button 
               onClick={onClose}
               className="submit-button"
             >
-              Crear Nueva Contraseña
+              Iniciar Sesión
             </button>
           </>
         )}

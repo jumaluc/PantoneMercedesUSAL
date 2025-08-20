@@ -3,7 +3,7 @@ const cors = require("cors");
 const crypto = require("crypto");
 require("dotenv").config();
 
-const { login, register, verifyEmail, tokenSave, verifyToken } = require("./modulo/db");
+const { login, register, verifyEmail, tokenSave, verifyToken, resetPassword } = require("./modulo/db");
 const sendPasswordResetEmail = require("./utils/emailService.js");
 
 const app = express();
@@ -77,20 +77,60 @@ app.post("/api/forgot-password", async (req, res) => {
   }
 });
 
-app.post("/api/verify-reset-code", async (req, res) =>{
+app.post("/api/verify-reset-code", async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    
+    // ✅ 'result' ya es el array, no necesitas [result]
+    const result = await verifyToken(email, code);
+    
+    console.log("🔍 Resultado de verifyToken:", result);
+    
+    if (result.length === 0) {
+      // ✅ Cambiar 404 por 400 (Bad Request)
+      return res.status(400).json({ 
+        valid: false,
+        message: "Código de recuperación incorrecto o expirado" 
+      });
+    }
+    else {
+      // ✅ result[0] para acceder al primer elemento del array
+      const id_cliente = result[0].id_cliente;
+      console.log("✅ ID del cliente:", id_cliente);
+      
+      return res.status(200).json({ 
+        valid: true,
+        message: "Código de recuperación verificado con éxito", 
+        id: id_cliente 
+      });
+    }
 
-  try{
-    console.log("ENTRO")
-    const {email , code} = req.body;
-    const [result] = verifyToken(email, code)
-    console.log(result)
-    res.status(500).json({ message : "Error del servidor"})
+  } catch (error) {
+    console.error("❌ Error en verify-reset-code:", error);
+    return res.status(500).json({ 
+      valid: false,
+      message: "Error del servidor" 
+    });
+  }
+});
+
+app.post("/api/reset-password", async (req, res) => {
+
+  const {email, idResetPassword ,newPassword} = req.body;
+
+  console.log(email, idResetPassword, newPassword)
+  const result = await resetPassword(email, idResetPassword ,newPassword);
+
+  if (result === 1 ){
+      res.status(200).json({ message : "Contraseña actualizada correctamente"} )
 
   }
-  catch(error){
-    res.status(500).json({ message : "Error del servidor"})
+  else{
+    res.status(500).json({ message : "Error en el servidor"})
   }
+
 })
+
 
 // Servidor
 app.listen(PORT, () => {

@@ -35,17 +35,24 @@ async function tokenSave(resetToken, resetTokenExpiry, id) {
 }
 
 async function verifyToken(email, resetToken){
-try{
+
 
   const query = 'SELECT id_cliente FROM clientes WHERE mail = ?  and resetToken = ? ' ;
   const [result] = await pool.query(query, [email, resetToken]);
+  console.log("Resultado de la verificación del token:", result);
   return result;
-}
-catch(error){
-      console.error("Error en verifyToken:", error);
-      throw error;
-}
 
 }
 
-module.exports = { pool, login, register, verifyEmail, tokenSave, verifyToken };
+async function resetPassword(email, idResetPassword ,newPassword){
+
+  const query = 'UPDATE clientes SET contraseña = ? WHERE mail = ? and id_cliente = ?  ';
+  const [result] = await pool.query(query, [newPassword, email, idResetPassword]);
+
+
+  return result.affectedRows;
+}
+
+
+
+module.exports = { pool, login, register, verifyEmail, tokenSave, verifyToken, resetPassword };
