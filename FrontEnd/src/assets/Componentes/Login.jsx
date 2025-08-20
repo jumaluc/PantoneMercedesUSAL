@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import '../Estilos/Login.css';
 import { toast } from "react-toastify";
-
+import ForgotPassword from "./ForgotPassword";
 
 const Login = () => {
   const [activeTab, setActiveTab] = useState('login');
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [errors, setErrors] = useState({});
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const [loginData, setLoginData] = useState({
     email: '',
@@ -22,6 +23,7 @@ const Login = () => {
     email: '',
     password: '',
     password2: '',
+    service: '',
     acceptTerm: false
   });
 
@@ -95,7 +97,10 @@ const Login = () => {
     } else if (!/\S+@\S+\.\S+/.test(registerData.email)) {
       newErrors.email = 'El formato del email no es válido';
     }
-
+    if (!registerData.service) {
+      console.log("Error")
+    newErrors.service = 'Debes seleccionar un tipo de servicio';
+    }
     // Validar teléfono
     if (!registerData.cel) {
       newErrors.cel = 'El teléfono es requerido';
@@ -128,41 +133,52 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const login = () => {
-    if (!validateLogin()) {
-      setModalMessage('Por favor, corrige los errores en el formulario');
-      setShowModal(true);
-      return;
+
+const login = () => {
+  if (!validateLogin()) {
+    setModalMessage('Por favor, corrige los errores en el formulario');
+    setShowModal(true);
+    return;
+  }
+
+  fetch('http://localhost:3000/api/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(loginData),
+  })
+  .then(async (response) => {
+    // Primero obtenemos los datos de la respuesta
+    const data = await response.json();
+    
+    console.log("Respuesta completa:", data);
+    console.log("Status:", response.status);
+    console.log("OK:", response.ok);
+    
+    if (!response.ok) {
+      const errorMessage = data.message || data.error || 'Error en el login';
+      throw new Error(errorMessage);
     }
-
-    // Aquí iría la lógica real de login (API call, etc.)
-        fetch('http://localhost:3000/api/login', {
-      method : 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(loginData),
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Error en la creación del cliente');
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Cliente creado:', data);
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
-
+    
+    console.log("Login exitoso:", data);
     toast.success("✅ Login exitoso");
-
-
-    console.log('Login exitoso:', loginData);
     setModalMessage('Inicio de sesión exitoso. Redirigiendo al dashboard...');
     setShowModal(true);
-  };
+    
+    return data;
+  })
+  .catch((error) => {
+    console.error('Error completo:', error);
+    
+    // Mostrar el mensaje de error específico del servidor
+    const errorMessage = error.message || 'Error de conexión con el servidor';
+    
+    toast.error(`❌ ${errorMessage}`);
+    setModalMessage(`Error: ${errorMessage}`);
+    setShowModal(true);
+  });
+};
 
 
   const register = () => {
@@ -309,12 +325,18 @@ const Login = () => {
                     />
                     <span className="checkbox-text">Recordarme</span>
                   </label>
-                  <a href="#" className="forgot-link">¿Olvidaste tu contraseña?</a>
-                </div>
+                  <a href="#" className="forgot-link" onClick={(e) => {
+                    e.preventDefault();
+                    setShowForgotPassword(true);
+                  }}>
+                    ¿Olvidaste tu contraseña?
+                  </a>                
+                  </div>
                 
                 <button 
                   type="submit" 
                   className="submit-button"
+                  id="submit-button-login"
                 >
                   Iniciar Sesión
                 </button>
@@ -404,7 +426,27 @@ const Login = () => {
                   />
                   {errors.password2 && <span className="error-message">{errors.password2}</span>}
                 </div>
-                
+
+                <div className="form-group">
+                  <label className="form-label">Tipo de Servicio</label>
+                  <select 
+                    className={`form-input ${errors.servicio ? 'input-error' : ''}`}
+                    value={registerData.servicio} 
+                    name='service' 
+                    onChange={handleChangeRegister}
+                    required
+                  >
+                    <option value="">Selecciona un servicio</option>
+                    <option value="fotografia">XV</option>
+                    <option value="video">Casamiento</option>
+                    <option value="retrato">Book</option>
+                    <option value="eventos">Bautismo</option>
+                    <option value="producto">Evento Coorporativo</option>
+                    <option value="dron">Otros</option>
+                  </select>
+                  {errors.servicio && <span className="error-message">{errors.servicio}</span>}
+                </div>
+
                 <div className="form-checkbox-group">
                   <input 
                     type="checkbox" 
@@ -441,13 +483,21 @@ const Login = () => {
             className="modal-content"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="modal-icon">
+          <div className="modal-icon">
+            {modalMessage.toLowerCase().includes('error') ? (
+              // Icono de error
+              <svg className="modal-error" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+              </svg>
+            ) : (
+              // Icono de éxito (el que ya tienes)
               <svg className="modal-check" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
               </svg>
-            </div>
+            )}
+          </div>
             <h3 className="modal-title">
-              {modalMessage.includes('error') ? '¡Error!' : '¡Éxito!'}
+              {modalMessage.toLowerCase().includes('error') ? '¡Error!' : '¡Éxito!'}
             </h3>
             <p className="modal-message">{modalMessage}</p>
             <button 
@@ -458,6 +508,9 @@ const Login = () => {
             </button>
           </div>
         </div>
+      )}
+      {showForgotPassword && (
+        <ForgotPassword onClose={() => setShowForgotPassword(false)} />
       )}
     </div>
   );

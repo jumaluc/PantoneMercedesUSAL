@@ -180,23 +180,21 @@ body {
 .form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 6px;
 }
 .form-column {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 6px;
 }
 
 .form-row {
   display: flex;
-  gap: 16px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 8px;
 }
 
 .form-group.half {
@@ -305,7 +303,9 @@ body {
 .terms-link:hover {
   color: #FFB347;
 }
-
+#submit-button-login{
+  margin-top: 10px;
+}
 .submit-button {
   padding: 12px 16px;
   background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
@@ -479,4 +479,138 @@ body {
 
 .modal-icon {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+/* Estilos para el modal de recuperación */
+.modal-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #fff;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.modal-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Mensajes de éxito/error */
+.modal-message.success {
+  color: #4ade80;
+  background-color: rgba(74, 222, 128, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  margin: 10px 0;
+}
+
+.modal-message.error {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  margin: 10px 0;
+}
+
+/* Botón deshabilitado */
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: scale(1);
+}
+
+.submit-button:disabled:hover {
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  transform: scale(1);
+}
+
+/* Icono personalizado para recuperación */
+.modal-icon .modal-check {
+  width: 32px;
+  height: 32px;
+}
+/* Estilos específicos para el formulario de recuperación */
+.modal-content .form {
+  margin: 20px 0;
+}
+
+.modal-content .form-group {
+  margin-bottom: 20px;
+}
+
+.modal-content .form-input {
+  width: 100%;
+  margin-bottom: 0;
+}
+/* Estilos para el timer */
+.timer {
+  font-size: 14px;
+  color: #FF8C00;
+  margin: 10px 0;
+}
+
+.timer.expired {
+  color: #ef4444;
+}
+
+/* Estilos para el input de código */
+.code-input {
+  text-align: center;
+  font-size: 18px;
+  letter-spacing: 8px;
+  font-weight: bold;
+}
+
+/* Botón para reenviar código */
+.resend-button {
+  background: none;
+  border: none;
+  color: #FF8C00;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-top: 10px;
+}
+
+.resend-button:disabled {
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* Estados de éxito */
+.modal-icon.success {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+}
+.code-input {
+  text-align: center;
+  font-size: 18px;
+  letter-spacing: 8px;
+  font-weight: bold;
+}
+
+.resend-button {
+  background: none;
+  border: none;
+  color: #FF8C00;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 8px;
+}
+
+.resend-button:disabled {
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.resend-button:hover:not(:disabled) {
+  color: #FFB347;
 }
