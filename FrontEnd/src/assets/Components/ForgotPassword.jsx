@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../Estilos/Login.css';
+import '../Styles/Login.css';
 
 const ForgotPassword = ({ onClose }) => {
   const [email, setEmail] = useState('');

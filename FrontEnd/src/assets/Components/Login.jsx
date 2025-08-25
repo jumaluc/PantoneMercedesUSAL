@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../Estilos/Login.css';
+import '../Styles/Login.css';
 import { toast } from "react-toastify";
 import ForgotPassword from "./ForgotPassword";
 
@@ -9,7 +9,8 @@ const Login = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [errors, setErrors] = useState({});
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-
+  const [modalType, setModalType] = useState('success');
+  
   const [loginData, setLoginData] = useState({
     email: '',
     password: '',
@@ -33,7 +34,7 @@ const Login = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-    // Limpiar error cuando el usuario empiece a escribir
+ 
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -45,24 +46,21 @@ const Login = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-    // Limpiar error cuando el usuario empiece a escribir
+   
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
-  // Validaciones para login
   const validateLogin = () => {
     const newErrors = {};
 
-    // Validar email
     if (!loginData.email) {
       newErrors.email = 'El email es requerido';
     } else if (!/\S+@\S+\.\S+/.test(loginData.email)) {
       newErrors.email = 'El formato del email no es válido';
     }
 
-    // Validar password
     if (!loginData.password) {
       newErrors.password = 'La contraseña es requerida';
     } else if (loginData.password.length < 6) {
@@ -73,42 +71,37 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Validaciones para registro
   const validateRegister = () => {
     const newErrors = {};
 
-    // Validar nombre
     if (!registerData.firstName.trim()) {
       newErrors.firstName = 'El nombre es requerido';
     } else if (registerData.firstName.length < 2) {
       newErrors.firstName = 'El nombre debe tener al menos 2 caracteres';
     }
 
-    // Validar apellido
     if (!registerData.lastName.trim()) {
       newErrors.lastName = 'El apellido es requerido';
     } else if (registerData.lastName.length < 2) {
       newErrors.lastName = 'El apellido debe tener al menos 3 caracteres';
     }
 
-    // Validar email
     if (!registerData.email) {
       newErrors.email = 'El email es requerido';
     } else if (!/\S+@\S+\.\S+/.test(registerData.email)) {
       newErrors.email = 'El formato del email no es válido';
     }
+    
     if (!registerData.service) {
-      console.log("Error")
-    newErrors.service = 'Debes seleccionar un tipo de servicio';
+      newErrors.service = 'Debes seleccionar un tipo de servicio';
     }
-    // Validar teléfono
+
     if (!registerData.cel) {
       newErrors.cel = 'El teléfono es requerido';
     } else if (!/^[+]?[0-9\s\-\(\)]{10,}$/.test(registerData.cel)) {
       newErrors.cel = 'El formato del teléfono no es válido';
     }
 
-    // Validar contraseña
     if (!registerData.password) {
       newErrors.password = 'La contraseña es requerida';
     } else if (registerData.password.length < 6) {
@@ -117,14 +110,12 @@ const Login = () => {
       newErrors.password = 'La contraseña debe contener mayúsculas, minúsculas y números';
     }
 
-    // Validar confirmación de contraseña
     if (!registerData.password2) {
       newErrors.password2 = 'Debes confirmar la contraseña';
     } else if (registerData.password !== registerData.password2) {
       newErrors.password2 = 'Las contraseñas no coinciden';
     }
 
-    // Validar términos y condiciones
     if (!registerData.acceptTerm) {
       newErrors.acceptTerm = 'Debes aceptar los términos y condiciones';
     }
@@ -133,9 +124,9 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-
 const login = () => {
   if (!validateLogin()) {
+    setModalType('error');
     setModalMessage('Por favor, corrige los errores en el formulario');
     setShowModal(true);
     return;
@@ -149,53 +140,51 @@ const login = () => {
     body: JSON.stringify(loginData),
   })
   .then(async (response) => {
-    // Primero obtenemos los datos de la respuesta
     const data = await response.json();
     
-    console.log("Respuesta completa:", data);
+    console.log("Respuesta completa:", data); 
     console.log("Status:", response.status);
-    console.log("OK:", response.ok);
     
     if (!response.ok) {
       const errorMessage = data.message || data.error || 'Error en el login';
       throw new Error(errorMessage);
     }
     
-    console.log("Login exitoso:", data);
-    toast.success("✅ Login exitoso");
-    setModalMessage('Inicio de sesión exitoso. Redirigiendo al dashboard...');
-    setShowModal(true);
+    if (!data.user || !data.token) {
+      throw new Error('Datos incompletos en la respuesta del servidor');
+    }
+
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify({
+      id: data.user.id_cliente,
+      nombre: data.user.nombre,
+      email: data.user.mail,
+      apellido: data.user.apellido,
+      telefono: data.user.telefono
+    }));
     
-    return data;
+    window.location.href = '/dashboard';
   })
   .catch((error) => {
     console.error('Error completo:', error);
-    
-    // Mostrar el mensaje de error específico del servidor
     const errorMessage = error.message || 'Error de conexión con el servidor';
-    
     toast.error(`❌ ${errorMessage}`);
+    setModalType('error');
     setModalMessage(`Error: ${errorMessage}`);
     setShowModal(true);
   });
 };
 
-
   const register = () => {
     if (!validateRegister()) {
+      setModalType('error');
       setModalMessage('Por favor, corrige los errores en el formulario');
       setShowModal(true);
       return;
     }
 
-    console.log('Registro exitoso:', registerData);
-    setModalMessage('¡Cuenta creada exitosamente! Se ha enviado un email de confirmación.');
-    setShowModal(true);
-    
-    // Aquí iría la lógica real de registro (API call, etc.)
-
     fetch('http://localhost:3000/api/register', {
-      method : 'POST',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -203,15 +192,38 @@ const login = () => {
     })
     .then(response => {
       if (!response.ok) {
-        throw new Error('Error en la creación del cliente');
+        return response.json().then(errorData => {
+          throw new Error(errorData.error || 'Error en la creación del cliente');
+        });
       }
       return response.json();
     })
     .then(data => {
-      console.log('Cliente creado:', data);
+      setModalType('success');
+      setModalMessage('¡Cuenta creada exitosamente! Se ha enviado un email de confirmación.');
+      setShowModal(true);
+      setRegisterData({
+        firstName: '',
+        lastName: '',
+        cel: '',
+        email: '',
+        password: '',
+        password2: '',
+        service: '',
+        acceptTerm: false
+      }
+      
+    );
+    setErrors({})
     })
     .catch(error => {
-      console.error('Error:', error);
+      setModalType('error');
+      setModalMessage(error.message);
+      const newErrors = {};
+      newErrors.email = 'Email en uso';
+      setErrors(newErrors);
+      setShowModal(true);
+      return Object.keys(newErrors).length === 0;
     });
   };
 
@@ -221,16 +233,12 @@ const login = () => {
 
   return (
     <div className="login-container">
-      {/* Background Pattern */}
       <div className="background-pattern"></div>
 
-      {/* Main Container */}
       <div className="main-container">
         
-        {/* Left Side - Branding */}
         <div className="branding-section">
           <div className="branding-content">
-            {/* Logo/Icon */}
             <div className="camera-icon">
               <svg className="camera-svg" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 15.5c1.93 0 3.5-1.57 3.5-3.5S13.93 8.5 12 8.5 8.5 10.07 8.5 12s1.57 3.5 3.5 3.5zm0-5c.83 0 1.5.67 1.5 1.5S12.83 13.5 12 13.5s-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z"/>
@@ -245,7 +253,6 @@ const login = () => {
               Capturamos momentos únicos con la más alta calidad profesional
             </p>
             
-            {/* Features */}
             <div className="features-list">
               <div className="feature-item">
                 <div className="feature-dot orange-dot"></div>
@@ -263,11 +270,9 @@ const login = () => {
           </div>
         </div>
 
-        {/* Right Side - Forms */}
         <div className="form-section">
           <div className="form-container">
             
-            {/* Form Toggle Buttons */}
             <div className="tab-buttons">
               <button 
                 className={`tab-button ${activeTab === 'login' ? 'tab-active' : 'tab-inactive'}`}
@@ -283,7 +288,6 @@ const login = () => {
               </button>
             </div>
 
-            {/* Login Form */}
             <div className={`form-content ${activeTab === 'login' ? '' : 'form-hidden'}`}>
               <h2 className="form-title">Bienvenido de vuelta</h2>
               
@@ -331,7 +335,7 @@ const login = () => {
                   }}>
                     ¿Olvidaste tu contraseña?
                   </a>                
-                  </div>
+                </div>
                 
                 <button 
                   type="submit" 
@@ -343,7 +347,6 @@ const login = () => {
               </form>
             </div>
 
-            {/* Register Form */}
             <div className={`form-content ${activeTab === 'register' ? '' : 'form-hidden'}`}>
               <h2 className="form-title">Crear cuenta nueva</h2>
               
@@ -430,8 +433,8 @@ const login = () => {
                 <div className="form-group">
                   <label className="form-label">Tipo de Servicio</label>
                   <select 
-                    className={`form-input ${errors.servicio ? 'input-error' : ''}`}
-                    value={registerData.servicio} 
+                    className={`form-input ${errors.service ? 'input-error' : ''}`}
+                    value={registerData.service} 
                     name='service' 
                     onChange={handleChangeRegister}
                     required
@@ -444,7 +447,7 @@ const login = () => {
                     <option value="producto">Evento Coorporativo</option>
                     <option value="dron">Otros</option>
                   </select>
-                  {errors.servicio && <span className="error-message">{errors.servicio}</span>}
+                  {errors.service && <span className="error-message">{errors.service}</span>}
                 </div>
 
                 <div className="form-checkbox-group">
@@ -473,43 +476,40 @@ const login = () => {
         </div>
       </div>
 
-      {/* Modal de errores/éxito */}
-      {showModal && (
+            {showModal && (
         <div 
           className="modal-overlay"
           onClick={closeDemoModal}
         >
           <div 
-            className="modal-content"
+            className={`modal-content ${modalType === 'error' ? 'modal-error' : 'modal-success'}`}
             onClick={(e) => e.stopPropagation()}
           >
-          <div className="modal-icon">
-            {modalMessage.toLowerCase().includes('error') ? (
-              // Icono de error
-              <svg className="modal-error" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-              </svg>
-            ) : (
-              // Icono de éxito (el que ya tienes)
-              <svg className="modal-check" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-              </svg>
-            )}
-          </div>
+            <div className="modal-icon">
+              {modalType === 'error' ? (
+                <svg className="modal-error-icon" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+              ) : (
+                <svg className="modal-success-icon" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                </svg>
+              )}
+            </div>
             <h3 className="modal-title">
-              {modalMessage.toLowerCase().includes('error') ? '¡Error!' : '¡Éxito!'}
+              {modalType === 'error' ? '¡Error!' : '¡Éxito!'}
             </h3>
             <p className="modal-message">{modalMessage}</p>
             <button 
               onClick={closeDemoModal} 
-              className="modal-button"
+              className={`modal-button ${modalType === 'error' ? 'modal-button-error' : 'modal-button-success'}`}
             >
               Aceptar
             </button>
           </div>
         </div>
       )}
-      {showForgotPassword && (
+            {showForgotPassword && (
         <ForgotPassword onClose={() => setShowForgotPassword(false)} />
       )}
     </div>

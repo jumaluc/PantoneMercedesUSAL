@@ -472,11 +472,19 @@ body {
 }
 
 /* Ajustes para el modal de error */
-.modal-content {
+.modal-error {
   background: #111827;
   border: 1px solid #ef4444;
 }
+.modal-success{
+  background: #111827;
+  border: 1px solid #75cc03;
+}
+.modal-success-icon{
+    background: linear-gradient(135deg, #1de402 0%, #7ae202 100%);
+    border-radius: 50%;
 
+}
 .modal-icon {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
@@ -614,7 +622,6 @@ body {
 .resend-button:hover:not(:disabled) {
   color: #FFB347;
 }
-/* Agrega estos estilos a Login.css */
 .password-strength {
   margin-top: 5px;
   font-size: 12px;
@@ -629,7 +636,29 @@ body {
   color: #ef4444;
 }
 
-/* Mejora visual para los inputs de contraseña */
 .form-input[type="password"] {
   letter-spacing: 1px;
+}
+.password-input-container {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+}
+
+.password-toggle:hover {
+  color: #333;
+}
+
+.form-input {
+  padding-right: 45px; /* Espacio para el botón */
 }

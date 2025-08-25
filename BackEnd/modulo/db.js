@@ -8,7 +8,7 @@ const pool = mysql.createPool({
 });
 
 async function login(email, password) {
-  const query = "SELECT * FROM Clientes WHERE mail = ? AND contraseña = ?";
+  const query = "SELECT id_cliente, mail, nombre, apellido, telefono FROM Clientes WHERE mail = ? AND contraseña = ?";
   const [rows] = await pool.query(query, [email, password]);
   return rows;
 }
@@ -35,15 +35,30 @@ async function tokenSave(resetToken, resetTokenExpiry, id) {
 }
 
 async function verifyToken(email, resetToken){
-
-
+try{
+  
   const query = 'SELECT id_cliente FROM clientes WHERE mail = ?  and resetToken = ? ' ;
   const [result] = await pool.query(query, [email, resetToken]);
-  console.log("Resultado de la verificación del token:", result);
   return result;
+}
+catch(error){
+      console.error("Error en verifyToken:", error);
+      throw error;
+}
 
 }
 
+async function verifyUniqueEmail(email){
+
+  try{
+      const query = 'SELECT id_cliente FROM clientes WHERE mail=?'
+      const [result] = await pool.query(query, [email]);
+      return result;
+  }
+  catch(error){
+    throw error;
+  }
+}
 async function resetPassword(email, idResetPassword ,newPassword){
 
   const query = 'UPDATE clientes SET contraseña = ? WHERE mail = ? and id_cliente = ?  ';
@@ -53,6 +68,14 @@ async function resetPassword(email, idResetPassword ,newPassword){
   return result.affectedRows;
 }
 
+async function editProfile(id,name, email, telefono){
+
+  const query = 'UPDATE clientes SET nombre = ?, mail = ?, telefono = ? WHERE id_cliente = ?'
+  const [result] = await pool.query(query, [name, email, telefono, id]);
+
+  return result.affectedRows;
+
+}
 
 
-module.exports = { pool, login, register, verifyEmail, tokenSave, verifyToken, resetPassword };
+module.exports = { pool, login, register, verifyEmail, tokenSave, verifyToken, resetPassword, verifyUniqueEmail, editProfile };
