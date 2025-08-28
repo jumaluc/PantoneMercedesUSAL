@@ -1,0 +1,150 @@
+:root {
+  --primary-dark: #1f1c1b;     
+  --primary-light: #2c5282;    
+  --accent-gold: #d4af37;      
+  --accent-cream: #f8f4e6;    
+  --text-light: #718096;      
+  --white: #ffffff;
+  --success: #38a169;          
+  --error: #e53e3e;           
+}
+
+.admin-dashboard {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Barra superior */
+.top-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: rgba(20, 21, 23, var(--tw-bg-opacity, 1));
+  color: #fff;
+  padding: 5px 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  /* sombra abajo */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  /* border-bottom: 3px solid var(--accent-gold); */ /* opcional */
+}
+
+.container-logo-titulo{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+/* Contenedor de sidebar + contenido */
+.dashboard-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.dashboard-body {
+  display: flex;
+  flex: 1;
+}
+
+/*ESTO ES LO QUE ESTA ADENTRO */
+.admin-main {
+  flex: 1;
+  overflow-y: auto; 
+  background: linear-gradient(135deg, #fff 0%, var(--white) 100%);
+  
+  }
+
+.admin-navbar { 
+  position: sticky;
+  top: 4rem; /* queda debajo del navbar */
+  height: calc(100vh - 4rem);
+  width: 220px;
+  background-color: rgba(20, 21, 23, var(--tw-bg-opacity, 1));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: white;
+}
+
+.top-navbar-title{
+  font-size: 20px;
+  letter-spacing: 1.5px;
+}
+.navBarLogo {
+  width: 50px;
+  mix-blend-mode: lighten; 
+  height: 50px;
+  border-radius: 50%;
+  margin: 5px 15px 5px 10px;
+  display: block;
+}
+.welcome{
+  margin-right: 15px;
+}
+.nav-items {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  margin-top: 30px;
+}
+.item-icon{
+  color: #fff;
+}
+.nav-label{
+  color: #fff;
+}
+.nav-item {
+  padding: 12px;
+  text-align: left;
+  margin-top: 10px;
+  border: none;
+  background: none;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-item:hover {
+  background-color: #e0e0e0;
+}
+
+.nav-item.active {
+  background-color: #333232;
+  font-weight: bold;
+}
+
+.navbar-footer {
+  padding: 1rem;
+}
+.user-info{
+  margin-right: 20px;
+}
+.logout-btn {
+  margin-right: 20px;
+  width: 100px;
+  padding: 10px 2px;
+  background: #e88f01;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.logout-btn:hover {
+  background: #ff7700;
+}
+
+/* Contenido principal */
+.admin-main {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}

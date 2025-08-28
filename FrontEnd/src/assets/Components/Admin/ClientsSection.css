@@ -1,0 +1,88 @@
+:root {
+  --primary-dark: #1f1c1b;     
+  --primary-light: #2c5282;    
+  --accent-gold: #d4af37;      
+  --accent-cream: #f8f4e6;    
+  --text-light: #718096;      
+  --white: #ffffff;
+  --success: #38a169;          
+  --error: #e53e3e;           
+}
+
+.clients-section {
+    background-color: white;
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-header h2 {
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.section-header span {
+  font-size: 1rem;
+  color: #666;
+}
+
+/* Tabla de clientes */
+.clients-table {
+  width: 100%;
+  border-collapse: collapse; 
+  background-color: #fff;
+  border-radius: 15px;
+  overflow: hidden;
+
+  /* Box-shadow elegante */
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.08),   /* sombra ligera alrededor */
+    0 10px 20px rgba(0, 0, 0, 0.05); /* sombra difusa para profundidad */
+}
+
+.clients-table th, .clients-table td {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+/* Encabezado */
+.clients-table th {
+  background-color: #f0f0f0;
+  color: #555;
+  font-weight: 600;
+}
+
+/* Filas del tbody */
+.clients-table tbody tr {
+  background-color: #fff;
+  transition: background-color 0.25s ease, transform 0.2s ease;
+  border-radius: 10px; /* esquinas internas suaves */
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.03); /* separación sutil entre filas */
+}
+
+/* Hover sobre filas */
+.clients-table tbody tr:hover {
+  background-color: #f9f9f9;
+  transform: translateY(-1px); /* efecto sutil de elevación */
+}
+
+/* Celdas */
+.clients-table td {
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  color: #555;
+  font-size: 1.2rem;
+  margin-top: 2rem;
+}
