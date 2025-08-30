@@ -2,8 +2,13 @@ import React, { useState, useEffect } from 'react';
 import AdminNavbar from './AdminNavbar';
 import ClientsSection from './ClientsSection';
 import GalleriesSection from './GalleriesSection';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+faArrowRightFromBracket
+} from '@fortawesome/free-solid-svg-icons';
 
 import './AdminDashboard.css';
+
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('clients');
@@ -59,17 +64,13 @@ const AdminDashboard = () => {
                       <span className="user-email">{adminData.email}</span>
                   </div>}
 
-          <button 
-                  className="logout-btn"
+                  <FontAwesomeIcon    className='logoutFontIcon'       
                   onClick={() => {
                     fetch('http://localhost:3000/auth/logout', {
                       method: 'POST',
                       credentials: 'include'
                     }).then(() => window.location.href = '/login');
-                  }}
-                >
-                  Cerrar Sesión
-                </button>
+                  }} icon={faArrowRightFromBracket} />
         </div>
       </header>
 

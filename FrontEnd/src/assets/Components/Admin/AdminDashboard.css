@@ -27,7 +27,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-
+  border-bottom: 0.7px solid rgb(255, 145, 0);
   /* sombra abajo */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
   /* border-bottom: 3px solid var(--accent-gold); */ /* opcional */
@@ -127,19 +127,18 @@
 .user-info{
   margin-right: 20px;
 }
-.logout-btn {
+.logoutFontIcon {
   margin-right: 20px;
-  width: 100px;
-  padding: 10px 2px;
-  background: #e88f01;
-  color: white;
+  width: 25px;
+  height: 20px;
+  color: #e88f01;
   border: none;
   cursor: pointer;
   border-radius: 4px;
 }
 
-.logout-btn:hover {
-  background: #ff7700;
+.logoutFontIcon:hover {
+  color: #faa65d;
 }
 
 /* Contenido principal */

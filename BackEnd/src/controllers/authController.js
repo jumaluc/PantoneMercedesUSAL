@@ -8,9 +8,9 @@ const authController = {
         try{
             const {email, password} = req.body;
             //HACER PREVIA VERIFICACION
-
-            const result = await User.equalPassword(email);
-            const validPassword = await bcrypt.compare(password, result.password);
+            const result = await User.equalPassword(email) || false;
+            const validPassword = await bcrypt.compare(password, result.password) || false;
+            if(!result)return res.status(401).json({message : 'Credenciales Incorrectas'});
             if(!validPassword){
                 return res.status(401).json({message : 'Credenciales Incorrectas'});
             }
@@ -42,7 +42,6 @@ const authController = {
             console.log("RESULTADO DEL REGISTRO : ",result)
             if(result === 0)return res.status(500).json({message : 'Error en el servidor'});
             res.status(200).send(req.body)
-            //CREAR COOKIE
         }
         catch(error){
             res.status(500).json({message : 'Error en el servidor'})

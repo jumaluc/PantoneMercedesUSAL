@@ -8,9 +8,145 @@
   --success: #38a169;          
   --error: #e53e3e;           
 }
+/* --- TABLA - ARREGLO URGENTE --- */
+.clients-table {
+  width: 100%;
+  border-collapse: separate; /* 👈 Cambia de collapse a separate */
+  border-spacing: 0; /* 👈 Mantiene el espaciado consistente */
+  background-color: #fff;
+  border-radius: 15px;
+  /* 👇 REMOVER overflow: hidden */
+  overflow: visible; /* 👈 Esto ya lo tienes, está bien */
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 10px 20px rgba(0, 0, 0, 0.05);
+  position: relative; /* 👈 Añade esto */
+  z-index: 1; /* 👈 Contexto de apilamiento */
+}
+
+/* 👇 Asegurar que las celdas no corten el contenido */
+.clients-table td {
+  position: relative; /* 👈 Necesario para el menú */
+  overflow: visible !important; /* 👈 Forzar visibilidad */
+  z-index: auto; /* 👈 Permitir que los elementos hijos se muestren */
+}
+
+/* 👇 Específicamente para la celda de acciones */
+.clients-table td:last-child {
+  overflow: visible;
+  z-index: 1000; /* 👈 Alto z-index para la celda de acciones */
+}
+
+/* 👇 Las filas necesitan un contexto de apilamiento */
+.clients-table tbody tr {
+  background-color: #fff;
+  transition: background-color 0.25s ease, transform 0.2s ease;
+  position: relative;
+  z-index: 1; /* 👈 Contexto para la fila */
+}
+
+/* 👇 Cuando el menú está activo, aumentar z-index */
+.clients-table tbody tr:hover {
+  background-color: #f9f9f9;
+  transform: translateY(-1px);
+  z-index: 1001; /* 👈 Más alto cuando se hace hover */
+}
+
+/* --- MENÚ DE ACCIONES MEJORADO --- */
+.actions-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  z-index: 1002; /* 👈 Más alto que la fila */
+}
+
+.actions-menu {
+  position: absolute;
+  top: 80%;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); /* 👈 Sombra más fuerte */
+  z-index: 9999; 
+  min-width: 180px;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+
+/* 👇 Asegurar que el menú esté por encima de TODO */
+.actions-menu {
+  z-index: 10000 !important;
+  position: fixed !important; /* 👈 Alternativa: usar fixed en lugar de absolute */
+  transform: translateZ(100px); /* 👈 Forzar aceleración GPU */
+}
+/* --- MENÚ DE ACCIONES --- */
+.actions-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+}
+
+.actions-toggle {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.3s;
+  font-size: 1rem;
+  color: #555;
+}
+
+.actions-toggle:hover {
+  background-color: #f0f0f0;
+}
+
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 15px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9em;
+  transition: background-color 0.3s;
+}
+
+.action-btn:hover {
+  background-color: #f8f9fa;
+}
+
+.edit-btn {
+  color: #3498db;
+  border-bottom: 1px solid #eee;
+}
+
+.edit-btn:hover {
+  background-color: #ebf5fb;
+}
+
+.delete-btn {
+  color: #e74c3c;
+}
+
+.delete-btn:hover {
+  background-color: #fdedec;
+}
+
+/* Animación suave */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 .clients-section {
-    background-color: white;
+  background-color: white;
   padding: 2rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -32,18 +168,17 @@
   color: #666;
 }
 
-/* Tabla de clientes */
+/* Tabla */
 .clients-table {
   width: 100%;
   border-collapse: collapse; 
   background-color: #fff;
   border-radius: 15px;
-  overflow: hidden;
-
-  /* Box-shadow elegante */
+  /* 👇 IMPORTANTE: no recortar el menú */
+  overflow: visible;
   box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.08),   /* sombra ligera alrededor */
-    0 10px 20px rgba(0, 0, 0, 0.05); /* sombra difusa para profundidad */
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 10px 20px rgba(0, 0, 0, 0.05);
 }
 
 .clients-table th, .clients-table td {
@@ -52,37 +187,49 @@
   font-size: 0.95rem;
 }
 
-/* Encabezado */
 .clients-table th {
   background-color: #f0f0f0;
   color: #555;
   font-weight: 600;
 }
 
-/* Filas del tbody */
 .clients-table tbody tr {
   background-color: #fff;
-  transition: background-color 0.25s ease, transform 0.2s ease;
-  border-radius: 10px; /* esquinas internas suaves */
-  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.03); /* separación sutil entre filas */
+  position: relative;
+  z-index: 1;
 }
 
-/* Hover sobre filas */
 .clients-table tbody tr:hover {
   background-color: #f9f9f9;
-  transform: translateY(-1px); /* efecto sutil de elevación */
+  /* Se eliminó el transform que movía la fila */
 }
 
-/* Celdas */
 .clients-table td {
   color: #333;
   border-bottom: 1px solid #f0f0f0;
 }
 
-/* Loading */
-.loading {
-  text-align: center;
-  color: #555;
-  font-size: 1.2rem;
-  margin-top: 2rem;
+/* Botón crear */
+.btn-create-client {
+  background: #e88f01;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+  margin-right: 15px;
 }
+
+.btn-create-client:hover {
+  background: #9a7e21;
+  transform: translateY(-1px);
+}
+
+.section-add-clients {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+

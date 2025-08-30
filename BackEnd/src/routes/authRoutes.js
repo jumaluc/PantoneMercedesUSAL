@@ -8,5 +8,6 @@ router.post('/login', authController.login);
 router.post('/register', authController.register);
 router.get('/me', authController.me);
 router.get('/logout', authController.logout);
+router.post('/logout', authController.logout);
 
 module.exports = router;
