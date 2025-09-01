@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminNavbar from './AdminNavbar';
 import ClientsSection from './ClientsSection';
-import GalleriesSection from './GalleriesSection';
+import GalleriesSection from './Galery/GalleriesSection';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
 faArrowRightFromBracket

@@ -78,6 +78,7 @@
 }
 
 .form-group-client-modal input,
+.form-group-client-modal textarea,
 .form-group-client-modal select {
   width: 100%;
   padding: 12px 15px;

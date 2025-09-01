@@ -1,38 +1,78 @@
-// ClientsSection.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './ClientsSection.css';
 import CreateClientModal from './CreateClientModal';
 import EditClientModal from './EditClientModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrash, faEllipsisV, faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
+import { useSearchFilter } from '../../hooks/useSearchFilter'; 
+import SearchFilter from './SearchFilter'; 
+import { toast } from "react-toastify";
+import Swal from 'sweetalert2';
 
 const ClientsSection = () => {
-  const [clients, setClients] = useState([]);
+  const [allClients, setAllClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [activeMenu, setActiveMenu] = useState(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const menuRef = useRef(null);
+
+  const {
+    filteredData: filteredClients,
+    searchTerm,
+    handleSearch,
+    sortConfig,
+    handleSort,
+    clearSearch,
+    totalItems,
+    filteredCount,
+    hasFilters
+  } = useSearchFilter(allClients, [
+    'first_name', 
+    'last_name', 
+    'email', 
+    'service', 
+    'number'
+  ]);
 
   useEffect(() => {
     fetchClients();
   }, []);
 
+  // Cerrar menú al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (activeMenu && menuRef.current && !menuRef.current.contains(event.target)) {
+        setActiveMenu(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activeMenu]);
+
   const fetchClients = async () => {
     try {
+      console.log
       const response = await fetch('http://localhost:3000/admin/getAllClients', {
         credentials: 'include'
       });
       const data = await response.json();
-      setClients(data.data || []);
+      setAllClients(data.data || []); // 👈 Guardar en allClients
     } catch (error) {
       console.error('Error fetching clients:', error);
+      setAllClients([]); // 👈 En caso de error, array vacío
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClientCreated = () => fetchClients();
+  const handleClientCreated = () => {
+    fetchClients();
+    clearSearch();
+  };
 
   const handleClientUpdated = () => {
     fetchClients();
@@ -40,14 +80,43 @@ const ClientsSection = () => {
     setSelectedClient(null);
   };
 
-  const handleEditClick = (client) => {
-    setSelectedClient(client);
-    setIsEditModalOpen(true);
-    setActiveMenu(null);
+  // Función para obtener ícono de ordenamiento
+  const getSortIcon = (columnKey) => {
+    if (sortConfig.key !== columnKey) return faSort;
+    return sortConfig.direction === 'ascending' ? faSortUp : faSortDown;
   };
 
-  const handleDeleteClick = async (clientId) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
+  // Función para obtener clase de ordenamiento
+  const getSortClass = (columnKey) => {
+    if (sortConfig.key !== columnKey) return '';
+    return sortConfig.direction === 'ascending' ? 'sort-asc' : 'sort-desc';
+  };
+
+ const handleEditClick = (client, e) => {
+  e.stopPropagation();
+  console.log("Cliente a editar:", client);
+  setSelectedClient(client); 
+  setIsEditModalOpen(true);
+  setActiveMenu(null);
+};
+
+  const handleDeleteClick = async (clientId, e) => {
+    e.stopPropagation();
+    const result = await Swal.fire({
+    title: '¿Estás seguro?',
+    text: "¡No podrás revertir esta acción!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, eliminar!',
+    cancelButtonText: 'Cancelar',
+    background: '#fff',
+    customClass: {
+      popup: 'custom-swal-popup'
+      }
+    });
+    if (result.isConfirmed) {
       try {
         const response = await fetch(`http://localhost:3000/admin/deleteClient/${clientId}`, {
           method: 'DELETE',
@@ -55,28 +124,31 @@ const ClientsSection = () => {
         });
         
         if (response.ok) {
-          alert('Cliente eliminado exitosamente');
+          toast.success('Cliente eliminado correctamente')
           fetchClients();
         } else {
-          alert('Error al eliminar el cliente');
+          toast.error('Error al eliminar al cliente')
         }
       } catch (error) {
         console.error('Error deleting client:', error);
-        alert('Error de conexión');
+        toast.error('Error en el servidor');
       }
     }
     setActiveMenu(null);
   };
 
-  const toggleMenu = (clientId) => {
+  const toggleMenu = (clientId, e) => {
+    e.stopPropagation();
+    
+    // Calcular posición exacta para el menú fixed
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMenuPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.right + window.scrollX - 160 // Ajustar ancho del menú
+    });
+    
     setActiveMenu(activeMenu === clientId ? null : clientId);
   };
-
-  useEffect(() => {
-    const handleClickOutside = () => setActiveMenu(null);
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
 
   if (loading) return <div className="loading">Cargando clientes...</div>;
 
@@ -91,26 +163,68 @@ const ClientsSection = () => {
           >
             + Crear Cliente
           </button>
-          <span>{clients.length} clientes encontrados</span>
+          <span>
+            {`${allClients.length} clientes encontrados`}
+          </span>
         </div>
       </div>
+
+      {/* 🔍 COMPONENTE DE BÚSQUEDA */}
+      <SearchFilter
+        searchTerm={searchTerm}
+        onSearchChange={handleSearch}
+        onClear={clearSearch}
+        placeholder="Buscar clientes por nombre, email, teléfono o servicio..."
+        resultsCount={filteredCount}
+        totalCount={totalItems}
+      />
 
       <table className="clients-table">
         <thead>
           <tr>
-            <th>CLIENTE</th>
-            <th>EMAIL</th>
-            <th>TELÉFONO</th>
-            <th>SERVICIO</th>
+            <th onClick={() => handleSort('first_name')} className="sortable-header">
+              <span>CLIENTE</span>
+              <FontAwesomeIcon 
+                icon={getSortIcon('first_name')} 
+                className={`sort-icon ${getSortClass('first_name')}`}
+              />
+            </th>
+            <th onClick={() => handleSort('email')} className="sortable-header">
+              <span>EMAIL</span>
+              <FontAwesomeIcon 
+                icon={getSortIcon('email')} 
+                className={`sort-icon ${getSortClass('email')}`}
+              />
+            </th>
+            <th onClick={() => handleSort('number')} className="sortable-header">
+              <span>TELÉFONO</span>
+              <FontAwesomeIcon 
+                icon={getSortIcon('number')} 
+                className={`sort-icon ${getSortClass('number')}`}
+              />
+            </th>
+            <th onClick={() => handleSort('service')} className="sortable-header">
+              <span>SERVICIO</span>
+              <FontAwesomeIcon 
+                icon={getSortIcon('service')} 
+                className={`sort-icon ${getSortClass('service')}`}
+              />
+            </th>
             <th>GALERÍA</th>
             <th>VIDEOS</th>
-            <th>FECHA</th>
+            <th onClick={() => handleSort('created_at')} className="sortable-header">
+              <span>FECHA</span>
+              <FontAwesomeIcon 
+                icon={getSortIcon('created_at')} 
+                className={`sort-icon ${getSortClass('created_at')}`}
+              />
+            </th>
             <th>COMENTARIOS</th>
             <th>ACCIONES</th>
           </tr>
         </thead>
         <tbody>
-          {clients.map(client => (
+          {filteredClients.map(client => ( // 👈 Usar filteredClients en lugar de clients
             <tr key={client.id} className='row-clients-table'>
               <td>{client.first_name} {client.last_name}</td>
               <td>{client.email}</td>
@@ -129,38 +243,60 @@ const ClientsSection = () => {
                 <div className="actions-container">
                   <button 
                     className="actions-toggle"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleMenu(client.id);
-                    }}
+                    onClick={(e) => toggleMenu(client.id, e)}
                   >
                     <FontAwesomeIcon icon={faEllipsisV} />
                   </button>
-                  
-                  {activeMenu === client.id && (
-                    <div className="actions-menu" onClick={(e) => e.stopPropagation()}>
-                      <button 
-                        className="action-btn edit-btn"
-                        onClick={() => handleEditClick(client)}
-                      >
-                        <FontAwesomeIcon icon={faEdit} />
-                        Editar Perfil
-                      </button>
-                      <button 
-                        className="action-btn delete-btn"
-                        onClick={() => handleDeleteClick(client.id)}
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                        Eliminar Perfil
-                      </button>
-                    </div>
-                  )}
                 </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* 🔥 MENÚ FUERA DE LA TABLA - POSICIÓN FIXED */}
+      {activeMenu && (
+        <div 
+          ref={menuRef}
+          className="actions-menu"
+          style={{
+            top: menuPosition.top,
+            left: menuPosition.left
+          }}
+        >
+          <button 
+            className="action-btn edit-btn"
+            onClick={(e) => handleEditClick(filteredClients.find(c => c.id === activeMenu), e)}
+          >
+            <FontAwesomeIcon icon={faEdit} />
+            Editar Perfil
+          </button>
+          <button 
+            className="action-btn delete-btn"
+            onClick={(e) => handleDeleteClick(activeMenu, e)}
+          >
+            <FontAwesomeIcon icon={faTrash} />
+            Eliminar Perfil
+          </button>
+        </div>
+      )}
+
+      {/* Mensaje cuando no hay resultados */}
+      {filteredCount === 0 && allClients.length > 0 && (
+        <div className="no-results">
+          <p>No se encontraron clientes que coincidan con "{searchTerm}"</p>
+          <button onClick={clearSearch} className="clear-filters-btn">
+            Limpiar búsqueda
+          </button>
+        </div>
+      )}
+
+      {/* Mensaje cuando no hay clientes */}
+      {allClients.length === 0 && !loading && (
+        <div className="no-results">
+          <p>No hay clientes registrados</p>
+        </div>
+      )}
 
       <CreateClientModal
         isOpen={isModalOpen}
@@ -182,3 +318,5 @@ const ClientsSection = () => {
 };
 
 export default ClientsSection;
+
+

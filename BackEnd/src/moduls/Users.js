@@ -48,6 +48,14 @@ class User {
         const [result] = await pool.execute('SELECT * FROM users WHERE role = "client"');
         return result;
     }
+    static async deleteClient(id){
+        const [result] = await pool.execute('DELETE from users WHERE id = ? and role = "client"',[id]);
+        return result;
+    }
+    static async findOne(id){
+        const [result] = await pool.execute('SELECT first_name, last_name FROM users WHERE id = ? and role = "client"',[id]);
+        return result[0]; 
+    }
 }
 
 module.exports = User;

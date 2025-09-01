@@ -8,114 +8,154 @@
   --success: #38a169;          
   --error: #e53e3e;           
 }
-/* --- TABLA - ARREGLO URGENTE --- */
+
+.clients-section {
+  background-color: white;
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-header h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin: 0;
+}
+
+.section-header span {
+  font-size: 1rem;
+  color: #666;
+}
+
+.section-add-clients {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* 🔥 TABLA - ELIMINAR CUALQUIER Z-INDEX CONFLICTIVO */
 .clients-table {
   width: 100%;
-  border-collapse: separate; /* 👈 Cambia de collapse a separate */
-  border-spacing: 0; /* 👈 Mantiene el espaciado consistente */
+  border-collapse: collapse;
   background-color: #fff;
-  border-radius: 15px;
-  /* 👇 REMOVER overflow: hidden */
-  overflow: visible; /* 👈 Esto ya lo tienes, está bien */
-  box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.08),
-    0 10px 20px rgba(0, 0, 0, 0.05);
-  position: relative; /* 👈 Añade esto */
-  z-index: 1; /* 👈 Contexto de apilamiento */
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  /* 👇 ELIMINAR cualquier z-index aquí */
+  position: relative;
 }
 
-/* 👇 Asegurar que las celdas no corten el contenido */
+.clients-table th, 
 .clients-table td {
-  position: relative; /* 👈 Necesario para el menú */
-  overflow: visible !important; /* 👈 Forzar visibilidad */
-  z-index: auto; /* 👈 Permitir que los elementos hijos se muestren */
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #f0f0f0;
+  /* 👇 Asegurar que las celdas no tengan z-index */
+  position: static;
 }
 
-/* 👇 Específicamente para la celda de acciones */
-.clients-table td:last-child {
-  overflow: visible;
-  z-index: 1000; /* 👈 Alto z-index para la celda de acciones */
+.clients-table th {
+  background-color: #f8f9fa;
+  color: #555;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  /* 👇 Z-index solo para headers sticky */
+  z-index: 10;
 }
 
-/* 👇 Las filas necesitan un contexto de apilamiento */
 .clients-table tbody tr {
   background-color: #fff;
-  transition: background-color 0.25s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease;
+  /* 👇 ELIMINAR z-index de las filas */
   position: relative;
-  z-index: 1; /* 👈 Contexto para la fila */
 }
 
-/* 👇 Cuando el menú está activo, aumentar z-index */
 .clients-table tbody tr:hover {
   background-color: #f9f9f9;
-  transform: translateY(-1px);
-  z-index: 1001; /* 👈 Más alto cuando se hace hover */
+  /* 👇 Mantener solo cambio de color, sin transform */
 }
 
-/* --- MENÚ DE ACCIONES MEJORADO --- */
-.actions-container {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  z-index: 1002; /* 👈 Más alto que la fila */
-}
-
-.actions-menu {
-  position: absolute;
-  top: 80%;
-  right: 0;
-  background: white;
-  border: 1px solid #ddd;
+/* Botón crear */
+.btn-create-client {
+  background: #e88f01;
+  color: white;
+  border: none;
+  padding: 12px 20px;
   border-radius: 8px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); /* 👈 Sombra más fuerte */
-  z-index: 9999; 
-  min-width: 180px;
-  overflow: hidden;
-  animation: fadeIn 0.2s ease;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
 }
 
-/* 👇 Asegurar que el menú esté por encima de TODO */
-.actions-menu {
-  z-index: 10000 !important;
-  position: fixed !important; /* 👈 Alternativa: usar fixed en lugar de absolute */
-  transform: translateZ(100px); /* 👈 Forzar aceleración GPU */
+.btn-create-client:hover {
+  background: #d47f01;
+  transform: translateY(-1px);
 }
-/* --- MENÚ DE ACCIONES --- */
+
+/* 🔥 MENÚ DE ACCIONES - POSICIÓN FIXED Y Z-INDEX ALTO */
 .actions-container {
   position: relative;
   display: flex;
   justify-content: center;
-  z-index: 10;
+  /* 👇 Crear nuevo contexto de apilamiento */
+  isolation: isolate;
 }
 
 .actions-toggle {
   background: none;
   border: none;
-  padding: 6px;
+  padding: 8px;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 4px;
   transition: background-color 0.3s;
   font-size: 1rem;
   color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .actions-toggle:hover {
   background-color: #f0f0f0;
 }
 
+/* 🔥 MENÚ CON POSITION: FIXED Y CÁLCULO DE POSICIÓN */
+.actions-menu {
+  position: fixed !important; /* 👈 FIXED en lugar de absolute */
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 9999 !important; /* 👈 Z-INDEX MUY ALTO */
+  min-width: 160px;
+  animation: fadeIn 0.2s ease;
+  /* 👇 Eliminar cualquier transform que cause conflicto */
+  transform: none !important;
+}
 
 .action-btn {
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 10px 15px;
+  padding: 10px 12px;
   border: none;
   background: none;
   cursor: pointer;
   text-align: left;
   font-size: 0.9em;
-  transition: background-color 0.3s;
+  transition: background-color 0.2s ease;
 }
 
 .action-btn:hover {
@@ -124,7 +164,6 @@
 
 .edit-btn {
   color: #3498db;
-  border-bottom: 1px solid #eee;
 }
 
 .edit-btn:hover {
@@ -139,97 +178,210 @@
   background-color: #fdedec;
 }
 
-/* Animación suave */
+/* Animaciones */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.clients-section {
-  background-color: white;
-  padding: 2rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.section-header {
+.loading {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 1rem;
-}
-
-.section-header h2 {
-  font-size: 1.8rem;
-  color: #333;
-}
-
-.section-header span {
-  font-size: 1rem;
+  height: 200px;
+  font-size: 1.1rem;
   color: #666;
 }
 
-/* Tabla */
-.clients-table {
-  width: 100%;
-  border-collapse: collapse; 
-  background-color: #fff;
-  border-radius: 15px;
-  /* 👇 IMPORTANTE: no recortar el menú */
+/* 🔥 ELIMINAR CUALQUIER REGLA CONFLICTIVA */
+.clients-table td:last-child {
   overflow: visible;
-  box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.08),
-    0 10px 20px rgba(0, 0, 0, 0.05);
-}
-
-.clients-table th, .clients-table td {
-  padding: 12px 16px;
-  text-align: left;
-  font-size: 0.95rem;
-}
-
-.clients-table th {
-  background-color: #f0f0f0;
-  color: #555;
-  font-weight: 600;
-}
-
-.clients-table tbody tr {
-  background-color: #fff;
   position: relative;
-  z-index: 1;
 }
 
-.clients-table tbody tr:hover {
-  background-color: #f9f9f9;
-  /* Se eliminó el transform que movía la fila */
+/* Asegurar que la tabla no cree contextos de apilamiento conflictivos */
+.clients-table {
+  transform-style: flat;
+  contain: layout;
 }
 
-.clients-table td {
-  color: #333;
-  border-bottom: 1px solid #f0f0f0;
+/* Responsive */
+@media (max-width: 768px) {
+  .clients-section {
+    padding: 1rem;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .section-add-clients {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .clients-table {
+    font-size: 0.9rem;
+  }
+  
+  .clients-table th,
+  .clients-table td {
+    padding: 8px 12px;
+  }
+  
+  .actions-menu {
+    min-width: 140px;
+    right: 10px !important;
+  }
+}
+/* ClientsSection.css - Agregar estas reglas */
+
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
 }
 
-/* Botón crear */
-.btn-create-client {
+.sortable-header:hover {
+  background-color: #edf2f7;
+}
+
+.sort-icon {
+  margin-left: 8px;
+  font-size: 0.8em;
+  color: #a0aec0;
+  transition: color 0.2s ease;
+}
+
+.sortable-header:hover .sort-icon {
+  color: #4a5568;
+}
+
+.sort-asc {
+  color: #e88f01;
+}
+
+.sort-desc {
+  color: #e88f01;
+}
+
+.no-results {
+  text-align: center;
+  padding: 2rem;
+  color: #718096;
+}
+
+.clear-filters-btn {
   background: #e88f01;
   color: white;
   border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s;
-  margin-right: 15px;
+  margin-top: 1rem;
 }
 
-.btn-create-client:hover {
-  background: #9a7e21;
+.clear-filters-btn:hover {
+  background: #d47f01;
+}
+/* Agregar al final de tu ClientsSection.css */
+
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  position: relative;
+  padding-right: 25px !important;
+}
+
+.sortable-header:hover {
+  background-color: #edf2f7;
+}
+
+.sort-icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8em;
+  color: #a0aec0;
+  transition: color 0.2s ease;
+}
+
+.sortable-header:hover .sort-icon {
+  color: #4a5568;
+}
+
+.sort-asc {
+  color: #e88f01;
+}
+
+.sort-desc {
+  color: #e88f01;
+}
+
+.no-results {
+  text-align: center;
+  padding: 2rem;
+  color: #718096;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.clear-filters-btn {
+  background: #e88f01;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+}
+
+.clear-filters-btn:hover {
+  background: #d47f01;
   transform: translateY(-1px);
 }
 
-.section-add-clients {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+/* Asegurar que la tabla se vea bien con los headers sortables */
+.clients-table th {
+  position: relative;
 }
 
+/* Loading state mejorado */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  font-size: 1.1rem;
+  color: #666;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.loading::after {
+  content: "";
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #e88f01;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

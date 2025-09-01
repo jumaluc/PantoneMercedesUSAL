@@ -1,8 +1,9 @@
 // EditClientModal.jsx
 import React, { useState, useEffect } from 'react';
-
+import { toast } from "react-toastify";
 const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
   const [formData, setFormData] = useState({
+    id: '',
     first_name: '',
     last_name: '',
     email: '',
@@ -27,6 +28,7 @@ const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
   useEffect(() => {
     if (client) {
       setFormData({
+        id: client.id || '',
         first_name: client.first_name || '',
         last_name: client.last_name || '',
         email: client.email || '',
@@ -78,8 +80,8 @@ const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:3000/admin/updateClient/${client.id}`, {
-        method: 'PUT',
+      const response = await fetch(`http://localhost:3000/admin/updateClient`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -90,14 +92,14 @@ const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
       const data = await response.json();
 
       if (response.ok) {
-        alert('Cliente actualizado exitosamente');
+        toast.success('Cliente actualizado exitosamente')
         onClientUpdated();
       } else {
-        alert(data.message || 'Error al actualizar el cliente');
+        toast.error('Error al actualizar el cliente')
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error de conexión con el servidor');
+      toast.error('Error al conectar con el servidor')
     } finally {
       setIsLoading(false);
     }
@@ -119,8 +121,8 @@ const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="client-form">
-          <div className="form-row">
-            <div className="form-group">
+          <div className="form-row-client-modal">
+            <div className="form-group-client-modal">
               <label>Nombre *</label>
               <input
                 type="text"
@@ -133,7 +135,7 @@ const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
               {errors.first_name && <span className="error-text">{errors.first_name}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="form-group-client-modal">
               <label>Apellido *</label>
               <input
                 type="text"
@@ -147,7 +149,7 @@ const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
             </div>
           </div>
 
-          <div className="form-group">
+          <div className="form-group-client-modal">
             <label>Email *</label>
             <input
               type="email"
@@ -160,7 +162,7 @@ const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
             {errors.email && <span className="error-text">{errors.email}</span>}
           </div>
 
-          <div className="form-group">
+          <div className="form-group-client-modal">
             <label>Teléfono *</label>
             <input
               type="tel"
@@ -173,7 +175,7 @@ const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
             {errors.number && <span className="error-text">{errors.number}</span>}
           </div>
 
-          <div className="form-group">
+          <div className="form-group-client-modal">
             <label>Tipo de Servicio *</label>
             <select
               name="service"
@@ -193,7 +195,7 @@ const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
             <button type="button" onClick={handleClose} className="btn-cancel">
               Cancelar
             </button>
-            <button type="submit" className="btn-save" disabled={isLoading}>
+            <button type="submit" className="btn-create" disabled={isLoading}>
               {isLoading ? 'Guardando...' : 'Guardar Cambios'}
             </button>
           </div>
