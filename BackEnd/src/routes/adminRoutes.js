@@ -8,4 +8,5 @@ router.post('/createClient',adminController.createClient);
 router.post('/updateClient', adminController.updateClient)
 router.delete('/deleteClient/:clientId',adminController.deleteClient);
 router.post('/createGallery', uploadGaleria ,adminController.createGallery);
+router.get('/getAllGalleries', adminController.getAllGalleries);
 module.exports = router;

@@ -53,7 +53,7 @@ class User {
         return result;
     }
     static async findOne(id){
-        const [result] = await pool.execute('SELECT first_name, last_name FROM users WHERE id = ? and role = "client"',[id]);
+        const [result] = await pool.execute('SELECT first_name, last_name, email FROM users WHERE id = ? and role = "client"',[id]);
         return result[0]; 
     }
 }

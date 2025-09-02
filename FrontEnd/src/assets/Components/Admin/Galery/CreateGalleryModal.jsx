@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faUpload, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { toast } from "react-toastify";
 
 const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
   const [formData, setFormData] = useState({
@@ -95,15 +96,15 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
       const data = await response.json();
 
       if (response.ok) {
-        alert('Galería creada exitosamente');
-        onGalleryCreated();
+        toast.success('Galeria creada exitosamente!');
+        //onGalleryCreated();
         handleClose();
       } else {
-        alert(data.message || 'Error al crear la galería');
+        toast.error('Error al crear la galeria')
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error de conexión con el servidor');
+        toast.error('Error al crear la galeria')
     } finally {
       setIsLoading(false);
     }
@@ -126,16 +127,16 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="modal-overlay-create-client">
+      <div className="modal-content-create-client">
+        <div className="modal-header-create-client">
           <h2>Crear Nueva Galería</h2>
           <button className="close-btn" onClick={handleClose}>
             <FontAwesomeIcon icon={faTimes} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="gallery-form">
+        <form onSubmit={handleSubmit} className="client-form">
           {/* Cliente */}
           <div className="form-group-client-modal">
             <label>Cliente *</label>

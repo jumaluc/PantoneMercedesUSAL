@@ -29,16 +29,31 @@ const GalleryCard = ({ gallery, onUpdate }) => {
     return new Date(dateString).toLocaleDateString('es-ES');
   };
 
+  // Obtener el nombre del cliente de la nueva estructura
+  const getClientName = () => {
+    if (gallery.client) {
+      return `${gallery.client.first_name || ''} ${gallery.client.last_name || ''}`.trim();
+    }
+    // Fallback por si acaso (debería venir siempre el cliente)
+    return gallery.client_name || 'Cliente no disponible';
+  };
+
+  // Obtener el email del cliente
+  const getClientEmail = () => {
+    if (gallery.client) {
+      return gallery.client.email || '';
+    }
+    return '';
+  };
+
   return (
     <div className="gallery-card">
       <div className="gallery-image">
-        {gallery.cover_image ? (
+        {gallery.cover_image_url ? (
           <img 
-            src={`http://localhost:3000${gallery.cover_image}`} 
-            alt={gallery.title}
-            onError={(e) => {
-              e.target.src = '/placeholder-image.jpg';
-            }}
+            src={gallery.cover_image_url} 
+            alt={'Imagen no encontrada'}
+      
           />
         ) : (
           <div className="no-image">
@@ -48,7 +63,8 @@ const GalleryCard = ({ gallery, onUpdate }) => {
         )}
         <div className="gallery-status">
           <span className={`status-badge ${gallery.status}`}>
-            {gallery.status}
+            {gallery.status === 'active' ? 'Activa' : 
+             gallery.status === 'inactive' ? 'Inactiva' : 'Borrador'}
           </span>
         </div>
       </div>
@@ -59,8 +75,15 @@ const GalleryCard = ({ gallery, onUpdate }) => {
         <div className="gallery-info">
           <div className="info-item">
             <strong>Cliente:</strong>
-            <span>{gallery.client_name} {gallery.client_last_name}</span>
+            <span>{getClientName()}</span>
           </div>
+          
+          {getClientEmail() && (
+            <div className="info-item">
+              <strong>Email:</strong>
+              <span>{getClientEmail()}</span>
+            </div>
+          )}
           
           <div className="info-item">
             <strong>Servicio:</strong>
@@ -69,7 +92,7 @@ const GalleryCard = ({ gallery, onUpdate }) => {
           
           <div className="info-item">
             <strong>Fotos:</strong>
-            <span>{gallery.photos_count} imágenes</span>
+            <span>{gallery.photos_count || 0} imágenes</span>
           </div>
           
           <div className="info-item">

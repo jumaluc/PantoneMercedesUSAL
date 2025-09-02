@@ -7,6 +7,8 @@ const {  uploadFile,
   checkCredentials} = require('../utils/googleStorageService')
 const Gallery = require('../moduls/Galleries')
 const Gallery_images = require('../moduls/Gallery_images')
+const path = require('path');
+
 const adminController = {
 
     getAllClients: async (req, res) =>{
@@ -107,50 +109,47 @@ createGallery: async (req, res) => {
         const uploadedImages = [];
         let photoCount = 0;
 
-        for (const file of req.files) {
-            try {
-                let fileName;
-                if (photoCount === 0) {
-                    fileName = 'fotoPrincipal.jpg';
-                } else {
-                    fileName = `${photoCount}.jpg`;
+                for (const file of req.files) {
+                    try {
+                        // Generar nombre único con UUID y mantener la extensión original
+                        const fileExtension = path.extname(file.originalname); // Obtener extensión (.jpg, .png, etc.)
+                        const uniqueFileName = `${uuidv4()}${fileExtension}`;
+
+                        // Determinar si es la imagen principal (la primera)
+                        const isPrimary = photoCount === 0;
+
+                        // Subir archivo a Google Cloud Storage
+                        const uploadResult = await uploadFile(
+                            file.buffer,
+                            uniqueFileName,  // Usar el nombre único
+                            folderName,
+                            file.mimetype
+                        );
+
+                        if (uploadResult.success) {
+                            uploadedImages.push({
+                                originalName: file.originalname,
+                                storageName: uniqueFileName,  // Guardar el nombre único
+                                url: uploadResult.url,
+                                path: uploadResult.path,
+                                isPrimary: isPrimary
+                            });
+                            photoCount++;
+                        } else {
+                            console.error('Error subiendo archivo:', uploadResult.error);
+                        }
+
+                    } catch (fileError) {
+                        console.error('Error procesando archivo:', fileError);
+                    }
                 }
-
-
-                // Subir archivo a Google Cloud Storage
-                const uploadResult = await uploadFile(
-                    file.buffer,
-                    fileName,
-                    folderName,
-                    file.mimetype
-                );
-
-                if (uploadResult.success) {
-                    uploadedImages.push({
-                        originalName: file.originalname,
-                        storageName: fileName,
-                        url: uploadResult.url,
-                        path: uploadResult.path,
-                        isPrimary: photoCount === 0
-                    });
-                    photoCount++;
-                } else {
-                    console.error('Error subiendo archivo:', uploadResult.error);
-                }
-
-            } catch (fileError) {
-                console.error('Error procesando archivo:', fileError);
-            }
-        }
         if (uploadedImages.length === 0) {
             return res.status(500).json({ message: 'Error al subir las imágenes' });
         }
 
-        // Crear registro en la base de datos
         const newGallery = await Gallery.newGallery(id, title, service, description, status, uploadedImages.length, uploadedImages[0].url, folderName,user.id )
         console.log( "NUEVA GALERIA ",newGallery)
         if(!newGallery || newGallery === 0)return res.status(500).json({message : 'Error en el servidor'})
-        // Guardar información detallada de las imágenes
         const galleryImages = uploadedImages.map(img => ({
             gallery_id: newGallery.insertId,
             original_name: img.originalName,
@@ -191,6 +190,36 @@ createGallery: async (req, res) => {
         console.error('Error en createGallery:', err);
         res.status(500).json({ message: 'Error del servidor' });
     }
-}
+},
+
+
+
+    getAllGalleries: async (req, res) =>{
+
+        try{  
+
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') {return res.status(401).json({ message: 'Acceso no autorizado' });}
+
+        const galleries = await Gallery.getAllGalleries();
+
+
+        const galleriesWithClients = await Promise.all(
+            galleries.map(async (gal) => {
+                const client = await User.findOne(gal.client_id);
+
+                return {
+                    ...gal,          
+                    client: client   
+                };
+            })
+        );
+        if(!galleriesWithClients)return res.status(500).json({message: 'Error en el servidor'})
+        return res.status(200).json(galleriesWithClients);
+    }
+    catch(err){console.log(err); return res.status(500).json({message: 'Error en el servidor'})}
+    }
+        
+
 }
 module.exports = adminController

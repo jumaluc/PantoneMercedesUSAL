@@ -3,9 +3,9 @@ const path = require('path');
 const fs = require('fs').promises;
 console.log("HOLA")
 // Configuración
-const KEY_FILENAME = process.env.GOOGLE_CREDENTIALS_PATH || 'C:\\Users\\HP\\OneDrive\\Escritorio\\PantoneMercedesUSAL\\BackEnd\\src\\config\\google-credentials.json'
-const PROJECT_ID = process.env.GOOGLE_PROJECT_ID || 'Pantone-web';
-const BUCKET_NAME = process.env.GOOGLE_BUCKET_NAME || 'pantone-almacen-imagenes';
+const KEY_FILENAME =  "C:\\Users\\grete\\Desktop\\PantoneMercedes\\BackEnd\\src\\config\\google-credentials.json"
+const PROJECT_ID =  'Pantone-web';
+const BUCKET_NAME = 'pantone-almacen-imagenes';
 
 
 async function checkCredentials() {

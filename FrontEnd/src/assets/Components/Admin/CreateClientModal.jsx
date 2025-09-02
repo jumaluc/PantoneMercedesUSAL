@@ -132,9 +132,9 @@ const CreateClientModal = ({ isOpen, onClose, onClientCreated }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="modal-overlay-create-client">
+      <div className="modal-content-create-client">
+        <div className="modal-header-create-client">
           <h2>Crear Nuevo Cliente</h2>
           <button className="close-btn" onClick={handleClose}>×</button>
         </div>

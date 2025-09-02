@@ -14,6 +14,15 @@ class Gallery {
     static async uploadedImages(){
 
     }
+    static async getAllGalleries(){
+        try{
+
+            const [result] = await pool.execute('SELECT * FROM galleries');
+            return result;
+
+        }
+        catch(err){console.log(err)}
+    }
 }
 
 module.exports = Gallery;

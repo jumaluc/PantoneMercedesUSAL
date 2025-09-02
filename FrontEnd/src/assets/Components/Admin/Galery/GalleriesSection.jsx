@@ -25,8 +25,8 @@ const GalleriesSection = () => {
     filteredCount,
     hasFilters
   } = useSearchFilter(allGalleries, [
-    'client_name',
-    'client_last_name',
+    'client.first_name',    // Cambiado para buscar en el objeto client
+    'client.last_name',     // Cambiado para buscar en el objeto client  
     'title',
     'service_type',
     'status'
@@ -37,13 +37,20 @@ const GalleriesSection = () => {
     fetchClients();
   }, []);
 
+  
   const fetchGalleries = async () => {
     try {
-      const response = await fetch('http://localhost:3000/admin/galleries', {
+      const response = await fetch('http://localhost:3000/admin/getAllGalleries', {
         credentials: 'include'
       });
+      
+      if (!response.ok) {
+        throw new Error('Error al obtener galerías');
+      }
+      
       const data = await response.json();
-      setAllGalleries(data.data || []);
+      // El backend devuelve directamente el array, no data.data
+      setAllGalleries(data || []);
     } catch (error) {
       console.error('Error fetching galleries:', error);
       setAllGalleries([]);

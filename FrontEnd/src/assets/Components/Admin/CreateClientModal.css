@@ -1,4 +1,4 @@
-.modal-overlay {
+.modal-overlay-create-client {
   position: fixed;
   top: 0;
   left: 0;
@@ -12,7 +12,7 @@
   padding: 20px;
 }
 
-.modal-content {
+.modal-content-create-client {
   background: white;
   border-radius: 12px;
   width: 100%;
@@ -22,7 +22,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.modal-header {
+.modal-header-create-client {
   display: flex;
   justify-content: space-between;
   align-items: center;

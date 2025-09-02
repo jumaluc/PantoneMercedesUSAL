@@ -100,9 +100,11 @@ const ClientsSection = () => {
   setActiveMenu(null);
 };
 
-  const handleDeleteClick = async (clientId, e) => {
-    e.stopPropagation();
-    const result = await Swal.fire({
+const handleDeleteClick = async (clientId, e) => {
+  e.stopPropagation();
+  
+  // 1. Confirmación de eliminación
+  const result = await Swal.fire({
     title: '¿Estás seguro?',
     text: "¡No podrás revertir esta acción!",
     icon: 'warning',
@@ -114,28 +116,63 @@ const ClientsSection = () => {
     background: '#fff',
     customClass: {
       popup: 'custom-swal-popup'
-      }
-    });
-    if (result.isConfirmed) {
-      try {
-        const response = await fetch(`http://localhost:3000/admin/deleteClient/${clientId}`, {
-          method: 'DELETE',
-          credentials: 'include'
+    }
+  });
+
+  if (result.isConfirmed) {
+    try {
+      const response = await fetch(`http://localhost:3000/admin/deleteClient/${clientId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        await Swal.fire({
+          title: '¡Eliminado!',
+          text: 'El cliente ha sido eliminado correctamente',
+          icon: 'success',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'Aceptar',
+          background: '#fff',
+          customClass: {
+            popup: 'custom-swal-popup'
+          }
         });
         
-        if (response.ok) {
-          toast.success('Cliente eliminado correctamente')
-          fetchClients();
-        } else {
-          toast.error('Error al eliminar al cliente')
-        }
-      } catch (error) {
-        console.error('Error deleting client:', error);
-        toast.error('Error en el servidor');
+        fetchClients(); 
+        
+      } else {
+        const errorData = await response.json();
+        await Swal.fire({
+          title: 'Error',
+          text: errorData.message || 'Error al eliminar el cliente',
+          icon: 'error',
+          confirmButtonColor: '#d33',
+          confirmButtonText: 'Entendido',
+          background: '#fff',
+          customClass: {
+            popup: 'custom-swal-popup'
+          }
+        });
       }
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      await Swal.fire({
+        title: 'Error de conexión',
+        text: 'No se pudo conectar con el servidor',
+        icon: 'error',
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Entendido',
+        background: '#fff',
+        customClass: {
+          popup: 'custom-swal-popup'
+        }
+      });
     }
-    setActiveMenu(null);
-  };
+  }
+  
+  setActiveMenu(null);
+};
 
   const toggleMenu = (clientId, e) => {
     e.stopPropagation();
