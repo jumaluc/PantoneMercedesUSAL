@@ -2,24 +2,61 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV, faEdit, faTrash, faEye, faImage } from '@fortawesome/free-solid-svg-icons';
 import './GalleriesSection.css';
+import Swal from 'sweetalert2';
 
 const GalleryCard = ({ gallery, onUpdate }) => {
   const [showMenu, setShowMenu] = useState(false);
 
   const handleDelete = async () => {
-    if (window.confirm('¿Eliminar esta galería?')) {
+
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡No podrás revertir esta acción!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar!',
+        cancelButtonText: 'Cancelar',
+        background: '#fff',
+        customClass: {
+          popup: 'custom-swal-popup'
+        }
+      })
+    if (result.isConfirmed) {
       try {
-        const response = await fetch(`http://localhost:3000/admin/galleries/${gallery.id}`, {
+        const response = await fetch(`http://localhost:3000/admin/deleteGallery/${gallery.id}`, {
           method: 'DELETE',
           credentials: 'include'
         });
         
         if (response.ok) {
-          alert('Galería eliminada');
+                  await Swal.fire({
+                    title: '¡Eliminado!',
+                    text: 'La galeria ha sido eliminada correctamente',
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'Aceptar',
+                    background: '#fff',
+                    customClass: {
+                      popup: 'custom-swal-popup'
+                    }
+                  });
           onUpdate();
         }
       } catch (error) {
-        console.error('Error deleting gallery:', error);
+                const errorData = await response.json();
+                await Swal.fire({
+                  title: 'Error',
+                  text: errorData.message || 'Error al eliminar la galeria',
+                  icon: 'error',
+                  confirmButtonColor: '#d33',
+                  confirmButtonText: 'Entendido',
+                  background: '#fff',
+                  customClass: {
+                    popup: 'custom-swal-popup'
+                  }
+                });
       }
     }
     setShowMenu(false);

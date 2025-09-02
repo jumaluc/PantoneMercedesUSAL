@@ -97,7 +97,7 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
 
       if (response.ok) {
         toast.success('Galeria creada exitosamente!');
-        //onGalleryCreated();
+        onGalleryCreated();
         handleClose();
       } else {
         toast.error('Error al crear la galeria')

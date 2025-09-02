@@ -95,8 +95,8 @@ const GalleriesSection = () => {
             Nueva Galería
           </button>
           <span>
-            {hasFilters ? `${filteredCount} de ${totalItems}` : totalItems} 
-            galerías encontradas
+            {hasFilters ? `${filteredCount} de ${totalItems}` : `${totalItems} galerias encontradas`} 
+            
           </span>
         </div>
       </div>

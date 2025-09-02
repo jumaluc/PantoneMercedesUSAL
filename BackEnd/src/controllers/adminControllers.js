@@ -218,6 +218,33 @@ createGallery: async (req, res) => {
         return res.status(200).json(galleriesWithClients);
     }
     catch(err){console.log(err); return res.status(500).json({message: 'Error en el servidor'})}
+    },
+
+    deleteGallery: async (req, res) =>{
+
+
+        try{
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') {return res.status(401).json({ message: 'Acceso no autorizado' });}
+
+        const {galleryId} = req.params;
+        const allFilePath = await Gallery_images.getAllImagesPathGallery(galleryId)
+        const resultDeleteGallery = await Gallery.deleteGallery(galleryId);
+
+        for(const path of allFilePath){
+            console.log("PATH : ",path.file_path)
+            await deleteFile(path.file_path);
+            
+        };
+        if(!resultDeleteGallery || resultDeleteGallery === 0)return res.status(500).json({message : 'Error al eliminar la galeria'});
+
+        res.status(200).json({message : 'Galeria eliminada correctamente'});
+        
+            
+
+        }
+        catch(err){console.log(err)}
+
     }
         
 

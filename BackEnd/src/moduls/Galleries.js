@@ -23,6 +23,13 @@ class Gallery {
         }
         catch(err){console.log(err)}
     }
+    static async deleteGallery(id){
+        try{
+            const [result] = await pool.execute('DELETE FROM galleries WHERE id = ?',[id]);
+            return result.affectedRows;
+        }
+        catch(err){console.log(err);}
+    }
 }
 
 module.exports = Gallery;

@@ -113,9 +113,9 @@ const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
   if (!isOpen || !client) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="modal-overlay-create-client">
+      <div className="modal-content-create-client">
+        <div className="modal-header-create-client">
           <h2>Editar Cliente</h2>
           <button className="close-btn" onClick={handleClose}>×</button>
         </div>
