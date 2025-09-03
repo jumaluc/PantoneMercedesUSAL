@@ -9,8 +9,8 @@ const authController = {
             const {email, password} = req.body;
             //HACER PREVIA VERIFICACION
             const result = await User.equalPassword(email) || false;
-            const validPassword = await bcrypt.compare(password, result.password) || false;
             if(!result)return res.status(401).json({message : 'Credenciales Incorrectas'});
+            const validPassword = await bcrypt.compare(password, result.password) || false;
             if(!validPassword){
                 return res.status(401).json({message : 'Credenciales Incorrectas'});
             }

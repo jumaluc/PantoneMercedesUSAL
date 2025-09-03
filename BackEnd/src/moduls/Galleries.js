@@ -30,6 +30,17 @@ class Gallery {
         }
         catch(err){console.log(err);}
     }
+
+    static async getID(id){
+        try
+        {
+
+            const [result] = await pool.execute('SELECT id, title, service_type, description, photos_count, created_at FROM galleries WHERE client_id = ?',[id]);
+            return result;
+
+        }
+        catch(err){console.log(err)}
+    }
 }
 
 module.exports = Gallery;

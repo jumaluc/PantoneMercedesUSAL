@@ -14,7 +14,7 @@ const Dashboard = () => {
     const fetchUser = async () => {
       try {
         const response = await fetch('http://localhost:3000/user/getUser', {
-          method: 'GET', // ✅ Debe ser string
+          method: 'GET',
           credentials: 'include'
         });
 
@@ -36,15 +36,15 @@ const Dashboard = () => {
   }, []);
 
   if (loading) {
-    return <div>Cargando...</div>;
+    return <div className="loading">Cargando...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="error">Error: {error}</div>;
   }
 
   if (!user) {
-    return <div>No se pudo cargar la información del usuario</div>;
+    return <div className="error">No se pudo cargar la información del usuario</div>;
   }
 
   const renderSection = () => {

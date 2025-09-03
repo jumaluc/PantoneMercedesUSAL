@@ -1,5 +1,7 @@
 const User = require('../moduls/Users')
-
+const Gallery = require('../moduls/Galleries')
+const Gallery_images = require('../moduls/Gallery_images');
+const { all } = require('../routes/userRoutes');
 const userController = {
 
     editProfile: async (req, res) => {
@@ -42,8 +44,38 @@ const userController = {
         catch(error){
 
         }
-    }
+    },
 
+getGallery: async (req, res) => {
+    try {
+        console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: "Acceso denegado" });
+        
+        const userInfo = await User.getUser(user.id);
+        if (!userInfo) return res.status(404).json({ message: "Usuario no encontrado" });
+        
+        const [getGalleryID] = await Gallery.getID(user.id);
+        if (!getGalleryID) return res.status(404).json({ message: "No se encontraron galerías" });
+        
+        console.log("ID DE LA GALERIA---: ",getGalleryID.id)
+        const allGalleryImages = await Gallery_images.getAllGalleryImages(getGalleryID.id);
+        
+        console.log("GALERIAS FOTOS : ",allGalleryImages)
+
+        return res.status(200).json({ 
+            data: {
+                user: userInfo,
+                galleries: getGalleryID, 
+                images: allGalleryImages || []
+            }
+        });
+
+    } catch (err) {
+        console.error('Error en getGallery:', err);
+        return res.status(500).json({ message: "Error interno del servidor" });
+    }
+}
 
 }
 

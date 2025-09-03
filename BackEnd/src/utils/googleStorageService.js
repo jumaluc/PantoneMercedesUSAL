@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs').promises;
 console.log("HOLA")
 // Configuración
-const KEY_FILENAME =  "C:\\Users\\HP\\OneDrive\\Escritorio\\PantoneMercedesUSAL\\BackEnd\\src\\config\\google-credentials.json"
+const KEY_FILENAME =  "C:\\Users\\grete\\Desktop\\PantoneMercedes\\BackEnd\\src\\config\\google-credentials.json"
 const PROJECT_ID =  'Pantone-web';
 const BUCKET_NAME = 'pantone-almacen-imagenes';
 
