@@ -59,7 +59,7 @@ const ClientProfile = ({ user }) => {
         <h2>Mi Perfil</h2>
         {!isEditing && (
           <button 
-            className="edit-btn"
+            className="profile-edit-btn"
             onClick={() => setIsEditing(true)}
           >
             Editar Perfil
@@ -68,9 +68,9 @@ const ClientProfile = ({ user }) => {
       </div>
       
       <form className="profile-form" onSubmit={handleSubmit}>
-        <div className="form-row">
+        
           <div className="profile-form-group">
-            <label>Nombre</label>
+            <label className="profile-form-label">Nombre</label>
             <input
               type="text"
               name="first_name"
@@ -82,7 +82,7 @@ const ClientProfile = ({ user }) => {
           </div>
 
           <div className="profile-form-group">
-            <label>Apellido</label>
+            <label className="profile-form-label">Apellido</label>
             <input
               type="text"
               name="last_name"
@@ -92,10 +92,10 @@ const ClientProfile = ({ user }) => {
               disabled={!isEditing}
             />
           </div>
-        </div>
+        
 
         <div className="profile-form-group">
-          <label>Email</label>
+          <label className="profile-form-label">Email</label>
           <input
             type="email"
             name="email"
@@ -107,7 +107,7 @@ const ClientProfile = ({ user }) => {
         </div>
 
         <div className="profile-form-group">
-          <label>Teléfono</label>
+          <label className="profile-form-label">Teléfono</label>
           <input
             type="tel"
             name="number"
@@ -120,7 +120,7 @@ const ClientProfile = ({ user }) => {
         </div>
 
         <div className="profile-form-group">
-          <label>Tipo de servicio</label>
+          <label className="profile-form-label">Tipo de servicio</label>
           <select
             name="service"
             value={profileData.service}
@@ -136,10 +136,10 @@ const ClientProfile = ({ user }) => {
         </div>
 
         {isEditing && (
-          <div className="form-actions">
+          <div className="profile-form-actions">
             <button 
               type="button" 
-              className="cancel-btn"
+              className="profile-cancel-btn"
               onClick={() => {
                 setIsEditing(false);
                 setProfileData({
@@ -153,7 +153,7 @@ const ClientProfile = ({ user }) => {
             >
               Cancelar
             </button>
-            <button type="submit" className="save-btn">
+            <button type="submit" className="profile-save-btn">
               Guardar Cambios
             </button>
           </div>

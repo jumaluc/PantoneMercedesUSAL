@@ -32,9 +32,10 @@ const Navbar = ({ user, activeSection, setActiveSection }) => {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
+        <img src="logoPantone.jpg" className='navBarLogo' alt="logo" />
         <h2>Pantone Mercedes</h2>
       </div>
-      
+              
       <div className="navbar-menu">
         <button 
           className={`nav-btn ${activeSection === 'gallery' ? 'active' : ''}`}

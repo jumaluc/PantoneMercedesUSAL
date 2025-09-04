@@ -34,7 +34,12 @@
   z-index: 1000;
   border-bottom: 3px solid var(--accent-gold);
 }
+.navbar-brand{
+  display: flex;
+  width: 500px;
+  align-items: center;
 
+}
 .navbar-brand h2 {
   color: var(--white);
   margin: 0;
@@ -412,4 +417,38 @@
 .logout-btn:hover {
   background: var(--accent-gold);
   color: var(--primary-dark);
+}
+
+.profile-edit-btn{
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  background-color: #65a7f8;
+  color: white;
+  border-radius: 5px;
+  border: none;
+}
+
+.profile-edit-btn:hover{
+  background-color: #87aede;
+  cursor: pointer;
+}
+.profile-cancel-btn{
+  padding: 10px 20px;
+  background-color: #ee0101;
+  color: white;
+  border-radius: 5px;
+  border: none;
+}
+.profile-save-btn{
+  padding: 10px 20px;
+  margin: 10px;
+  background-color: #50fc00;
+  color: white;
+  border-radius: 5px;
+  border: none;
+}
+
+.profile-cancel-btn:hover, .profile-save-btn:hover {
+
+  
 }

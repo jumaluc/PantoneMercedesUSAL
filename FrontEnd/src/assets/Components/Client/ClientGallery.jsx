@@ -140,8 +140,7 @@ const Gallery = ({ user }) => {
           <h1>{galleries.title}</h1>
           <p className="galeria-subtitle">{galleries.service_type}</p>
           <div className="galeria-client-info">
-            <span>{userInfo.first_name} {userInfo.last_name}</span>
-            <span>{images?.length || 0} fotos</span>
+            <span>Total de: {images?.length || 0} fotos</span>
           </div>
         </div>
       </header>
@@ -196,11 +195,7 @@ const Gallery = ({ user }) => {
               </div>
 
               {/* Badge de selección (siempre visible cuando está seleccionado) */}
-              {selectedImages.has(image.id) && (
-                <div className="selection-badge">
-                  <FontAwesomeIcon icon={faCheckCircle} />
-                </div>
-              )}
+
             </div>
           ))}
         </div>
@@ -250,10 +245,10 @@ const Gallery = ({ user }) => {
               </button>
 
               <div className="overlay-navigation">
-                <button onClick={() => navigateOverlay(-1)} className="nav-btn prev">
+                <button onClick={() => navigateOverlay(-1)} className="nav-btn-gallery prev">
                   ‹
                 </button>
-                <button onClick={() => navigateOverlay(1)} className="nav-btn next">
+                <button onClick={() => navigateOverlay(1)} className="nav-btn-gallery next">
                   ›
                 </button>
               </div>
