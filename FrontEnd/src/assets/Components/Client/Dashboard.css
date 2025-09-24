@@ -15,8 +15,7 @@
 }
 
 .dashboard-main {
-  padding: 30px;
-  margin-top: 80px;
+  margin-top: 120px;
 }
 
 
@@ -33,6 +32,7 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   z-index: 1000;
   border-bottom: 3px solid var(--accent-gold);
+  margin-bottom: 50px;
 }
 .navbar-brand{
   display: flex;
@@ -53,7 +53,7 @@
   gap: 15px;
 }
 
-.nav-btn {
+.nav-btn-client {
   padding: 12px 25px;
   border: 2px solid transparent;
   background: none;
@@ -64,12 +64,12 @@
   font-weight: 500;
 }
 
-.nav-btn:hover {
+.nav-btn-client:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--accent-gold);
 }
 
-.nav-btn.active {
+.nav-btn-client.active {
   background: var(--accent-gold);
   color: var(--primary-dark);
   border-color: var(--accent-gold);
@@ -355,7 +355,7 @@
     gap: 10px;
   }
   
-  .nav-btn {
+  .nav-btn-client {
     padding: 10px 15px;
     font-size: 14px;
   }

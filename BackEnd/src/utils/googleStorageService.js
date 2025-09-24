@@ -1,12 +1,11 @@
 const { Storage } = require('@google-cloud/storage');
 const path = require('path');
 const fs = require('fs').promises;
-console.log("HOLA")
-// Configuración
-const KEY_FILENAME =  "C:\\Users\\HP\\OneDrive\\Escritorio\\PantoneMercedesUSAL\\BackEnd\\src\\config\\google-credentials.json"
-const PROJECT_ID =  'Pantone-web';
-const BUCKET_NAME = 'pantone-almacen-imagenes';
 
+// Configuración
+const KEY_FILENAME = "C:\\Users\\grete\\Desktop\\PantoneMercedes\\BackEnd\\src\\config\\google-credentials.json";
+const PROJECT_ID = 'Pantone-web';
+const BUCKET_NAME = 'pantone-almacen-imagenes';
 
 async function checkCredentials() {
   try {
@@ -19,7 +18,7 @@ async function checkCredentials() {
     return false;
   }
 }
-checkCredentials();
+
 // Inicializar Storage
 const storage = new Storage({
   keyFilename: KEY_FILENAME,
@@ -68,8 +67,6 @@ async function uploadFile(fileBuffer, fileName, folderName, mimetype) {
   }
 }
 
-
-
 // Función para obtener múltiples URLs
 async function getFileUrls(clientId, clientName) {
   try {
@@ -93,6 +90,44 @@ async function getFileUrls(clientId, clientName) {
   }
 }
 
+// Función para descargar archivo individual
+async function downloadFile(filePath, res) {
+  try {
+    const file = bucket.file(filePath);
+    const [exists] = await file.exists();
+
+    if (!exists) {
+      return { success: false, error: 'Archivo no encontrado' };
+    }
+
+    const fileStream = file.createReadStream();
+    return { success: true, stream: fileStream };
+
+  } catch (error) {
+    console.error('Error descargando archivo:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Función para obtener información del archivo
+async function getFileInfo(filePath) {
+  try {
+    const file = bucket.file(filePath);
+    const [metadata] = await file.getMetadata();
+    
+    return {
+      success: true,
+      metadata: metadata,
+      size: metadata.size,
+      contentType: metadata.contentType,
+      lastModified: metadata.updated
+    };
+  } catch (error) {
+    console.error('Error obteniendo información del archivo:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 // Helper para content type
 function getContentType(extension) {
   const types = {
@@ -101,7 +136,8 @@ function getContentType(extension) {
     png: 'image/png',
     gif: 'image/gif',
     webp: 'image/webp',
-    svg: 'image/svg+xml'
+    svg: 'image/svg+xml',
+    zip: 'application/zip'
   };
   return types[extension.toLowerCase()] || 'application/octet-stream';
 }
@@ -118,11 +154,23 @@ async function deleteFile(filePath) {
   }
 }
 
+// Verificar credenciales al iniciar
+checkCredentials().then(hasCredentials => {
+  if (hasCredentials) {
+    console.log('✓ Google Cloud Storage configurado correctamente');
+  } else {
+    console.log('✗ Google Cloud Storage no está configurado');
+  }
+});
+
 module.exports = {
   storage,
   bucket,
   uploadFile,
   getFileUrls,
+  downloadFile,
+  getFileInfo,
   deleteFile,
-  checkCredentials
+  checkCredentials,
+  getContentType
 };

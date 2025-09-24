@@ -38,7 +38,7 @@ const Navbar = ({ user, activeSection, setActiveSection }) => {
               
       <div className="navbar-menu">
         <button 
-          className={`nav-btn ${activeSection === 'gallery' ? 'active' : ''}`}
+          className={`nav-btn-client ${activeSection === 'gallery' ? 'active' : ''}`}
           onClick={() => setActiveSection('gallery')}
         >
           <FontAwesomeIcon icon={faImages} />
@@ -46,7 +46,7 @@ const Navbar = ({ user, activeSection, setActiveSection }) => {
         </button>
         
         <button 
-          className={`nav-btn ${activeSection === 'profile' ? 'active' : ''}`}
+          className={`nav-btn-client ${activeSection === 'profile' ? 'active' : ''}`}
           onClick={() => setActiveSection('profile')}
         >
           <FontAwesomeIcon icon={faUser} />

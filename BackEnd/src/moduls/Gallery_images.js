@@ -21,6 +21,18 @@ class Gallery_images{
         }
         catch(err){console.log(err)}
     }
+    static async updateSelectionStatus(imageIds, isSelected){
+    try {
+        const placeholders = imageIds.map(() => '?').join(',');
+        const query = `UPDATE gallery_images SET is_selected = ? WHERE id IN (${placeholders})`;
+        
+        const [result] = await pool.execute(query, [isSelected, ...imageIds]);
+        return result.affectedRows > 0;
+    } catch (error) {
+        console.error('Error updating selection status:', error);
+        throw error;
+    }
+}
 }
 
 
