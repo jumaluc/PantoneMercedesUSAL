@@ -33,6 +33,30 @@ class Gallery_images{
         throw error;
     }
 }
+static async getTotalImages() {
+    try {
+        const [rows] = await pool.execute('SELECT COUNT(*) as total FROM gallery_images');
+        return rows[0].total;
+    } catch (error) {
+        console.error('Error getting total images:', error);
+        throw error;
+    }
+}
+
+static async getNewImagesCount(startDate, endDate) {
+    try {
+        const [rows] = await pool.execute(
+            `SELECT COUNT(*) as count FROM gallery_images gi 
+             JOIN galleries g ON gi.gallery_id = g.id 
+             WHERE gi.created_at BETWEEN ? AND ?`,
+            [startDate, endDate]
+        );
+        return rows[0].count;
+    } catch (error) {
+        console.error('Error getting new images count:', error);
+        throw error;
+    }
+}
 }
 
 

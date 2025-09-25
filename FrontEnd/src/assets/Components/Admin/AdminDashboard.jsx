@@ -2,18 +2,16 @@ import React, { useState, useEffect } from 'react';
 import AdminNavbar from './AdminNavbar';
 import ClientsSection from './ClientsSection';
 import GalleriesSection from './Galery/GalleriesSection';
+import StatsSection from './StatsSection'; // Nuevo componente
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-faArrowRightFromBracket
-} from '@fortawesome/free-solid-svg-icons';
-
+import { faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import './AdminDashboard.css';
 
-
 const AdminDashboard = () => {
-  const [activeSection, setActiveSection] = useState('clients');
+  const [activeSection, setActiveSection] = useState('stats'); // Cambiado a stats por defecto
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dashboardStats, setDashboardStats] = useState(null);
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -22,8 +20,10 @@ const AdminDashboard = () => {
           credentials: 'include'
         });
         const data = await response.json();
-        console.log(data.data)
         setAdminData(data.data);
+        
+        // Cargar estadísticas del dashboard
+        await fetchDashboardStats();
       } catch (error) {
         console.error('Error loading admin data:', error);
       } finally {
@@ -34,18 +34,42 @@ const AdminDashboard = () => {
     fetchAdminData();
   }, []);
 
+  const fetchDashboardStats = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/admin/dashboard-stats', {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setDashboardStats(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+    }
+  };
+
   const renderSection = () => {
-    if (loading) return <div className="loading">Cargando...</div>;
+    if (loading) return <div className="admin-loading">Cargando...</div>;
 
     switch (activeSection) {
+      case 'stats': return <StatsSection />;
       case 'clients': return <ClientsSection />;
       case 'galleries': return <GalleriesSection />;
-      case 'videos': return <VideosSection />;
-      case 'comments': return <CommentsSection />;
       case 'audit': return <AuditSection />;
-      case 'stats': return <StatsSection />;
       case 'profile': return <ProfileSection adminData={adminData} />;
-      default: return <ClientsSection />;
+      default: return <StatsSection />;
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:3000/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error during logout:', error);
     }
   };
 
@@ -58,19 +82,23 @@ const AdminDashboard = () => {
           <h1 className='top-navbar-title'>Panel Administrativo</h1>
         </div>
         <div className='container-logo-titulo'>
-                  {adminData &&         
-                    <div className="user-info">
-                      <span className="user-name">{adminData.first_name} {adminData.last_name}</span>
-                      <span className="user-email">{adminData.email}</span>
-                  </div>}
+          {adminData &&         
+            <div className="user-info">
+              <span className="user-name">{adminData.first_name} {adminData.last_name}</span>
+              <span className="user-email">{adminData.email}</span>
+              {dashboardStats && (
+                <span className="user-stats">
+                  {dashboardStats.todayStats?.totalActions || 0} acciones hoy
+                </span>
+              )}
+            </div>
+          }
 
-                  <FontAwesomeIcon    className='logoutFontIcon'       
-                  onClick={() => {
-                    fetch('http://localhost:3000/auth/logout', {
-                      method: 'POST',
-                      credentials: 'include'
-                    }).then(() => window.location.href = '/login');
-                  }} icon={faArrowRightFromBracket} />
+          <FontAwesomeIcon 
+            className='logoutFontIcon'       
+            onClick={handleLogout} 
+            icon={faArrowRightFromBracket} 
+          />
         </div>
       </header>
 
@@ -80,6 +108,7 @@ const AdminDashboard = () => {
           activeSection={activeSection}
           setActiveSection={setActiveSection}
           adminData={adminData}
+          dashboardStats={dashboardStats}
         />
 
         {/* Contenido principal */}

@@ -56,6 +56,51 @@ class User {
         const [result] = await pool.execute('SELECT first_name, last_name, email FROM users WHERE id = ? and role = "client"',[id]);
         return result[0]; 
     }
+    static async getTotalClients() {
+    try {
+        const [rows] = await pool.execute('SELECT COUNT(*) as total FROM users WHERE role = "client"');
+        return rows[0].total;
+    } catch (error) {
+        console.error('Error getting total clients:', error);
+        throw error;
+    }
+}
+
+static async getNewClientsCount(startDate, endDate) {
+    try {
+        const [rows] = await pool.execute(
+            'SELECT COUNT(*) as count FROM users WHERE role = "client" AND created_at BETWEEN ? AND ?',
+            [startDate, endDate]
+        );
+        return rows[0].count;
+    } catch (error) {
+        console.error('Error getting new clients count:', error);
+        throw error;
+    }
+}
+
+static async getClientsGrowth(days = 30) {
+    try {
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+
+        const query = `
+            SELECT 
+                DATE(created_at) as date,
+                COUNT(*) as new_clients
+            FROM users 
+            WHERE role = "client" AND created_at >= ?
+            GROUP BY DATE(created_at)
+            ORDER BY date ASC
+        `;
+        
+        const [growth] = await pool.execute(query, [startDate]);
+        return growth;
+    } catch (error) {
+        console.error('Error getting clients growth:', error);
+        throw error;
+    }
+}
 }
 
 module.exports = User;
