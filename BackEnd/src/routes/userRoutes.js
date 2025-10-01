@@ -16,4 +16,7 @@ router.post('/addComment',userController.addComment);
 router.get('/getImageComments',userController.getImageComments);
 router.delete('/deleteImageComment', userController.deleteImageComment);
 router.put('/updateImageComment', userController.updateImageComment)
+router.get('/getMyComments', userController.getMyComments);
+router.post("/createRequest",  userController.createRequest);
+router.get('/getMyRequests', userController.getMyRequests);
 module.exports = router;

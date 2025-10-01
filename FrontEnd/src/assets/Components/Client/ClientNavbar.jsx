@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSignOutAlt, faImages, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faSignOutAlt, faImages, faUser, faComment, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = ({ user, activeSection, setActiveSection }) => {
   const navigate = useNavigate();
@@ -43,6 +43,14 @@ const Navbar = ({ user, activeSection, setActiveSection }) => {
         >
           <FontAwesomeIcon icon={faImages} />
           Mi Galería
+        </button>
+        
+        <button 
+          className={`nav-btn-client ${activeSection === 'comments' ? 'active' : ''}`}
+          onClick={() => setActiveSection('comments')}
+        >
+          <FontAwesomeIcon icon={faComment} />
+          Comentarios & Solicitudes
         </button>
         
         <button 

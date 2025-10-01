@@ -4,7 +4,7 @@ const Gallery_images = require('../moduls/Gallery_images');
 const { storage, bucket } = require('../utils/googleStorageService');
 const archiver = require('archiver');
 const Comments = require('../moduls/Comments')
-
+const General_requests = require('../moduls/General_requests');
 const userController = {
 
     editProfile: async (req, res) => {
@@ -306,8 +306,60 @@ updateImageComment: async (req, res) => {
     console.log(err);
     return res.status(500).json({ message: "Error interno del servidor" });
   }
+},
+
+getMyComments: async (req,res) =>{
+
+  try{
+    const user = req.session.user;
+    if (!user) return res.status(404).json({ message: "Acceso denegado" });
+
+    const idUser = req.session.user.id;
+
+
+    const comments = await Comments.getMyComments(idUser);
+    if(!comments) return res.status(500).json({message : "Error en el servidor"});
+    return res.status(200).json({comments});
+
+  }
+  catch(err){console.log(err)};
+},
+
+createRequest: async (req, res) =>{
+  try{
+    console.log("ENTRO AL CREATE REQUESTS ----------------------------")
+    const user = req.session.user;
+    if (!user) return res.status(404).json({ message: "Acceso denegado" });
+    const {type, subject, message, priority} = req.body;
+
+    const idUser = req.session.user.id;
+    const response = await General_requests.createRequest(idUser, type, subject, message, priority);
+    if(!response || response < 0)return req.status(500).json({message : "Error en el servidor"});
+
+    return res.status(200).json({message : "Solicitud creada correctamente"});
+
+  }
+  catch(err){console.log(err)}
+},
+
+
+ getMyRequests: async(req,res) =>{
+  try{
+        const user = req.session.user;
+        if (!user) return res.status(404).json({ message: "Acceso denegado" });
+        const id = req.session.user.id;
+        const requests = await General_requests.getMyRequests(id);
+        if(!requests) return res.status(500).json({message : "Error en el servidor"});
+
+        console.log(requests)
+        return res.status(200).json({requests})
+
+  }
+       catch(err){console.log(err)}
+ }
+
 }
 
-};
+;
 
 module.exports = userController;

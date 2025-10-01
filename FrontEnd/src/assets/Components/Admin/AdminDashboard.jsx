@@ -86,11 +86,7 @@ const AdminDashboard = () => {
             <div className="user-info">
               <span className="user-name">{adminData.first_name} {adminData.last_name}</span>
               <span className="user-email">{adminData.email}</span>
-              {dashboardStats && (
-                <span className="user-stats">
-                  {dashboardStats.todayStats?.totalActions || 0} acciones hoy
-                </span>
-              )}
+
             </div>
           }
 

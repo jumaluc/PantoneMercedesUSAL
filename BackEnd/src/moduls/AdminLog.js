@@ -81,22 +81,33 @@ class AdminLog {
                 params.push(filters.limit);
             }
 
-            if (filters.offset) {
+            if (filters.page && filters.limit) {
+                const offset = (filters.page - 1) * filters.limit;
                 query += ' OFFSET ?';
-                params.push(filters.offset);
+                params.push(offset);
             }
 
             const [logs] = await pool.execute(query, params);
             
+            // Parsear JSON fields de manera segura
             return logs.map(log => ({
                 ...log,
-                old_values: log.old_values ? JSON.parse(log.old_values) : null,
-                new_values: log.new_values ? JSON.parse(log.new_values) : null,
-                additional_data: log.additional_data ? JSON.parse(log.additional_data) : null
+                old_values: log.old_values ? this.safeJsonParse(log.old_values) : null,
+                new_values: log.new_values ? this.safeJsonParse(log.new_values) : null,
+                additional_data: log.additional_data ? this.safeJsonParse(log.additional_data) : null
             }));
         } catch (error) {
             console.error('Error getting admin logs:', error);
             throw error;
+        }
+    }
+
+    static safeJsonParse(str) {
+        try {
+            return JSON.parse(str);
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+            return null;
         }
     }
 
@@ -129,14 +140,14 @@ class AdminLog {
             }
 
             const [result] = await pool.execute(query, params);
-            return result[0].total;
+            return result[0]?.total || 0;
         } catch (error) {
             console.error('Error getting logs count:', error);
             throw error;
         }
     }
 
-    // NUEVOS MÉTODOS PARA ESTADÍSTICAS
+    // MÉTODOS PARA ESTADÍSTICAS
 
     static async getRecentActivity(limit = 10) {
         try {
@@ -155,10 +166,10 @@ class AdminLog {
             `;
             
             const [logs] = await pool.execute(query, [limit]);
-            return logs;
+            return logs || [];
         } catch (error) {
             console.error('Error getting recent activity:', error);
-            throw error;
+            return [];
         }
     }
 
@@ -175,10 +186,10 @@ class AdminLog {
             `;
             
             const [summary] = await pool.execute(query, [startDate, endDate]);
-            return summary;
+            return summary || [];
         } catch (error) {
             console.error('Error getting action summary:', error);
-            throw error;
+            return [];
         }
     }
 
@@ -191,10 +202,10 @@ class AdminLog {
             `;
             
             const [result] = await pool.execute(query, [startDate, endDate]);
-            return result[0].count;
+            return result[0]?.count || 0;
         } catch (error) {
             console.error('Error getting actions count:', error);
-            throw error;
+            return 0;
         }
     }
 
@@ -207,10 +218,10 @@ class AdminLog {
             `;
             
             const [result] = await pool.execute(query, [startDate, endDate, actionType]);
-            return result[0].count;
+            return result[0]?.count || 0;
         } catch (error) {
             console.error('Error getting actions count by type:', error);
-            throw error;
+            return 0;
         }
     }
 
@@ -231,10 +242,10 @@ class AdminLog {
             `;
             
             const [summary] = await pool.execute(query, [startDate]);
-            return summary;
+            return summary || [];
         } catch (error) {
             console.error('Error getting stats summary:', error);
-            throw error;
+            return [];
         }
     }
 
@@ -255,10 +266,10 @@ class AdminLog {
             `;
             
             const [activity] = await pool.execute(query, [adminId, startDate]);
-            return activity;
+            return activity || [];
         } catch (error) {
             console.error('Error getting admin activity:', error);
-            throw error;
+            return [];
         }
     }
 }

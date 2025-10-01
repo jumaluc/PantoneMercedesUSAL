@@ -45,7 +45,17 @@ static async updateImageComment(comment_id, comment) {
         throw err; // Es importante lanzar el error para manejarlo adecuadamente
     }
 }
+
+static async getMyComments(idUser){
+    try{
+        const [result] = await pool.execute('SELECT image_comments.id, image_comments.image_id, comment, image_comments.created_at, image_comments.updated_at, gallery_images.image_url FROM image_comments INNER JOIN gallery_images ON image_comments.image_id = gallery_images.id WHERE image_comments.user_id = ?',[idUser])
+        return result;
     }
+    catch(err){console.log(err)}
+}
+
+
+}
 
 
 

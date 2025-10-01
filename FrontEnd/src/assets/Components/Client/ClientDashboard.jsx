@@ -1,6 +1,7 @@
 import Navbar from './ClientNavbar';
 import ClientProfile from './ClientProfile';
 import Gallery from './ClientGallery';
+import ClientCommentsAndRequests from './ClientCommentsAndRequests';
 import './Dashboard.css';
 import React, { useState, useEffect } from 'react';
 
@@ -51,6 +52,8 @@ const Dashboard = () => {
     switch (activeSection) {
       case 'profile':
         return <ClientProfile user={user} />;
+      case 'comments':
+        return <ClientCommentsAndRequests user={user} />;
       case 'gallery':
       default:
         return <Gallery user={user} />;

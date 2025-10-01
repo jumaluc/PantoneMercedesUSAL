@@ -285,7 +285,8 @@ const adminController = {
             res.status(500).json({ message: 'Error del servidor' });
         }
     },
-       getDashboardStats: async (req, res) => {
+
+    getDashboardStats: async (req, res) => {
         try {
             const user = req.session.user;
             if (!user || user.role !== 'admin') {
@@ -311,119 +312,151 @@ const adminController = {
     },
 
     calculateDashboardStats: async (range) => {
-        const today = new Date();
-        const startDate = new Date();
-        
-        // Calcular fechas según el rango
-        switch (range) {
-            case 'week':
-                startDate.setDate(today.getDate() - 7);
-                break;
-            case 'month':
-                startDate.setMonth(today.getMonth() - 1);
-                break;
-            default: // today
-                startDate.setHours(0, 0, 0, 0);
+        try {
+            const today = new Date();
+            const startDate = new Date();
+            
+            // Calcular fechas según el rango
+            switch (range) {
+                case 'week':
+                    startDate.setDate(today.getDate() - 7);
+                    break;
+                case 'month':
+                    startDate.setMonth(today.getMonth() - 1);
+                    break;
+                default: // today
+                    startDate.setHours(0, 0, 0, 0);
+            }
+
+            // Obtener datos en paralelo para mejor performance
+            const [
+                todayStats,
+                weekStats,
+                recentActivity,
+                actionSummary
+            ] = await Promise.all([
+                adminController.getTodayStats(),
+                adminController.getWeekStats(),
+                AdminLog.getRecentActivity(10),
+                AdminLog.getActionSummary(startDate, today)
+            ]);
+
+            return {
+                todayStats,
+                weekStats,
+                recentActivity: recentActivity || [],
+                actionSummary: actionSummary || [],
+                range
+            };
+        } catch (error) {
+            console.error('Error calculating dashboard stats:', error);
+            return {
+                todayStats: {},
+                weekStats: {},
+                recentActivity: [],
+                actionSummary: [],
+                range
+            };
         }
-
-        // Obtener datos en paralelo para mejor performance
-        const [
-            todayStats,
-            weekStats,
-            recentActivity,
-            actionSummary,
-            clientsGrowth,
-            galleriesGrowth
-        ] = await Promise.all([
-            adminController.getTodayStats(),
-            adminController.getWeekStats(),
-            AdminLog.getRecentActivity(10),
-            AdminLog.getActionSummary(startDate),
-            adminController.getClientsGrowth(startDate),
-            adminController.getGalleriesGrowth(startDate)
-        ]);
-
-        return {
-            todayStats,
-            weekStats,
-            recentActivity,
-            actionSummary,
-            clientsGrowth,
-            galleriesGrowth,
-            range
-        };
     },
 
     getTodayStats: async () => {
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        
-        const todayEnd = new Date();
-        todayEnd.setHours(23, 59, 59, 999);
+        try {
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+            
+            const todayEnd = new Date();
+            todayEnd.setHours(23, 59, 59, 999);
 
-        const yesterdayStart = new Date(todayStart);
-        yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+            const yesterdayStart = new Date(todayStart);
+            yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+            const yesterdayEnd = new Date(todayStart);
 
-        const [
-            totalClients,
-            newClientsToday,
-            totalGalleries,
-            newGalleriesToday,
-            totalImages,
-            newImagesToday,
-            actionsToday,
-            actionsYesterday
-        ] = await Promise.all([
-            User.getTotalClients(),
-            User.getNewClientsCount(todayStart, todayEnd),
-            Gallery.getTotalGalleries(),
-            Gallery.getNewGalleriesCount(todayStart, todayEnd),
-            Gallery_images.getTotalImages(),
-            Gallery_images.getNewImagesCount(todayStart, todayEnd),
-            AdminLog.getActionsCount(todayStart, todayEnd),
-            AdminLog.getActionsCount(yesterdayStart, todayStart)
-        ]);
+            const [
+                totalClients,
+                newClientsToday,
+                totalGalleries,
+                newGalleriesToday,
+                totalImages,
+                newImagesToday,
+                actionsToday,
+                actionsYesterday
+            ] = await Promise.all([
+                User.getTotalClients ? await User.getTotalClients() : 0,
+                User.getNewClientsCount ? await User.getNewClientsCount(todayStart, todayEnd) : 0,
+                Gallery.getTotalGalleries ? await Gallery.getTotalGalleries() : 0,
+                Gallery.getNewGalleriesCount ? await Gallery.getNewGalleriesCount(todayStart, todayEnd) : 0,
+                Gallery_images.getTotalImages ? await Gallery_images.getTotalImages() : 0,
+                Gallery_images.getNewImagesCount ? await Gallery_images.getNewImagesCount(todayStart, todayEnd) : 0,
+                AdminLog.getActionsCount ? await AdminLog.getActionsCount(todayStart, todayEnd) : 0,
+                AdminLog.getActionsCount ? await AdminLog.getActionsCount(yesterdayStart, yesterdayEnd) : 0
+            ]);
 
-        const actionsChange = actionsYesterday > 0 ? 
-            Math.round(((actionsToday - actionsYesterday) / actionsYesterday) * 100) : 0;
+            const actionsChange = actionsYesterday > 0 ? 
+                Math.round(((actionsToday - actionsYesterday) / actionsYesterday) * 100) : 
+                actionsToday > 0 ? 100 : 0;
 
-        return {
-            totalClients,
-            newClients: newClientsToday,
-            totalGalleries,
-            newGalleries: newGalleriesToday,
-            totalImages,
-            newImages: newImagesToday,
-            totalActions: actionsToday,
-            actionsChange
-        };
+            return {
+                totalClients: totalClients || 0,
+                newClients: newClientsToday || 0,
+                totalGalleries: totalGalleries || 0,
+                newGalleries: newGalleriesToday || 0,
+                totalImages: totalImages || 0,
+                newImages: newImagesToday || 0,
+                totalActions: actionsToday || 0,
+                actionsChange: actionsChange || 0
+            };
+        } catch (error) {
+            console.error('Error getting today stats:', error);
+            return {
+                totalClients: 0,
+                newClients: 0,
+                totalGalleries: 0,
+                newGalleries: 0,
+                totalImages: 0,
+                newImages: 0,
+                totalActions: 0,
+                actionsChange: 0
+            };
+        }
     },
 
     getWeekStats: async () => {
-        const weekStart = new Date();
-        weekStart.setDate(weekStart.getDate() - 7);
-        
-        const [
-            clientsCreated,
-            galleriesCreated,
-            updatesPerformed,
-            deletionsPerformed,
-            totalActions
-        ] = await Promise.all([
-            User.getNewClientsCount(weekStart, new Date()),
-            Gallery.getNewGalleriesCount(weekStart, new Date()),
-            AdminLog.getActionsCountByType(weekStart, new Date(), 'UPDATE'),
-            AdminLog.getActionsCountByType(weekStart, new Date(), 'DELETE'),
-            AdminLog.getActionsCount(weekStart, new Date())
-        ]);
+        try {
+            const weekStart = new Date();
+            weekStart.setDate(weekStart.getDate() - 7);
+            
+            const [
+                clientsCreated,
+                galleriesCreated,
+                updatesPerformed,
+                deletionsPerformed,
+                totalActions
+            ] = await Promise.all([
+                User.getNewClientsCount ? await User.getNewClientsCount(weekStart, new Date()) : 0,
+                Gallery.getNewGalleriesCount ? await Gallery.getNewGalleriesCount(weekStart, new Date()) : 0,
+                AdminLog.getActionsCountByType ? await AdminLog.getActionsCountByType(weekStart, new Date(), 'UPDATE') : 0,
+                AdminLog.getActionsCountByType ? await AdminLog.getActionsCountByType(weekStart, new Date(), 'DELETE') : 0,
+                AdminLog.getActionsCount ? await AdminLog.getActionsCount(weekStart, new Date()) : 0
+            ]);
 
-        return {
-            clientsCreated,
-            galleriesCreated,
-            updatesPerformed,
-            deletionsPerformed,
-            totalActions
-        };
+            return {
+                clientsCreated: clientsCreated || 0,
+                galleriesCreated: galleriesCreated || 0,
+                updatesPerformed: updatesPerformed || 0,
+                deletionsPerformed: deletionsPerformed || 0,
+                totalActions: totalActions || 0
+            };
+        } catch (error) {
+            console.error('Error getting week stats:', error);
+            return {
+                clientsCreated: 0,
+                galleriesCreated: 0,
+                updatesPerformed: 0,
+                deletionsPerformed: 0,
+                totalActions: 0
+            };
+        }
     },
 
     getActivityLogs: async (req, res) => {
@@ -506,7 +539,7 @@ const adminController = {
             }
 
             const { days = 30 } = req.query;
-            const growthData = await User.getClientsGrowth(parseInt(days));
+            const growthData = await User.getClientsGrowth ? await User.getClientsGrowth(parseInt(days)) : [];
 
             res.status(200).json({
                 success: true,
@@ -529,7 +562,7 @@ const adminController = {
             }
 
             const { days = 30 } = req.query;
-            const growthData = await Gallery.getGalleriesGrowth(parseInt(days));
+            const growthData = await Gallery.getGalleriesGrowth ? await Gallery.getGalleriesGrowth(parseInt(days)) : [];
 
             res.status(200).json({
                 success: true,

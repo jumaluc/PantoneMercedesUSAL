@@ -38,13 +38,17 @@ const StatsSection = () => {
             
             if (response.ok) {
                 const data = await response.json();
-                setStats(data.data);
+                if (data.success) {
+                    setStats(data.data);
+                } else {
+                    throw new Error(data.message || 'Error al cargar estadísticas');
+                }
             } else {
                 throw new Error('Error al cargar estadísticas');
             }
         } catch (error) {
             console.error('Error fetching stats:', error);
-            toast.error('Error al cargar las estadísticas');
+            toast.error(error.message || 'Error al cargar las estadísticas');
         } finally {
             setLoading(false);
         }
@@ -56,7 +60,15 @@ const StatsSection = () => {
             'UPDATE': '#3b82f6',
             'DELETE': '#ef4444',
             'VIEW': '#8b5cf6',
-            'LOGIN': '#f59e0b'
+            'LOGIN': '#f59e0b',
+            'CLIENT_CREATE': '#10b981',
+            'CLIENT_UPDATE': '#3b82f6',
+            'CLIENT_DELETE': '#ef4444',
+            'CLIENT_VIEW': '#8b5cf6',
+            'GALLERY_CREATE': '#f59e0b',
+            'GALLERY_UPDATE': '#3b82f6',
+            'GALLERY_DELETE': '#ef4444',
+            'GALLERY_VIEW': '#8b5cf6'
         };
         return colors[actionType] || '#6b7280';
     };
@@ -67,24 +79,41 @@ const StatsSection = () => {
             'UPDATE': faEdit,
             'DELETE': faTrash,
             'VIEW': faEye,
+            'CLIENT_CREATE': faUserPlus,
+            'CLIENT_UPDATE': faEdit,
+            'CLIENT_DELETE': faTrash,
+            'CLIENT_VIEW': faUsers,
             'GALLERY_CREATE': faImage,
-            'CLIENT_CREATE': faUserPlus
+            'GALLERY_UPDATE': faEdit,
+            'GALLERY_DELETE': faTrash,
+            'GALLERY_VIEW': faImages
         };
         return icons[actionType] || faChartBar;
     };
 
     const formatNumber = (num) => {
-        return num?.toLocaleString('es-ES') || '0';
+        if (num === null || num === undefined) return '0';
+        return num.toLocaleString('es-ES');
     };
 
     const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        if (!dateString) return 'Fecha no disponible';
+        try {
+            return new Date(dateString).toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            return 'Fecha inválida';
+        }
+    };
+
+    const calculatePercentage = (current, max) => {
+        if (!max || max === 0) return '0%';
+        return `${Math.round((current / max) * 100)}%`;
     };
 
     if (loading) {
@@ -130,7 +159,7 @@ const StatsSection = () => {
                         <FontAwesomeIcon icon={faUsers} />
                     </div>
                     <div className="stat-info">
-                        <h3>{formatNumber(stats.todayStats?.totalClients || stats.weekStats?.totalClients)}</h3>
+                        <h3>{formatNumber(stats.todayStats?.totalClients || stats.weekStats?.totalClients || 0)}</h3>
                         <p>Total Clientes</p>
                         <span className="stat-change">
                             +{formatNumber(stats.todayStats?.newClients || 0)} nuevos
@@ -143,7 +172,7 @@ const StatsSection = () => {
                         <FontAwesomeIcon icon={faImages} />
                     </div>
                     <div className="stat-info">
-                        <h3>{formatNumber(stats.todayStats?.totalGalleries || stats.weekStats?.totalGalleries)}</h3>
+                        <h3>{formatNumber(stats.todayStats?.totalGalleries || stats.weekStats?.totalGalleries || 0)}</h3>
                         <p>Galerías Activas</p>
                         <span className="stat-change">
                             +{formatNumber(stats.todayStats?.newGalleries || 0)} nuevas
@@ -156,10 +185,10 @@ const StatsSection = () => {
                         <FontAwesomeIcon icon={faChartBar} />
                     </div>
                     <div className="stat-info">
-                        <h3>{formatNumber(stats.todayStats?.totalActions || stats.weekStats?.totalActions)}</h3>
-                        <p>Acciones Hoy</p>
+                        <h3>{formatNumber(stats.todayStats?.totalActions || stats.weekStats?.totalActions || 0)}</h3>
+                        <p>Acciones {timeRange === 'today' ? 'Hoy' : timeRange === 'week' ? 'Esta Semana' : 'Este Mes'}</p>
                         <span className="stat-change">
-                            {stats.todayStats?.actionsChange || 0}% vs ayer
+                            {stats.todayStats?.actionsChange || 0}% vs período anterior
                         </span>
                     </div>
                 </div>
@@ -169,7 +198,7 @@ const StatsSection = () => {
                         <FontAwesomeIcon icon={faImage} />
                     </div>
                     <div className="stat-info">
-                        <h3>{formatNumber(stats.todayStats?.totalImages || stats.weekStats?.totalImages)}</h3>
+                        <h3>{formatNumber(stats.todayStats?.totalImages || stats.weekStats?.totalImages || 0)}</h3>
                         <p>Imágenes Subidas</p>
                         <span className="stat-change">
                             +{formatNumber(stats.todayStats?.newImages || 0)} nuevas
@@ -184,24 +213,31 @@ const StatsSection = () => {
                 <div className="activity-summary">
                     <h3>Resumen de Actividades</h3>
                     <div className="activity-list">
-                        {stats.actionSummary?.map((action, index) => (
-                            <div key={index} className="activity-item">
-                                <div className="activity-icon" style={{ color: getActionColor(action.action_type) }}>
-                                    <FontAwesomeIcon icon={getActionIcon(action.action_type)} />
-                                </div>
-                                <div className="activity-details">
-                                    <span className="activity-type">{action.action_type}</span>
-                                    <span className="activity-count">{formatNumber(action.count)} acciones</span>
-                                </div>
-                                <div 
-                                    className="activity-bar"
-                                    style={{ 
-                                        width: `${(action.count / Math.max(...stats.actionSummary.map(a => a.count))) * 100}%`,
-                                        backgroundColor: getActionColor(action.action_type)
-                                    }}
-                                ></div>
-                            </div>
-                        ))}
+                        {stats.actionSummary && stats.actionSummary.length > 0 ? (
+                            stats.actionSummary.map((action, index) => {
+                                const maxCount = Math.max(...stats.actionSummary.map(a => a.count));
+                                return (
+                                    <div key={index} className="activity-item">
+                                        <div className="activity-icon" style={{ color: getActionColor(action.action_type) }}>
+                                            <FontAwesomeIcon icon={getActionIcon(action.action_type)} />
+                                        </div>
+                                        <div className="activity-details">
+                                            <span className="activity-type">{action.action_type}</span>
+                                            <span className="activity-count">{formatNumber(action.count)} acciones</span>
+                                        </div>
+                                        <div 
+                                            className="activity-bar"
+                                            style={{ 
+                                                width: calculatePercentage(action.count, maxCount),
+                                                backgroundColor: getActionColor(action.action_type)
+                                            }}
+                                        ></div>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <p className="no-data">No hay actividades para mostrar</p>
+                        )}
                     </div>
                 </div>
 
@@ -209,36 +245,40 @@ const StatsSection = () => {
                 <div className="recent-activity">
                     <h3>Actividad Reciente</h3>
                     <div className="activity-timeline">
-                        {stats.recentActivity?.slice(0, 8).map((activity, index) => (
-                            <div key={activity.id || index} className="timeline-item">
-                                <div 
-                                    className="timeline-marker"
-                                    style={{ backgroundColor: getActionColor(activity.action_type) }}
-                                ></div>
-                                <div className="timeline-content">
-                                    <div className="activity-header">
-                                        <span className="admin-name">{activity.admin_name}</span>
-                                        <span className="activity-time">
-                                            <FontAwesomeIcon icon={faClock} />
-                                            {formatDate(activity.created_at)}
-                                        </span>
+                        {stats.recentActivity && stats.recentActivity.length > 0 ? (
+                            stats.recentActivity.slice(0, 8).map((activity, index) => (
+                                <div key={activity.id || index} className="timeline-item">
+                                    <div 
+                                        className="timeline-marker"
+                                        style={{ backgroundColor: getActionColor(activity.action_type) }}
+                                    ></div>
+                                    <div className="timeline-content">
+                                        <div className="activity-header">
+                                            <span className="admin-name">{activity.admin_name}</span>
+                                            <span className="activity-time">
+                                                <FontAwesomeIcon icon={faClock} />
+                                                {formatDate(activity.created_at)}
+                                            </span>
+                                        </div>
+                                        <p className="activity-description">{activity.action_description}</p>
+                                        {activity.resource_type && (
+                                            <span className="activity-resource">
+                                                {activity.resource_type}: {activity.resource_name || 'N/A'}
+                                            </span>
+                                        )}
                                     </div>
-                                    <p className="activity-description">{activity.action_description}</p>
-                                    {activity.resource_type && (
-                                        <span className="activity-resource">
-                                            {activity.resource_type}: {activity.resource_name}
-                                        </span>
-                                    )}
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            <p className="no-data">No hay actividad reciente</p>
+                        )}
                     </div>
                 </div>
             </div>
 
             {/* Estadísticas detalladas */}
             <div className="detailed-stats">
-                <h3>Estadísticas Detalladas</h3>
+                <h3>Estadísticas Detalladas - Última Semana</h3>
                 <div className="stats-grid">
                     <div className="detail-stat">
                         <FontAwesomeIcon icon={faUserPlus} />
