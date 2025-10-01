@@ -1,6 +1,13 @@
 // hooks/useSearchFilter.js
 import { useState, useMemo } from 'react';
 
+// Función auxiliar para obtener valores de campos anidados
+const getNestedValue = (obj, path) => {
+  return path.split('.').reduce((current, key) => {
+    return current && current[key] !== undefined ? current[key] : null;
+  }, obj);
+};
+
 export const useSearchFilter = (initialData = [], searchFields = []) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ 
@@ -16,7 +23,11 @@ export const useSearchFilter = (initialData = [], searchFields = []) => {
     if (searchTerm.trim()) {
       filtered = initialData.filter(item =>
         searchFields.some(field => {
-          const fieldValue = item[field];
+          // Manejar campos anidados (ej: 'client.first_name')
+          const fieldValue = field.includes('.') 
+            ? getNestedValue(item, field)
+            : item[field];
+            
           if (fieldValue == null) return false;
           
           return fieldValue.toString().toLowerCase().includes(searchTerm.toLowerCase());
@@ -24,11 +35,11 @@ export const useSearchFilter = (initialData = [], searchFields = []) => {
       );
     }
 
-    // 2. ORDENAMIENTO
+    // 2. ORDENAMIENTO (opcional - puedes comentar si no lo necesitas)
     if (sortConfig.key) {
       filtered = [...filtered].sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
+        const aValue = getNestedValue(a, sortConfig.key);
+        const bValue = getNestedValue(b, sortConfig.key);
 
         // Manejar valores nulos/undefined
         if (aValue == null) return 1;

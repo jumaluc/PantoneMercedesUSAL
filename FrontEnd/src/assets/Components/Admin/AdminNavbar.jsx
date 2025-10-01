@@ -13,12 +13,11 @@ import {
 
 const AdminNavbar = ({ activeSection, setActiveSection, adminData }) => {
   const navItems = [
+    { id: 'stats', label: 'Estadísticas', icon: faChartBar },
     { id: 'clients', label: 'Clientes', icon: faPeopleGroup },
     { id: 'galleries', label: 'Galerías', icon: faImages },
     { id: 'videos', label: 'Videos', icon: faVideo },
-    { id: 'comments', label: 'Comentarios', icon: faComments },
     { id: 'audit', label: 'Historial', icon: faHistory },
-    { id: 'stats', label: 'Estadísticas', icon: faChartBar },
     { id: 'profile', label: 'Perfil', icon: faUserGear }
   ];
 

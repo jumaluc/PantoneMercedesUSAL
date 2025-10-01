@@ -5,6 +5,7 @@ const { storage, bucket } = require('../utils/googleStorageService');
 const archiver = require('archiver');
 const Comments = require('../moduls/Comments')
 const General_requests = require('../moduls/General_requests');
+const { getAllVideosById } = require('../moduls/Client_videos');
 const userController = {
 
     editProfile: async (req, res) => {
@@ -356,6 +357,14 @@ createRequest: async (req, res) =>{
 
   }
        catch(err){console.log(err)}
+ },
+
+ getAllVideosById: async (req,res) =>{
+  try{
+
+    
+  }
+  catch(err){console.log(err);}
  }
 
 }

@@ -1,54 +1,41 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
-import './SearchFilter.css';
+import './SearchFilter.css'; // O incluye los estilos en VideoSection.css
 
 const SearchFilter = ({ 
-  searchTerm = '',
-  onSearchChange,
-  onClear,
+  searchTerm, 
+  onSearchChange, 
+  onClear, 
   placeholder = "Buscar...",
-  resultsCount = 0,
-  totalCount = 0,
-  className = "" 
+  resultsCount,
+  totalCount 
 }) => {
-  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
-
-  const handleSearchChange = (term) => {
-    setLocalSearchTerm(term);
-    if (onSearchChange) {
-      onSearchChange(term);
-    }
-  };
-
-  const handleClear = () => {
-    setLocalSearchTerm('');
-    if (onClear) {
-      onClear();
-    }
-  };
-
   return (
-    <div className={`search-filter-container ${className}`}>
-      <div className="search-input-wrapper">
+    <div className="search-filter-container">
+      <div className="search-box">
         <FontAwesomeIcon icon={faSearch} className="search-icon" />
         <input
           type="text"
           placeholder={placeholder}
-          value={localSearchTerm}
-          onChange={(e) => handleSearchChange(e.target.value)}
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
           className="search-input"
         />
-        {localSearchTerm && (
-          <button onClick={handleClear} className="clear-search-btn">
+        {searchTerm && (
+          <button onClick={onClear} className="clear-search-btn">
             <FontAwesomeIcon icon={faTimes} />
           </button>
         )}
       </div>
       
-      {localSearchTerm && (
+      {(resultsCount !== undefined && totalCount !== undefined) && (
         <div className="search-results-info">
-          Mostrando {resultsCount} de {totalCount} resultados
+          {resultsCount === totalCount ? (
+            <span>{totalCount} elementos</span>
+          ) : (
+            <span>{resultsCount} de {totalCount} elementos</span>
+          )}
         </div>
       )}
     </div>

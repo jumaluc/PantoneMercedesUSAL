@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import AdminNavbar from './AdminNavbar';
 import ClientsSection from './ClientsSection';
 import GalleriesSection from './Galery/GalleriesSection';
-import StatsSection from './StatsSection'; // Nuevo componente
+import VideosSection from './VideosSection'; // Nueva importación
+import StatsSection from './StatsSection';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-  const [activeSection, setActiveSection] = useState('stats'); // Cambiado a stats por defecto
+  const [activeSection, setActiveSection] = useState('clients');
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dashboardStats, setDashboardStats] = useState(null);
@@ -22,7 +23,6 @@ const AdminDashboard = () => {
         const data = await response.json();
         setAdminData(data.data);
         
-        // Cargar estadísticas del dashboard
         await fetchDashboardStats();
       } catch (error) {
         console.error('Error loading admin data:', error);
@@ -55,6 +55,7 @@ const AdminDashboard = () => {
       case 'stats': return <StatsSection />;
       case 'clients': return <ClientsSection />;
       case 'galleries': return <GalleriesSection />;
+      case 'videos': return <VideosSection />; //
       case 'audit': return <AuditSection />;
       case 'profile': return <ProfileSection adminData={adminData} />;
       default: return <StatsSection />;
@@ -86,7 +87,6 @@ const AdminDashboard = () => {
             <div className="user-info">
               <span className="user-name">{adminData.first_name} {adminData.last_name}</span>
               <span className="user-email">{adminData.email}</span>
-
             </div>
           }
 

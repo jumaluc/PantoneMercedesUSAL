@@ -2,7 +2,7 @@
 const User = require('../moduls/Users');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
-const { uploadFile, getFileUrls, deleteFile, checkCredentials } = require('../utils/googleStorageService');
+const { uploadFile, getFileUrls, deleteFile, checkCredentials, uploadVideoToGCS } = require('../utils/googleStorageService');
 const Gallery = require('../moduls/Galleries');
 const Gallery_images = require('../moduls/Gallery_images');
 const path = require('path');
@@ -598,7 +598,215 @@ const adminController = {
                 message: 'Error al obtener timeline de actividad'
             });
         }
+    },
+createVideo: async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(401).json({ message: 'Acceso no autorizado' });
+      }
+
+      // Verificar que se recibió el archivo
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'No se recibió ningún archivo de video'
+        });
+      }
+      console.log("++++++++++++++++++++++++ ENTRO AL CREATE VIDEO")
+      const { client_id, title, description, service_type, estimated_delivery, status, progress } = req.body;
+      console.log(req.body);
+      // Validaciones básicas
+      if (!client_id || !title) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cliente y título son obligatorios'
+        });
+      }
+
+      // 1. Subir video directamente a Google Cloud Storage
+      const videoUploadResult = await uploadVideoToGCS(req.file, 'videos', client_id);
+
+      // 2. Guardar información en la base de datos
+      const videoData = {
+        client_id: parseInt(client_id),
+        title: title.trim(),
+        description: description?.trim(),
+        service_type: service_type?.trim(),
+        estimated_delivery: estimated_delivery || null,
+        status: status || 'waiting_selection',
+        progress: progress ? parseInt(progress) : 0,
+        video_url: videoUploadResult.url,
+        file_name: videoUploadResult.fileName,
+        original_filename: req.file.originalname,
+        file_size: req.file.size,
+        format: req.file.mimetype,
+        created_by: user.id
+      };
+      console.log("VIDEO DATA EN EL CONTROLLER : ", videoData)
+      // Insertar en la base de datos (ajusta según tu modelo)
+      const newVideo = await Video.create(videoData);
+
+      res.status(201).json({
+        success: true,
+        message: 'Video creado y subido correctamente',
+        data: {
+          video: newVideo,
+          uploadInfo: {
+            url: videoUploadResult.url,
+            size: videoUploadResult.size,
+            originalName: videoUploadResult.originalName
+          }
+        }
+      });
+
+    } catch (error) {
+      console.error('Error creating video:', error);
+      
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Error al crear el video'
+      });
     }
+  },
+
+  getAllVideos: async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(401).json({ message: 'Acceso no autorizado' });
+      }
+
+      const videos = await Video.getAllWithClients();
+      
+      res.status(200).json({
+        success: true,
+        videos: videos
+      });
+
+    } catch (error) {
+      console.error('Error getting videos:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error al obtener los videos'
+      });
+    }
+  },
+
+  updateVideoStatus: async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(401).json({ message: 'Acceso no autorizado' });
+      }
+
+      const { videoId } = req.params;
+      const { status } = req.body;
+
+      const result = await Video.updateStatus(videoId, status);
+      
+      if (result) {
+        res.json({
+          success: true,
+          message: 'Estado del video actualizado'
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: 'Video no encontrado'
+        });
+      }
+
+    } catch (error) {
+      console.error('Error updating video status:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error al actualizar el estado'
+      });
+    }
+  },
+
+  updateVideoProgress: async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(401).json({ message: 'Acceso no autorizado' });
+      }
+
+      const { videoId } = req.params;
+      const { progress } = req.body;
+
+      const result = await Video.updateProgress(videoId, parseInt(progress));
+      
+      if (result) {
+        res.json({
+          success: true,
+          message: 'Progreso del video actualizado'
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: 'Video no encontrado'
+        });
+      }
+
+    } catch (error) {
+      console.error('Error updating video progress:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error al actualizar el progreso'
+      });
+    }
+  },
+
+  deleteVideo: async (req, res) => {
+    try {
+      const user = req.session.user;
+      if (!user || user.role !== 'admin') {
+        return res.status(401).json({ message: 'Acceso no autorizado' });
+      }
+
+      const { videoId } = req.params;
+
+      // 1. Obtener información del video para eliminar de GCS
+      const video = await Video.getById(videoId);
+      if (!video) {
+        return res.status(404).json({
+          success: false,
+          message: 'Video no encontrado'
+        });
+      }
+
+      // 2. Eliminar archivo de Google Cloud Storage
+      if (video.file_name) {
+        await deleteFileFromGCS(video.file_name);
+      }
+
+      // 3. Eliminar de la base de datos
+      const result = await Video.delete(videoId);
+      
+      if (result) {
+        res.json({
+          success: true,
+          message: 'Video eliminado correctamente'
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: 'Error al eliminar el video'
+        });
+      }
+
+    } catch (error) {
+      console.error('Error deleting video:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error al eliminar el video'
+      });
+    }
+  }
+
+
 
 };
 

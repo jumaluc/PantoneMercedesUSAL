@@ -10,26 +10,17 @@ import {
     faCheckCircle,
     faEdit,
     faHourglassHalf,
-    faFilm,
-    faFileVideo,
-    faHistory,
     faSearch,
     faFilter,
-    faExpand,
-    faVolumeUp,
-    faVolumeMute,
-    faStepBackward,
-    faStepForward
+    faFileVideo,
+    faHistory
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import './ClientVideosSection.css';
 
 const ClientVideosSection = ({ user }) => {
-    const [activeTab, setActiveTab] = useState('galleries');
-    const [galleries, setGalleries] = useState([]);
     const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedGallery, setSelectedGallery] = useState(null);
     const [playingVideo, setPlayingVideo] = useState(null);
     const [videoProgress, setVideoProgress] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
@@ -37,47 +28,13 @@ const ClientVideosSection = ({ user }) => {
     const [downloadingVideo, setDownloadingVideo] = useState(null);
 
     useEffect(() => {
-        fetchData();
-    }, [activeTab]);
+        fetchVideos();
+    }, []);
 
-    const fetchData = async () => {
+    const fetchVideos = async () => {
         try {
             setLoading(true);
-            if (activeTab === 'galleries') {
-                await fetchGalleries();
-            } else if (selectedGallery) {
-                await fetchVideos(selectedGallery.id);
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            toast.error('Error al cargar los datos');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchGalleries = async () => {
-        try {
-            const response = await fetch('http://localhost:3000/user/getVideoGalleries', {
-                credentials: 'include'
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                setGalleries(data.galleries || []);
-            } else {
-                throw new Error('Error al cargar galerías de video');
-            }
-        } catch (error) {
-            console.error('Error fetching video galleries:', error);
-            toast.error('Error al cargar las galerías de video');
-            setGalleries([]);
-        }
-    };
-
-    const fetchVideos = async (galleryId) => {
-        try {
-            const response = await fetch(`http://localhost:3000/user/getVideos/${galleryId}`, {
+            const response = await fetch('http://localhost:3000/user/getMyVideos', {
                 credentials: 'include'
             });
             
@@ -91,13 +48,9 @@ const ClientVideosSection = ({ user }) => {
             console.error('Error fetching videos:', error);
             toast.error('Error al cargar los videos');
             setVideos([]);
+        } finally {
+            setLoading(false);
         }
-    };
-
-    const handleGallerySelect = (gallery) => {
-        setSelectedGallery(gallery);
-        setActiveTab('videos');
-        fetchVideos(gallery.id);
     };
 
     const handleVideoPlay = (video) => {
@@ -215,18 +168,11 @@ const ClientVideosSection = ({ user }) => {
         return new Date(dateString).toLocaleDateString('es-ES', {
             day: '2-digit',
             month: '2-digit',
-            year: 'numeric'
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
         });
     };
-
-    const filteredGalleries = galleries.filter(gallery => {
-        const matchesSearch = searchTerm === '' || 
-            gallery.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            gallery.description?.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        if (filterStatus === 'all') return matchesSearch;
-        return matchesSearch && gallery.status === filterStatus;
-    });
 
     const filteredVideos = videos.filter(video => {
         const matchesSearch = searchTerm === '' || 
@@ -241,7 +187,7 @@ const ClientVideosSection = ({ user }) => {
         return (
             <div className="video-section-loading">
                 <FontAwesomeIcon icon={faSpinner} spin size="2x" />
-                <p>Cargando {activeTab === 'galleries' ? 'galerías' : 'videos'}...</p>
+                <p>Cargando videos...</p>
             </div>
         );
     }
@@ -254,189 +200,96 @@ const ClientVideosSection = ({ user }) => {
                 <p>Gestiona y descarga tus videos profesionales</p>
             </div>
 
-            {/* Navegación */}
-            <div className="video-section-nav">
-                <button 
-                    className={`video-nav-btn ${activeTab === 'galleries' ? 'active' : ''}`}
-                    onClick={() => {
-                        setActiveTab('galleries');
-                        setSelectedGallery(null);
-                    }}
-                >
-                    <FontAwesomeIcon icon={faFilm} />
-                    Galerías de Video
-                </button>
-                {selectedGallery && (
+            {/* Filtros y búsqueda */}
+            <div className="video-filters">
+                <div className="video-search-box">
+                    <FontAwesomeIcon icon={faSearch} />
+                    <input 
+                        type="text" 
+                        placeholder="Buscar videos..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <div className="video-filter-buttons">
                     <button 
-                        className={`video-nav-btn ${activeTab === 'videos' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('videos')}
+                        className={`video-filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
+                        onClick={() => setFilterStatus('all')}
                     >
-                        <FontAwesomeIcon icon={faFileVideo} />
-                        {selectedGallery.title}
+                        Todos
                     </button>
-                )}
+                    <button 
+                        className={`video-filter-btn ${filterStatus === 'waiting_selection' ? 'active' : ''}`}
+                        onClick={() => setFilterStatus('waiting_selection')}
+                    >
+                        Esperando selección
+                    </button>
+                    <button 
+                        className={`video-filter-btn ${filterStatus === 'in_editing' ? 'active' : ''}`}
+                        onClick={() => setFilterStatus('in_editing')}
+                    >
+                        En edición
+                    </button>
+                    <button 
+                        className={`video-filter-btn ${filterStatus === 'completed' ? 'active' : ''}`}
+                        onClick={() => setFilterStatus('completed')}
+                    >
+                        Finalizados
+                    </button>
+                </div>
             </div>
 
-            {/* Contenido */}
-            <div className="video-section-content">
-                {activeTab === 'galleries' && (
-                    <div className="video-galleries-section">
-                        {/* Filtros y búsqueda */}
-                        <div className="video-filters">
-                            <div className="video-search-box">
-                                <FontAwesomeIcon icon={faSearch} />
-                                <input 
-                                    type="text" 
-                                    placeholder="Buscar galerías..." 
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-                            <div className="video-filter-buttons">
-                                <button 
-                                    className={`video-filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
-                                    onClick={() => setFilterStatus('all')}
-                                >
-                                    Todas
-                                </button>
-                                <button 
-                                    className={`video-filter-btn ${filterStatus === 'waiting_selection' ? 'active' : ''}`}
-                                    onClick={() => setFilterStatus('waiting_selection')}
-                                >
-                                    Esperando selección
-                                </button>
-                                <button 
-                                    className={`video-filter-btn ${filterStatus === 'in_editing' ? 'active' : ''}`}
-                                    onClick={() => setFilterStatus('in_editing')}
-                                >
-                                    En edición
-                                </button>
-                                <button 
-                                    className={`video-filter-btn ${filterStatus === 'completed' ? 'active' : ''}`}
-                                    onClick={() => setFilterStatus('completed')}
-                                >
-                                    Finalizados
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Lista de galerías */}
-                        <div className="video-galleries-grid">
-                            {filteredGalleries.length > 0 ? (
-                                filteredGalleries.map((gallery) => {
-                                    const statusInfo = getStatusInfo(gallery.status);
-                                    const progressInfo = getProgressInfo(gallery.progress);
-                                    
-                                    return (
-                                        <div key={gallery.id} className="video-gallery-card">
-                                            <div className="video-gallery-header">
-                                                <div className="video-gallery-title">
-                                                    <FontAwesomeIcon icon={faFilm} />
-                                                    <h3>{gallery.title}</h3>
-                                                </div>
-                                                <div 
-                                                    className="video-gallery-status"
-                                                    style={{ color: statusInfo.color }}
-                                                >
-                                                    <FontAwesomeIcon icon={statusInfo.icon} />
-                                                    {statusInfo.text}
-                                                </div>
-                                            </div>
-
-                                            <div className="video-gallery-description">
-                                                {gallery.description || 'Sin descripción'}
-                                            </div>
-
-                                            {/* Barra de progreso */}
-                                            <div className="video-progress-section">
-                                                <div className="video-progress-header">
-                                                    <span>Progreso: {gallery.progress}%</span>
-                                                    <span style={{ color: progressInfo.color }}>
-                                                        {progressInfo.label}
-                                                    </span>
-                                                </div>
-                                                <div className="video-progress-bar">
-                                                    <div 
-                                                        className="video-progress-fill"
-                                                        style={{ 
-                                                            width: `${gallery.progress}%`,
-                                                            backgroundColor: progressInfo.color
-                                                        }}
-                                                    ></div>
-                                                </div>
-                                            </div>
-
-                                            <div className="video-gallery-meta">
-                                                <div className="video-meta-item">
-                                                    <FontAwesomeIcon icon={faClock} />
-                                                    <span>
-                                                        {gallery.estimated_delivery 
-                                                            ? `Entrega estimada: ${formatDate(gallery.estimated_delivery)}`
-                                                            : 'Sin fecha de entrega'
-                                                        }
-                                                    </span>
-                                                </div>
-                                                <div className="video-meta-item">
-                                                    <FontAwesomeIcon icon={faVideo} />
-                                                    <span>Servicio: {gallery.service_type}</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="video-gallery-actions">
-                                                <button 
-                                                    className="video-view-btn"
-                                                    onClick={() => handleGallerySelect(gallery)}
-                                                    disabled={gallery.status === 'waiting_selection'}
-                                                >
-                                                    <FontAwesomeIcon icon={faPlay} />
-                                                    {gallery.status === 'completed' ? 'Ver Videos' : 'Ver Progreso'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    );
-                                })
-                            ) : (
-                                <div className="video-empty-state">
-                                    <FontAwesomeIcon icon={faFilm} size="3x" />
-                                    <h3>No hay galerías de video disponibles</h3>
-                                    <p>Tu fotógrafo te notificará cuando tengas galerías de video asignadas</p>
+            {/* Lista de videos */}
+            <div className="videos-grid">
+                {filteredVideos.length > 0 ? (
+                    filteredVideos.map((video) => {
+                        const statusInfo = getStatusInfo(video.status);
+                        const progressInfo = getProgressInfo(video.progress);
+                        
+                        return (
+                            <div key={video.id} className="video-card">
+                                <div className="video-header">
+                                    <div className="video-title-section">
+                                        <FontAwesomeIcon icon={faFileVideo} />
+                                        <h3>{video.title}</h3>
+                                    </div>
+                                    <div 
+                                        className="video-status"
+                                        style={{ color: statusInfo.color }}
+                                    >
+                                        <FontAwesomeIcon icon={statusInfo.icon} />
+                                        {statusInfo.text}
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-                    </div>
-                )}
 
-                {activeTab === 'videos' && selectedGallery && (
-                    <div className="videos-list-section">
-                        {/* Header de la galería */}
-                        <div className="videos-gallery-header">
-                            <button 
-                                className="video-back-btn"
-                                onClick={() => {
-                                    setActiveTab('galleries');
-                                    setSelectedGallery(null);
-                                }}
-                            >
-                                ← Volver a Galerías
-                            </button>
-                            <div className="videos-gallery-info">
-                                <h2>{selectedGallery.title}</h2>
-                                <p>{selectedGallery.description}</p>
-                                <div className="videos-gallery-stats">
-                                    <span>{videos.length} video{s}</span>
-                                    <span>•</span>
-                                    <span>
-                                        {videos.filter(v => v.status === 'ready').length} listos para descargar
-                                    </span>
+                                {video.description && (
+                                    <div className="video-description">
+                                        {video.description}
+                                    </div>
+                                )}
+
+                                {/* Barra de progreso */}
+                                <div className="video-progress-section">
+                                    <div className="video-progress-header">
+                                        <span>Progreso: {video.progress}%</span>
+                                        <span style={{ color: progressInfo.color }}>
+                                            {progressInfo.label}
+                                        </span>
+                                    </div>
+                                    <div className="video-progress-bar">
+                                        <div 
+                                            className="video-progress-fill"
+                                            style={{ 
+                                                width: `${video.progress}%`,
+                                                backgroundColor: progressInfo.color
+                                            }}
+                                        ></div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        {/* Lista de videos */}
-                        <div className="videos-grid">
-                            {filteredVideos.length > 0 ? (
-                                filteredVideos.map((video) => (
-                                    <div key={video.id} className="video-card">
+                                {/* Información del video */}
+                                {video.video_url && (
+                                    <div className="video-preview-section">
                                         <div className="video-thumbnail">
                                             {video.thumbnail_url ? (
                                                 <img 
@@ -450,6 +303,7 @@ const ClientVideosSection = ({ user }) => {
                                                     onClick={() => handleVideoPlay(video)}
                                                 >
                                                     <FontAwesomeIcon icon={faVideo} />
+                                                    <span>Ver Video</span>
                                                 </div>
                                             )}
                                             <div className="video-overlay">
@@ -468,85 +322,108 @@ const ClientVideosSection = ({ user }) => {
                                                 </div>
                                             )}
                                         </div>
-
-                                        <div className="video-info">
-                                            <h4 className="video-title">{video.title}</h4>
-                                            {video.description && (
-                                                <p className="video-description">{video.description}</p>
-                                            )}
-                                            
-                                            <div className="video-meta">
-                                                {video.resolution && (
-                                                    <span className="video-resolution">{video.resolution}</span>
-                                                )}
-                                                {video.file_size && (
-                                                    <span className="video-size">{formatFileSize(video.file_size)}</span>
-                                                )}
-                                                {video.download_count !== undefined && (
-                                                    <span className="video-downloads">
-                                                        <FontAwesomeIcon icon={faDownload} />
-                                                        {video.download_count}
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            <div className="video-actions">
-                                                <button 
-                                                    className="video-download-btn"
-                                                    onClick={() => handleDownloadVideo(video)}
-                                                    disabled={downloadingVideo === video.id || video.status !== 'ready'}
-                                                >
-                                                    {downloadingVideo === video.id ? (
-                                                        <FontAwesomeIcon icon={faSpinner} spin />
-                                                    ) : (
-                                                        <FontAwesomeIcon icon={faDownload} />
-                                                    )}
-                                                    Descargar
-                                                </button>
-                                                {video.status !== 'ready' && (
-                                                    <span className="video-status-badge">
-                                                        {video.status === 'processing' ? 'Procesando' : 'Subiendo'}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Reproductor de video */}
-                                        {playingVideo?.id === video.id && (
-                                            <div className="video-player-overlay">
-                                                <div className="video-player-container">
-                                                    <video 
-                                                        controls
-                                                        autoPlay
-                                                        src={video.video_url}
-                                                        className="video-player"
-                                                        onTimeUpdate={(e) => 
-                                                            handleVideoProgress(video.id, 
-                                                                (e.target.currentTime / e.target.duration) * 100
-                                                            )
-                                                        }
-                                                    >
-                                                        Tu navegador no soporta el elemento video.
-                                                    </video>
-                                                    <button 
-                                                        className="video-close-btn"
-                                                        onClick={() => setPlayingVideo(null)}
-                                                    >
-                                                        ×
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
                                     </div>
-                                ))
-                            ) : (
-                                <div className="video-empty-state">
-                                    <FontAwesomeIcon icon={faVideo} size="3x" />
-                                    <h3>No hay videos en esta galería</h3>
-                                    <p>Los videos aparecerán aquí una vez que estén listos</p>
+                                )}
+
+                                {/* Meta información */}
+                                <div className="video-meta-info">
+                                    <div className="video-meta-row">
+                                        <div className="video-meta-item">
+                                            <FontAwesomeIcon icon={faClock} />
+                                            <span>
+                                                {video.estimated_delivery 
+                                                    ? `Entrega estimada: ${formatDate(video.estimated_delivery)}`
+                                                    : 'Sin fecha de entrega'
+                                                }
+                                            </span>
+                                        </div>
+                                        <div className="video-meta-item">
+                                            <FontAwesomeIcon icon={faVideo} />
+                                            <span>
+                                                {video.service_type || 'Video profesional'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    {(video.file_size || video.resolution || video.download_count !== undefined) && (
+                                        <div className="video-meta-row">
+                                            {video.resolution && (
+                                                <span className="video-tech-info">
+                                                    Resolución: {video.resolution}
+                                                </span>
+                                            )}
+                                            {video.file_size && (
+                                                <span className="video-tech-info">
+                                                    Tamaño: {formatFileSize(video.file_size)}
+                                                </span>
+                                            )}
+                                            {video.download_count !== undefined && (
+                                                <span className="video-tech-info">
+                                                    <FontAwesomeIcon icon={faDownload} />
+                                                    Descargas: {video.download_count}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
+
+                                {/* Acciones */}
+                                <div className="video-actions">
+                                    <button 
+                                        className="video-download-btn"
+                                        onClick={() => handleDownloadVideo(video)}
+                                        disabled={downloadingVideo === video.id || video.status !== 'completed'}
+                                    >
+                                        {downloadingVideo === video.id ? (
+                                            <FontAwesomeIcon icon={faSpinner} spin />
+                                        ) : (
+                                            <FontAwesomeIcon icon={faDownload} />
+                                        )}
+                                        {video.status === 'completed' ? 'Descargar Video' : 'No disponible'}
+                                    </button>
+                                    
+                                    {video.status !== 'completed' && (
+                                        <div className="video-status-description">
+                                            <FontAwesomeIcon icon={statusInfo.icon} />
+                                            {statusInfo.description}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Reproductor de video */}
+                                {playingVideo?.id === video.id && (
+                                    <div className="video-player-overlay">
+                                        <div className="video-player-container">
+                                            <video 
+                                                controls
+                                                autoPlay
+                                                src={video.video_url}
+                                                className="video-player"
+                                                onTimeUpdate={(e) => 
+                                                    handleVideoProgress(video.id, 
+                                                        (e.target.currentTime / e.target.duration) * 100
+                                                    )
+                                                }
+                                            >
+                                                Tu navegador no soporta el elemento video.
+                                            </video>
+                                            <button 
+                                                className="video-close-btn"
+                                                onClick={() => setPlayingVideo(null)}
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })
+                ) : (
+                    <div className="video-empty-state">
+                        <FontAwesomeIcon icon={faVideo} size="3x" />
+                        <h3>No hay videos disponibles</h3>
+                        <p>Tu fotógrafo te notificará cuando tengas videos asignados</p>
                     </div>
                 )}
             </div>
