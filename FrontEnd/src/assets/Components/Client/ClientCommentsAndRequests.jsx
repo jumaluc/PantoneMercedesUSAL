@@ -15,9 +15,11 @@ import {
     faReply,
     faExclamationCircle,
     faEnvelope,
-    faListAlt
+    faListAlt,
+    faTrash
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
 import './ClientCommentsAndRequests.css';
 
 const ClientCommentsAndRequests = ({ user }) => {
@@ -26,6 +28,7 @@ const ClientCommentsAndRequests = ({ user }) => {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [sendingRequest, setSendingRequest] = useState(false);
+    const [deletingComment, setDeletingComment] = useState(null);
     const [newRequest, setNewRequest] = useState({
         type: 'general',
         subject: '',
@@ -57,28 +60,145 @@ const ClientCommentsAndRequests = ({ user }) => {
 
     const fetchComments = async () => {
         console.log("Intentado agarrar los comentarios (fetchComments)")
-        const response = await fetch('http://localhost:3000/user/getMyComments', {
-            credentials: 'include'
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            setComments(data.comments || []);
-        } else {
-            throw new Error('Error al cargar comentarios');
+        try {
+            const response = await fetch('http://localhost:3000/user/getMyComments', {
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setComments(data.comments || []);
+            } else {
+                throw new Error('Error al cargar comentarios');
+            }
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+            toast.error('Error al cargar los comentarios');
+            setComments([]);
         }
     };
 
     const fetchRequests = async () => {
-        const response = await fetch('http://localhost:3000/user/getMyRequests', {
-            credentials: 'include'
+        try {
+            const response = await fetch('http://localhost:3000/user/getMyRequests', {
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setRequests(data.requests || []);
+            } else {
+                throw new Error('Error al cargar solicitudes');
+            }
+        } catch (error) {
+            console.error('Error fetching requests:', error);
+            toast.error('Error al cargar las solicitudes');
+            setRequests([]);
+        }
+    };
+
+    const handleDeleteComment = async (commentId, commentText) => {
+        if (!commentId) {
+            toast.error('ID de comentario no válido');
+            return;
+        }
+
+        // Mostrar confirmación con SweetAlert2
+        const result = await Swal.fire({
+            title: '¿Eliminar comentario?',
+            html: `
+                <div style="text-align: left;">
+                    <p style="margin-bottom: 10px; color: #666;">¿Estás seguro de que quieres eliminar este comentario?</p>
+                    <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; border-left: 4px solid #dc3545;">
+                        <strong style="color: #dc3545;">Comentario:</strong>
+                        <p style="margin: 5px 0 0 0; color: #333;">${commentText || 'Sin texto'}</p>
+                    </div>
+                    <p style="margin-top: 15px; color: #dc3545; font-size: 14px;">
+                        <strong>⚠️ Esta acción no se puede deshacer</strong>
+                    </p>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            backdrop: true,
+            allowOutsideClick: false,
+            customClass: {
+                popup: 'comment-swal-popup',
+                title: 'comment-swal-title',
+                htmlContainer: 'comment-swal-html',
+                confirmButton: 'comment-swal-confirm',
+                cancelButton: 'comment-swal-cancel'
+            }
         });
-        
-        if (response.ok) {
-            const data = await response.json();
-            setRequests(data.requests || []);
-        } else {
-            throw new Error('Error al cargar solicitudes');
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        setDeletingComment(commentId);
+        try {
+            const response = await fetch(`http://localhost:3000/user/deleteImageComment`, {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({commentId})
+
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                
+                // Mostrar mensaje de éxito con SweetAlert2
+                await Swal.fire({
+                    title: '✅ Comentario eliminado',
+                    text: 'El comentario ha sido eliminado correctamente',
+                    icon: 'success',
+                    confirmButtonColor: '#28a745',
+                    confirmButtonText: 'Aceptar',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    }
+                });
+
+                // Actualizar la lista de comentarios eliminando el comentario borrado
+                setComments(prevComments => prevComments.filter(comment => comment.id !== commentId));
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al eliminar el comentario');
+            }
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+            
+            // Mostrar mensaje de error con SweetAlert2
+            await Swal.fire({
+                title: '❌ Error',
+                html: `
+                    <div style="text-align: left;">
+                        <p style="margin-bottom: 10px;">No se pudo eliminar el comentario:</p>
+                        <div style="background: #fee; padding: 10px; border-radius: 6px; border-left: 4px solid #dc3545;">
+                            <strong style="color: #dc3545;">Error:</strong>
+                            <p style="margin: 5px 0 0 0; color: #333;">${error.message}</p>
+                        </div>
+                    </div>
+                `,
+                icon: 'error',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Entendido'
+            });
+        } finally {
+            setDeletingComment(null);
         }
     };
 
@@ -101,7 +221,23 @@ const ClientCommentsAndRequests = ({ user }) => {
             });
 
             if (response.ok) {
-                toast.success('Solicitud enviada correctamente');
+                // Mostrar confirmación de éxito con SweetAlert2
+                await Swal.fire({
+                    title: '✅ Solicitud enviada',
+                    text: 'Tu solicitud ha sido enviada correctamente al administrador',
+                    icon: 'success',
+                    confirmButtonColor: '#28a745',
+                    confirmButtonText: 'Aceptar',
+                    timer: 4000,
+                    timerProgressBar: true,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    }
+                });
+
                 setNewRequest({
                     type: 'general',
                     subject: '',
@@ -109,12 +245,21 @@ const ClientCommentsAndRequests = ({ user }) => {
                     priority: 'medium'
                 });
                 await fetchRequests();
+                setActiveTab('requests');
             } else {
                 throw new Error('Error al enviar la solicitud');
             }
         } catch (error) {
             console.error('Error sending request:', error);
-            toast.error('Error al enviar la solicitud');
+            
+            // Mostrar error con SweetAlert2
+            await Swal.fire({
+                title: '❌ Error al enviar',
+                text: 'No se pudo enviar la solicitud. Por favor, intenta nuevamente.',
+                icon: 'error',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Entendido'
+            });
         } finally {
             setSendingRequest(false);
         }
@@ -123,7 +268,8 @@ const ClientCommentsAndRequests = ({ user }) => {
     const filteredComments = comments.filter(comment => {
         const matchesSearch = searchTerm === '' || 
             comment.image_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            comment.comment_text?.toLowerCase().includes(searchTerm.toLowerCase());
+            comment.comment_text?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            comment.comment?.toLowerCase().includes(searchTerm.toLowerCase());
         
         if (filter === 'all') return matchesSearch;
         if (filter === 'replied') return matchesSearch && comment.admin_reply;
@@ -267,19 +413,40 @@ const ClientCommentsAndRequests = ({ user }) => {
                                                     </div>
                                                 )}
                                                 <div className="comment-image-details">
-
+                                                    <span className="comment-image-name">
+                                                        <FontAwesomeIcon icon={faImage} />
+                                                        {comment.image_name || 'Imagen'}
+                                                    </span>
                                                     <span className="comment-date">
                                                         <FontAwesomeIcon icon={faClock} />
                                                         {formatDate(comment.created_at)}
                                                     </span>
                                                 </div>
                                             </div>
+                                            {/* Botón de eliminar */}
+                                            <button 
+                                                className={`comment-delete-btn ${deletingComment === comment.id ? 'comment-deleting' : ''}`}
+                                                onClick={() => handleDeleteComment(
+                                                    comment.id, 
+                                                    comment.comment || comment.comment_text
+                                                )}
+                                                disabled={deletingComment === comment.id}
+                                                title="Eliminar comentario"
+                                            >
+                                                {deletingComment === comment.id ? (
+                                                    <FontAwesomeIcon icon={faSpinner} spin />
+                                                ) : (
+                                                    <FontAwesomeIcon icon={faTrash} />
+                                                )}
+                                            </button>
                                         </div>
                                         
                                         <div className="comment-comment-content">
                                             <div className="comment-user-comment">
                                                 <div className="comment-comment-bubble">
-                                                    <p className="comment-comment-text">{comment.comment}</p>
+                                                    <p className="comment-comment-text">
+                                                        {comment.comment || comment.comment_text}
+                                                    </p>
                                                 </div>
                                             </div>
 

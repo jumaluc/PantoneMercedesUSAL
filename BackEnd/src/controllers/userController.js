@@ -267,10 +267,10 @@ deleteImageComment: async (req, res) => {
     const user = req.session.user;
     if (!user) return res.status(404).json({ message: "Acceso denegado" });
 
-    const { comment_id } = req.body;
+    const { commentId } = req.body;
 
     // Elimina la desestructuración [result] ya que no es necesaria
-    const result = await Comments.deleteImageComment(comment_id);
+    const result = await Comments.deleteImageComment(commentId);
 
     if (!result || result === 0) return res.status(500).json({ message: "Error en el servidor o comentario no encontrado" });
     

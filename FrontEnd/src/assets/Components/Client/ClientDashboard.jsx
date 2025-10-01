@@ -2,6 +2,7 @@ import Navbar from './ClientNavbar';
 import ClientProfile from './ClientProfile';
 import Gallery from './ClientGallery';
 import ClientCommentsAndRequests from './ClientCommentsAndRequests';
+import ClientVideosSection from './ClientVideosSection'; // Nueva importación
 import './Dashboard.css';
 import React, { useState, useEffect } from 'react';
 
@@ -54,6 +55,8 @@ const Dashboard = () => {
         return <ClientProfile user={user} />;
       case 'comments':
         return <ClientCommentsAndRequests user={user} />;
+      case 'videos':
+        return <ClientVideosSection user={user} />; // Nueva sección
       case 'gallery':
       default:
         return <Gallery user={user} />;

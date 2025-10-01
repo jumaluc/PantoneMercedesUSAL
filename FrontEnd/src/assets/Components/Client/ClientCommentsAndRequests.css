@@ -613,3 +613,135 @@
         justify-content: center;
     }
 }
+/* Agrega estos estilos al archivo ClientCommentsAndRequests.css */
+
+/* Botón de eliminar comentario */
+.comment-delete-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+.comment-delete-btn:hover:not(:disabled) {
+    background: #c82333;
+    transform: scale(1.05);
+}
+
+.comment-delete-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.comment-delete-btn.comment-deleting {
+    background: #6c757d;
+}
+
+/* Ajustes en el header del comentario para incluir el botón de eliminar */
+.comment-comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.comment-image-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    width: 100%;
+    flex: 1;
+}
+
+/* Resto del CSS permanece igual... */
+/* Agrega esto al archivo ClientCommentsAndRequests.css */
+
+/* Estilos personalizados para SweetAlert */
+.comment-swal-popup {
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.comment-swal-title {
+    color: #dc3545;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.comment-swal-html {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.comment-swal-confirm {
+    background: #dc3545 !important;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.comment-swal-confirm:hover {
+    background: #c82333 !important;
+    transform: translateY(-1px);
+}
+
+.comment-swal-cancel {
+    background: #6c757d !important;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.comment-swal-cancel:hover {
+    background: #5a6268 !important;
+    transform: translateY(-1px);
+}
+
+/* Animaciones para los alerts */
+@import 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css';
+
+/* Botón de eliminar comentario */
+.comment-delete-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+.comment-delete-btn:hover:not(:disabled) {
+    background: #c82333;
+    transform: scale(1.05);
+}
+
+.comment-delete-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.comment-delete-btn.comment-deleting {
+    background: #6c757d;
+}
