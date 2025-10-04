@@ -2,11 +2,12 @@
 const User = require('../moduls/Users');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
-const { uploadFile, getFileUrls, deleteFile, checkCredentials, uploadVideoToGCS } = require('../utils/googleStorageService');
+const { uploadFile, getFileUrls, deleteFile, checkCredentials, uploadVideoToGCS} = require('../utils/googleStorageService');
 const Gallery = require('../moduls/Galleries');
 const Gallery_images = require('../moduls/Gallery_images');
 const path = require('path');
 const AdminLog = require('../moduls/AdminLog');
+const Video = require('../moduls/Video')
 
 const adminController = {
 
@@ -605,8 +606,6 @@ createVideo: async (req, res) => {
       if (!user || user.role !== 'admin') {
         return res.status(401).json({ message: 'Acceso no autorizado' });
       }
-
-      // Verificar que se recibió el archivo
       if (!req.file) {
         return res.status(400).json({
           success: false,
@@ -616,7 +615,6 @@ createVideo: async (req, res) => {
       console.log("++++++++++++++++++++++++ ENTRO AL CREATE VIDEO")
       const { client_id, title, description, service_type, estimated_delivery, status, progress } = req.body;
       console.log(req.body);
-      // Validaciones básicas
       if (!client_id || !title) {
         return res.status(400).json({
           success: false,
@@ -624,27 +622,24 @@ createVideo: async (req, res) => {
         });
       }
 
-      // 1. Subir video directamente a Google Cloud Storage
       const videoUploadResult = await uploadVideoToGCS(req.file, 'videos', client_id);
 
-      // 2. Guardar información en la base de datos
       const videoData = {
-        client_id: parseInt(client_id),
+        user_id: parseInt(client_id),
         title: title.trim(),
-        description: description?.trim(),
-        service_type: service_type?.trim(),
+        description : description.trim(),
         estimated_delivery: estimated_delivery || null,
         status: status || 'waiting_selection',
-        progress: progress ? parseInt(progress) : 0,
         video_url: videoUploadResult.url,
         file_name: videoUploadResult.fileName,
         original_filename: req.file.originalname,
         file_size: req.file.size,
         format: req.file.mimetype,
-        created_by: user.id
+        created_by: user.id,
+        progress : progress,
       };
       console.log("VIDEO DATA EN EL CONTROLLER : ", videoData)
-      // Insertar en la base de datos (ajusta según tu modelo)
+
       const newVideo = await Video.create(videoData);
 
       res.status(201).json({
@@ -732,13 +727,13 @@ createVideo: async (req, res) => {
       if (!user || user.role !== 'admin') {
         return res.status(401).json({ message: 'Acceso no autorizado' });
       }
-
+      console.log("ENTRO AL UPDATE ------------", req.params, req.body)
       const { videoId } = req.params;
       const { progress } = req.body;
 
       const result = await Video.updateProgress(videoId, parseInt(progress));
       
-      if (result) {
+      if (result > 0) {
         res.json({
           success: true,
           message: 'Progreso del video actualizado'
@@ -767,8 +762,6 @@ createVideo: async (req, res) => {
       }
 
       const { videoId } = req.params;
-
-      // 1. Obtener información del video para eliminar de GCS
       const video = await Video.getById(videoId);
       if (!video) {
         return res.status(404).json({
@@ -777,13 +770,11 @@ createVideo: async (req, res) => {
         });
       }
 
-      // 2. Eliminar archivo de Google Cloud Storage
       if (video.file_name) {
-        await deleteFileFromGCS(video.file_name);
+        await deleteFile(video.file_name);
       }
 
-      // 3. Eliminar de la base de datos
-      const result = await Video.delete(videoId);
+      const result = await Video.deleteVideo(videoId);
       
       if (result) {
         res.json({

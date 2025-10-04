@@ -6,6 +6,7 @@ const archiver = require('archiver');
 const Comments = require('../moduls/Comments')
 const General_requests = require('../moduls/General_requests');
 const { getAllVideosById } = require('../moduls/Client_videos');
+const Video = require('../moduls/Video');
 const userController = {
 
     editProfile: async (req, res) => {
@@ -50,32 +51,40 @@ const userController = {
         }
     },
 
-    getGallery: async (req, res) => {
-        try {
-            const user = req.session.user;
-            if (!user) return res.status(401).json({ message: "Acceso denegado" });
-            
-            const userInfo = await User.getUser(user.id);
-            if (!userInfo) return res.status(404).json({ message: "Usuario no encontrado" });
-            
-            const [getGalleryID] = await Gallery.getID(user.id);
-            if (!getGalleryID) return res.status(404).json({ message: "No se encontraron galerías" });
-            
-            const allGalleryImages = await Gallery_images.getAllGalleryImages(getGalleryID.id);
-
-            return res.status(200).json({
-                data: {
-                    user: userInfo,
-                    galleries: getGalleryID,
-                    images: allGalleryImages || []
-                }
-            });
-
-        } catch (err) {
-            console.error('Error en getGallery:', err);
-            return res.status(500).json({ message: "Error interno del servidor" });
+getGallery: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: "Acceso denegado" });
+        
+        const userInfo = await User.getUser(user.id);
+        if (!userInfo) return res.status(404).json({ message: "Usuario no encontrado" });
+        
+        // Cambiar para obtener todas las galerías (array)
+        const galleries = await Gallery.getByClientId(user.id);
+        if (!galleries || galleries.length === 0) {
+            return res.status(404).json({ message: "No se encontraron galerías" });
         }
-    },
+        
+        // Obtener imágenes para cada galería
+        const galleriesWithImages = await Promise.all(
+            galleries.map(async (gallery) => {
+                const images = await Gallery_images.getByGalleryId(gallery.id);
+                return {
+                    gallery: gallery,
+                    images: images || []
+                };
+            })
+        );
+
+        return res.status(200).json({
+            data: galleriesWithImages
+        });
+
+    } catch (err) {
+        console.error('Error en getGallery:', err);
+        return res.status(500).json({ message: "Error interno del servidor" });
+    }
+},
 
 downloadSingleImage: async (req, res) => {
   try {
@@ -359,13 +368,24 @@ createRequest: async (req, res) =>{
        catch(err){console.log(err)}
  },
 
- getAllVideosById: async (req,res) =>{
-  try{
+ getMyVideos: async (req, res) =>{
+    try{
+        const user = req.session.user;
+        if (!user) return res.status(404).json({ message: "Acceso denegado" });
+        const id = req.session.user.id;
 
-    
+        const videos = await Video.getMyVideos(id);
+
+        if(!videos) return res.status(500).json( {message : "Error al recuperar tus videos"})
+
+          console.log(videos)
+        return res.status(200).json({videos})
+
   }
-  catch(err){console.log(err);}
+       catch(err){console.log(err)}
  }
+
+
 
 }
 

@@ -45,6 +45,7 @@ const VideosSection = () => {
       }
       
       const data = await response.json();
+      console.log(data)
       setAllVideos(data.videos || []);
     } catch (error) {
       console.error('Error fetching videos:', error);
@@ -60,6 +61,7 @@ const VideosSection = () => {
         credentials: 'include'
       });
       const data = await response.json();
+      console.log(data)
       setAllClients(data.data || []);
     } catch (error) {
       console.error('Error fetching clients:', error);

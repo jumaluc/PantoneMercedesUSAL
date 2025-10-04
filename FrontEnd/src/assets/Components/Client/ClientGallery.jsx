@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faEdit, faEraser,faSpinner, faImages, faCheckCircle, faSearchPlus, faArrowUp, faTimes, faEye, faComment } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faEdit, faEraser,faSpinner, faImages, faCheckCircle, faSearchPlus, faArrowUp, faTimes, faEye, faComment, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import './Gallery.css';
@@ -8,7 +8,13 @@ import CommentsSection from './CommentSection';
 import ImageCommentsOverlay from './ImageCommentsOverlay';
 
 const Gallery = ({ user }) => {
-  const [galleryData, setGalleryData] = useState(null);
+  const [galleriesData, setGalleriesData] = useState([]);
+  // Usar localStorage para persistir el índice de galería
+  const [currentGalleryIndex, setCurrentGalleryIndex] = useState(() => {
+    // Recuperar el índice guardado o usar 0 por defecto
+    const savedIndex = localStorage.getItem('currentGalleryIndex');
+    return savedIndex ? parseInt(savedIndex) : 0;
+  });
   const [selectedImages, setSelectedImages] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [overlayVisible, setOverlayVisible] = useState(false);
@@ -22,6 +28,17 @@ const Gallery = ({ user }) => {
   const [showCommentsOverlay, setShowCommentsOverlay] = useState(false);
   const [commentsImage, setCommentsImage] = useState(null);
 
+  // Obtener la galería actual
+  const currentGallery = galleriesData[currentGalleryIndex] || null;
+  const currentGalleryId = currentGallery?.gallery?.id;
+
+  // Guardar el índice actual en localStorage cuando cambie
+  useEffect(() => {
+    if (galleriesData.length > 0) {
+      localStorage.setItem('currentGalleryIndex', currentGalleryIndex.toString());
+    }
+  }, [currentGalleryIndex, galleriesData.length]);
+
   useEffect(() => {
     fetchGalleries();
     window.addEventListener('scroll', handleScroll);
@@ -33,10 +50,10 @@ const Gallery = ({ user }) => {
   }, [selectedImages.size]);
 
   useEffect(() => {
-    if (galleryData?.images) {
+    if (currentGallery?.images) {
       const processImages = async () => {
         const processed = await Promise.all(
-          galleryData.images.map(async (image) => {
+          currentGallery.images.map(async (image) => {
             return new Promise((resolve) => {
               const img = new Image();
               img.onload = () => {
@@ -53,8 +70,10 @@ const Gallery = ({ user }) => {
         setProcessedImages(processed);
       };
       processImages();
+    } else {
+      setProcessedImages([]);
     }
-  }, [galleryData]);
+  }, [currentGallery]);
 
   const handleScroll = () => {
     setShowScrollTop(window.scrollY > 300);
@@ -66,12 +85,23 @@ const Gallery = ({ user }) => {
 
   const fetchGalleries = async () => {
     try {
+      setLoading(true);
       const response = await fetch('http://localhost:3000/user/getGallery', {
         credentials: 'include'
       });
       if (response.ok) {
         const data = await response.json();
-        setGalleryData(data.data);
+        console.log('Datos recibidos:', data);
+        setGalleriesData(data.data || []);
+        
+        // Verificar si el índice guardado es válido para los nuevos datos
+        if (data.data && data.data.length > 0) {
+          const savedIndex = localStorage.getItem('currentGalleryIndex');
+          const indexToUse = savedIndex ? 
+            Math.min(parseInt(savedIndex), data.data.length - 1) : 0;
+          
+          setCurrentGalleryIndex(indexToUse);
+        }
       } else {
         throw new Error('Error al cargar galerías');
       }
@@ -81,6 +111,17 @@ const Gallery = ({ user }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const navigateGallery = (direction) => {
+    if (galleriesData.length <= 1) return;
+    
+    let newIndex = currentGalleryIndex + direction;
+    if (newIndex < 0) newIndex = galleriesData.length - 1;
+    if (newIndex >= galleriesData.length) newIndex = 0;
+    
+    setCurrentGalleryIndex(newIndex);
+    setSelectedImages(new Set()); // Limpiar selección al cambiar de galería
   };
 
   const toggleImageSelection = (imageId, event) => {
@@ -160,7 +201,8 @@ const Gallery = ({ user }) => {
           imageUrls: Array.from(selectedImages).map(id => {
             const image = processedImages.find(img => img.id === id);
             return image ? image.image_url : '';
-          })
+          }),
+          galleryId: currentGalleryId
         })
       });
       if (response.ok) {
@@ -168,8 +210,9 @@ const Gallery = ({ user }) => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
+        const galleryName = currentGallery?.gallery?.title || 'galeria';
         const timestamp = new Date().getTime();
-        link.download = `galeria-${timestamp}.zip`;
+        link.download = `${galleryName}-${timestamp}.zip`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -196,7 +239,8 @@ const Gallery = ({ user }) => {
         },
         body: JSON.stringify({
           imageUrl: imageUrl,
-          filename: filename || `image_${imageId}`
+          filename: filename || `image_${imageId}`,
+          galleryId: currentGalleryId
         })
       });
       if (response.ok) {
@@ -252,14 +296,15 @@ const Gallery = ({ user }) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            imageIds: Array.from(selectedImages)
+            imageIds: Array.from(selectedImages),
+            galleryId: currentGalleryId
           })
         });
         if (response.ok) {
           const result = await response.json();
           toast.success(result.message || 'Selección confirmada correctamente');
           setSelectedImages(new Set());
-          fetchGalleries();
+          fetchGalleries(); // Recargar para actualizar datos
         } else {
           const errorData = await response.json();
           throw new Error(errorData.error || 'Error al confirmar la selección');
@@ -293,47 +338,82 @@ const Gallery = ({ user }) => {
     return (
       <div className="gallery-loading">
         <FontAwesomeIcon icon={faSpinner} spin size="2x" />
-        <p>Cargando galería...</p>
+        <p>Cargando galerías...</p>
       </div>
     );
   }
 
-  if (!galleryData || !galleryData.galleries) {
+  if (!galleriesData || galleriesData.length === 0) {
     return (
       <div className="gallery-empty">
         <FontAwesomeIcon icon={faImages} size="4x" />
         <h3>Aún no tienes galerías disponibles</h3>
-        <p>Tu fotógrafo te notificará cuando tu galería esté lista</p>
+        <p>Tu fotógrafo te notificará cuando tus galerías estén listas</p>
       </div>
     );
   }
 
-  const { galleries, images, user: userInfo } = galleryData;
-
   return (
     <div className="galeria-container">
-      {showHeader && (
+      {showHeader && currentGallery && (
         <header className="galeria-header">
           <div className="galeria-header-content">
             <div className="galeria-header-main">
-              <h1>{galleries.title}</h1>
-              <p className="galeria-service">{galleries.service_type}</p>
+              <div className="galeria-navigation">
+                {galleriesData.length > 1 && (
+                  <button 
+                    className="nav-arrow prev" 
+                    onClick={() => navigateGallery(-1)}
+                    title="Galería anterior"
+                  >
+                    <FontAwesomeIcon icon={faChevronLeft} />
+                  </button>
+                )}
+                
+                <div className="galeria-title-section">
+                  <h1>{currentGallery.gallery.title}</h1>
+                  <p className="galeria-service">{currentGallery.gallery.service_type}</p>
+                </div>
+
+                {galleriesData.length > 1 && (
+                  <button 
+                    className="nav-arrow next" 
+                    onClick={() => navigateGallery(1)}
+                    title="Siguiente galería"
+                  >
+                    <FontAwesomeIcon icon={faChevronRight} />
+                  </button>
+                )}
+              </div>
             </div>
+            
             <div className="galeria-header-meta">
-              <span className="galeria-client">{userInfo.first_name} {userInfo.last_name}</span>
-              <span className="galeria-count">{images?.length || 0} fotos</span>
+              <div className="galeria-meta-left">
+                <span className="galeria-client">{user?.first_name} {user?.last_name}</span>
+                <span className="galeria-count">{currentGallery.images?.length || 0} fotos</span>
+              </div>
+              
+              <div className="galeria-counter">
+                <span className="gallery-counter-text">
+                  Galería {currentGalleryIndex + 1} de {galleriesData.length}
+                </span>
+              </div>
             </div>
           </div>
         </header>
       )}
       
+      {/* STICKY HEADER CORREGIDO - Se mantiene siempre que haya selección */}
       {selectedImages.size > 0 && (
-        <div className="selection-counter-sticky">
+        <div className="selection-counter-sticky" key={`sticky-${currentGalleryId}`}>
           <div className="selection-counter-content">
             <div className="selection-info">
               <FontAwesomeIcon icon={faCheckCircle} className="selection-icon" />
               <span className="selection-text">
                 {selectedImages.size} imagen{selectedImages.size !== 1 ? 'es' : ''} seleccionada{selectedImages.size !== 1 ? 's' : ''}
+              </span>
+              <span className="gallery-indicator">
+                - {currentGallery?.gallery?.title}
               </span>
             </div>
             <div className="selection-actions">
@@ -361,37 +441,44 @@ const Gallery = ({ user }) => {
       
       <main className={`galeria-main ${selectedImages.size > 0 ? 'with-selection' : ''}`}>
         <div className="galeria-grid">
-          {processedImages.map((image, index) => (
-            <div key={image.id} className={`galeriaFotos-container-imagen ${image.isVertical ? 'vertical' : 'horizontal'}`}>
-              <div className={`galeria-item ${selectedImages.has(image.id) ? 'selected' : ''}`} onClick={(e) => handleImageClick(image, index, e)}>
-                <img src={image.image_url} alt={image.original_filename} onError={(e) => {
-                  e.target.src = '/placeholder-image.jpg';
-                }} />
-                <div className="galeria-item-overlay">
-                  <button className={`check-btn ${selectedImages.has(image.id) ? 'checked' : ''}`} onClick={(e) => toggleImageSelection(image.id, e)}>
-                    <FontAwesomeIcon icon={faCheckCircle} />
-                  </button>
-                  <button className="zoom-btn" onClick={(e) => handleZoomClick(image, index, e)}>
-                    <FontAwesomeIcon icon={faSearchPlus} />
-                  </button>
-                  <button className="download-single-btn" onClick={(e) => {
-                    e.stopPropagation();
-                    downloadSingleImage(image.id, image.image_url, image.original_filename);
-                  }} title="Descargar esta imagen">
-                    <FontAwesomeIcon icon={faDownload} />
-                  </button>
-                  <button className="check-btn" onClick={(e) => handleCommentsClick(image, e)} title="Agregar comentario">
-                    <FontAwesomeIcon icon={faComment} />
-                  </button>
-                </div>
-                {selectedImages.has(image.id) && (
-                  <div className="selection-badge">
-                    <FontAwesomeIcon icon={faCheckCircle} />
+          {processedImages.length > 0 ? (
+            processedImages.map((image, index) => (
+              <div key={image.id} className={`galeriaFotos-container-imagen ${image.isVertical ? 'vertical' : 'horizontal'}`}>
+                <div className={`galeria-item ${selectedImages.has(image.id) ? 'selected' : ''}`} onClick={(e) => handleImageClick(image, index, e)}>
+                  <img src={image.image_url} alt={image.original_filename} onError={(e) => {
+                    e.target.src = '/placeholder-image.jpg';
+                  }} />
+                  <div className="galeria-item-overlay">
+                    <button className={`check-btn ${selectedImages.has(image.id) ? 'checked' : ''}`} onClick={(e) => toggleImageSelection(image.id, e)}>
+                      <FontAwesomeIcon icon={faCheckCircle} />
+                    </button>
+                    <button className="zoom-btn" onClick={(e) => handleZoomClick(image, index, e)}>
+                      <FontAwesomeIcon icon={faSearchPlus} />
+                    </button>
+                    <button className="download-single-btn" onClick={(e) => {
+                      e.stopPropagation();
+                      downloadSingleImage(image.id, image.image_url, image.original_filename);
+                    }} title="Descargar esta imagen">
+                      <FontAwesomeIcon icon={faDownload} />
+                    </button>
+                    <button className="check-btn" onClick={(e) => handleCommentsClick(image, e)} title="Agregar comentario">
+                      <FontAwesomeIcon icon={faComment} />
+                    </button>
                   </div>
-                )}
+                  {selectedImages.has(image.id) && (
+                    <div className="selection-badge">
+                      <FontAwesomeIcon icon={faCheckCircle} />
+                    </div>
+                  )}
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="no-images-message">
+              <FontAwesomeIcon icon={faImages} size="3x" />
+              <p>No hay imágenes en esta galería</p>
             </div>
-          ))}
+          )}
         </div>
       </main>
       
@@ -404,6 +491,9 @@ const Gallery = ({ user }) => {
               <div className="preview-header-info">
                 <span className="preview-count">
                   {selectedImages.size} imagen{selectedImages.size !== 1 ? 'es' : ''} seleccionada{selectedImages.size !== 1 ? 's' : ''}
+                </span>
+                <span className="preview-gallery">
+                  - {currentGallery?.gallery?.title}
                 </span>
                 <button className="preview-close" onClick={closePreview}>
                   <FontAwesomeIcon icon={faTimes} />
@@ -489,6 +579,7 @@ const Gallery = ({ user }) => {
             </div>
             <div className="overlay-info">
               <span className="overlay-counter">{overlayIndex + 1} / {processedImages.length}</span>
+              <span className="overlay-gallery">{currentGallery?.gallery?.title}</span>
             </div>
           </div>
         </div>
@@ -498,10 +589,10 @@ const Gallery = ({ user }) => {
         image={commentsImage} 
         isOpen={showCommentsOverlay} 
         onClose={handleCommentsOverlayClose}
-        galleryId={galleries?.id}
+        galleryId={currentGalleryId}
       />
       
-      <CommentsSection user={user} galleryId={galleries?.id} />
+      <CommentsSection user={user} galleryId={currentGalleryId} />
     </div>
   );
 };

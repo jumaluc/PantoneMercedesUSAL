@@ -18,7 +18,105 @@
   margin-top: 120px;
 }
 
+/* Navegación entre galerías - FLECHAS MODIFICADAS */
+.galeria-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 60px;
+    position: relative;
+}
 
+.nav-arrow {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    font-size: 1.2rem;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.nav-arrow.prev {
+    left: 0;
+}
+
+.nav-arrow.next {
+    right: 0;
+}
+
+.nav-arrow:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.nav-arrow:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+/* Sección del título - CENTRADO */
+.galeria-title-section {
+    flex: 1;
+    text-align: center;
+    min-width: 0;
+    padding: 0 80px; /* Más padding para dar espacio a las flechas */
+}
+
+.galeria-title-section h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.galeria-service {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+/* Responsive para las flechas */
+@media (max-width: 768px) {
+    .galeria-title-section {
+        padding: 0 70px;
+    }
+    
+    .nav-arrow {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .galeria-title-section {
+        padding: 0 60px;
+    }
+    
+    .nav-arrow {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
 .navbar {
   position: fixed;
   top: 0;
@@ -34,6 +132,10 @@
   border-bottom: 3px solid var(--accent-gold);
   margin-bottom: 50px;
 }
+.navbar svg{
+  margin-right: 5px;
+}
+
 .navbar-brand{
   display: flex;
   width: 500px;
@@ -370,6 +472,11 @@
     gap: 15px;
   }
 }
+
+
+
+
+
 /* En tu Dashboard.css */
 .navbar-user {
   display: flex;
@@ -448,7 +555,3 @@
   border: none;
 }
 
-.profile-cancel-btn:hover, .profile-save-btn:hover {
-
-  
-}

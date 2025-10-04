@@ -13,14 +13,18 @@ class Gallery_images{
         }
         catch(err){console.log(err)}
     };
-    static async getAllGalleryImages(getGalleryID){
-        try{
-
-            const [result] = await pool.execute('SELECT id,image_url,original_filename FROM gallery_images WHERE gallery_id = ?', [getGalleryID]);
-            return result;
+        static async getByGalleryId(galleryId) {
+            try {
+                const [result] = await pool.execute(
+                    'SELECT id, image_url, original_filename FROM gallery_images WHERE gallery_id = ?', 
+                    [galleryId]
+                );
+                return result;
+            } catch(err) {
+                console.log(err);
+                throw err;
+            }
         }
-        catch(err){console.log(err)}
-    }
     static async updateSelectionStatus(imageIds, isSelected){
     try {
         const placeholders = imageIds.map(() => '?').join(',');

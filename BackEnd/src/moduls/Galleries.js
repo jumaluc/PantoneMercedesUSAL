@@ -31,16 +31,18 @@ class Gallery {
         catch(err){console.log(err);}
     }
 
-    static async getID(id){
-        try
-        {
-
-            const [result] = await pool.execute('SELECT id, title, service_type, description, photos_count, created_at FROM galleries WHERE client_id = ?',[id]);
-            return result;
-
-        }
-        catch(err){console.log(err)}
+static async getByClientId(clientId) {
+    try {
+        const [result] = await pool.execute(
+            'SELECT id, title, service_type, description, photos_count, created_at FROM galleries WHERE client_id = ? ORDER BY created_at DESC', 
+            [clientId]
+        );
+        return result;
+    } catch(err) {
+        console.log(err);
+        throw err;
     }
+}
     // En Gallery.js
 static async getGalleryById(galleryId) {
     try {

@@ -170,7 +170,7 @@ const login = () => {
   const register = () => {
     if (!validateRegister()) {
       setModalType('error');
-      setModalMessage('Por favor, corrige los errores en el formulario');
+      setModalMessage('Por favor, corriges los errores en el formulario');
       setShowModal(true);
       return;
     }
@@ -224,104 +224,104 @@ const login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="background-pattern"></div>
+    <div className="lg-login-container">
+      <div className="lg-background-pattern"></div>
 
-      <div className="main-container">
+      <div className="lg-main-container">
         
-        <div className="branding-section">
-          <div className="branding-content">
-            <div className="camera-icon">
-              <svg className="camera-svg" fill="currentColor" viewBox="0 0 24 24">
+        <div className="lg-branding-section">
+          <div className="lg-branding-content">
+            <div className="lg-camera-icon">
+              <svg className="lg-camera-svg" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 15.5c1.93 0 3.5-1.57 3.5-3.5S13.93 8.5 12 8.5 8.5 10.07 8.5 12s1.57 3.5 3.5 3.5zm0-5c.83 0 1.5.67 1.5 1.5S12.83 13.5 12 13.5s-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z"/>
                 <path d="M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h4.05l1.83-2h4.24L16 6h4v12z"/>
               </svg>
             </div>
             
-            <h1 className="brand-title">
-              Pantone <span className="brand-accent">Mercedes</span>
+            <h1 className="lg-brand-title">
+              Pantone <span className="lg-brand-accent">Mercedes</span>
             </h1>
-            <p className="brand-description">
+            <p className="lg-brand-description">
               Capturamos momentos únicos con la más alta calidad profesional
             </p>
             
-            <div className="features-list">
-              <div className="feature-item">
-                <div className="feature-dot orange-dot"></div>
+            <div className="lg-features-list">
+              <div className="lg-feature-item">
+                <div className="lg-feature-dot lg-orange-dot"></div>
                 <span>Fotografía profesional de eventos</span>
               </div>
-              <div className="feature-item">
-                <div className="feature-dot yellow-dot"></div>
+              <div className="lg-feature-item">
+                <div className="lg-feature-dot lg-yellow-dot"></div>
                 <span>Sesiones de retratos personalizadas</span>
               </div>
-              <div className="feature-item">
-                <div className="feature-dot orange-dot"></div>
+              <div className="lg-feature-item">
+                <div className="lg-feature-dot lg-orange-dot"></div>
                 <span>Edición y retoque de alta gama</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="form-section">
-          <div className="form-container">
+        <div className="lg-form-section">
+          <div className="lg-form-container">
             
-            <div className="tab-buttons">
+            <div className="lg-tab-buttons">
               <button 
-                className={`tab-button ${activeTab === 'login' ? 'tab-active' : 'tab-inactive'}`}
+                className={`lg-tab-button ${activeTab === 'login' ? 'lg-tab-active' : 'lg-tab-inactive'}`}
                 onClick={() => setActiveTab('login')}
               >
                 Iniciar Sesión
               </button>
               <button 
-                className={`tab-button ${activeTab === 'register' ? 'tab-active' : 'tab-inactive'}`}
+                className={`lg-tab-button ${activeTab === 'register' ? 'lg-tab-active' : 'lg-tab-inactive'}`}
                 onClick={() => setActiveTab('register')}
               >
                 Registrarse
               </button>
             </div>
 
-            <div className={`form-content ${activeTab === 'login' ? '' : 'form-hidden'}`}>
-              <h2 className="form-title">Bienvenido de vuelta</h2>
+            <div className={`lg-form-content ${activeTab === 'login' ? '' : 'lg-form-hidden'}`}>
+              <h2 className="lg-form-title">Bienvenido de vuelta</h2>
               
-              <form className="form" onSubmit={(e) => { e.preventDefault(); login(); }}>
-                <div className="form-group">
-                  <label className="form-label">Email</label>
+              <form className="lg-form" onSubmit={(e) => { e.preventDefault(); login(); }}>
+                <div className="lg-form-group">
+                  <label className="lg-form-label">Email</label>
                   <input 
                     type="email" 
-                    className={`form-input ${errors.email ? 'input-error' : ''}`} 
+                    className={`lg-form-input ${errors.email ? 'lg-input-error' : ''}`} 
                     placeholder="tu@email.com" 
                     value={loginData.email} 
                     onChange={handleChangeLogin} 
                     name="email"
                   />
-                  {errors.email && <span className="error-message">{errors.email}</span>}
+                  {errors.email && <span className="lg-error-message">{errors.email}</span>}
                 </div>
                 
-                <div className="form-group">
-                  <label className="form-label">Contraseña</label>
+                <div className="lg-form-group">
+                  <label className="lg-form-label">Contraseña</label>
                   <input 
                     type="password" 
-                    className={`form-input ${errors.password ? 'input-error' : ''}`} 
+                    className={`lg-form-input ${errors.password ? 'lg-input-error' : ''}`} 
                     placeholder="••••••••" 
                     value={loginData.password} 
                     onChange={handleChangeLogin} 
                     name="password"
                   />
-                  {errors.password && <span className="error-message">{errors.password}</span>}
+                  {errors.password && <span className="lg-error-message">{errors.password}</span>}
                 </div>
                 
-                <div className="form-options">
-                  <label className="checkbox-label">
+                <div className="lg-form-options">
+                  <label className="lg-checkbox-label">
                     <input 
                       type="checkbox" 
-                      className="form-checkbox" 
+                      className="lg-form-checkbox" 
                       onChange={handleChangeLogin} 
                       name="remember"
                       checked={loginData.remember}
                     />
-                    <span className="checkbox-text">Recordarme</span>
+                    <span className="lg-checkbox-text">Recordarme</span>
                   </label>
-                  <a href="#" className="forgot-link" onClick={(e) => {
+                  <a href="#" className="lg-forgot-link" onClick={(e) => {
                     e.preventDefault();
                     setShowForgotPassword(true);
                   }}>
@@ -331,101 +331,101 @@ const login = () => {
                 
                 <button 
                   type="submit" 
-                  className="submit-button"
-                  id="submit-button-login"
+                  className="lg-submit-button"
+                  id="lg-submit-button-login"
                 >
                   Iniciar Sesión
                 </button>
               </form>
             </div>
 
-            <div className={`form-content ${activeTab === 'register' ? '' : 'form-hidden'}`}>
-              <h2 className="form-title">Crear cuenta nueva</h2>
+            <div className={`lg-form-content ${activeTab === 'register' ? '' : 'lg-form-hidden'}`}>
+              <h2 className="lg-form-title">Crear cuenta nueva</h2>
               
-              <form className="form" onSubmit={(e) => { e.preventDefault(); register(); }}>
-                <div className="form-column">
-                  <div className="form-group">
-                    <label className="form-label">Nombre</label>
+              <form className="lg-form" onSubmit={(e) => { e.preventDefault(); register(); }}>
+                <div className="lg-form-column">
+                  <div className="lg-form-group">
+                    <label className="lg-form-label">Nombre</label>
                     <input 
                       type="text" 
-                      className={`form-input ${errors.first_name ? 'input-error' : ''}`} 
+                      className={`lg-form-input ${errors.first_name ? 'lg-input-error' : ''}`} 
                       placeholder="Nombre" 
                       value={registerData.first_name} 
                       name='first_name' 
                       onChange={handleChangeRegister} 
                     />
-                    {errors.first_name && <span className="error-message">{errors.first_name}</span>}
+                    {errors.first_name && <span className="lg-error-message">{errors.first_name}</span>}
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Apellido</label>
+                  <div className="lg-form-group">
+                    <label className="lg-form-label">Apellido</label>
                     <input 
                       type="text" 
-                      className={`form-input ${errors.last_name ? 'input-error' : ''}`} 
+                      className={`lg-form-input ${errors.last_name ? 'lg-input-error' : ''}`} 
                       placeholder="Apellido" 
                       value={registerData.last_name} 
                       name='last_name' 
                       onChange={handleChangeRegister}  
                     />
-                    {errors.last_name && <span className="error-message">{errors.last_name}</span>}
+                    {errors.last_name && <span className="lg-error-message">{errors.last_name}</span>}
                   </div>
                 </div>
                 
-                <div className="form-group">
-                  <label className="form-label">Email</label>
+                <div className="lg-form-group">
+                  <label className="lg-form-label">Email</label>
                   <input 
                     type="email" 
-                    className={`form-input ${errors.email ? 'input-error' : ''}`} 
+                    className={`lg-form-input ${errors.email ? 'lg-input-error' : ''}`} 
                     placeholder="tu@email.com" 
                     value={registerData.email} 
                     name='email' 
                     onChange={handleChangeRegister} 
                   />
-                  {errors.email && <span className="error-message">{errors.email}</span>}
+                  {errors.email && <span className="lg-error-message">{errors.email}</span>}
                 </div>
                 
-                <div className="form-group">
-                  <label className="form-label">Teléfono</label>
+                <div className="lg-form-group">
+                  <label className="lg-form-label">Teléfono</label>
                   <input 
                     type="tel" 
-                    className={`form-input ${errors.number ? 'input-error' : ''}`} 
+                    className={`lg-form-input ${errors.number ? 'lg-input-error' : ''}`} 
                     placeholder="+54 11 1234-5678" 
                     value={registerData.number} 
                     name='number' 
                     onChange={handleChangeRegister}
                   />
-                  {errors.number && <span className="error-message">{errors.number}</span>}
+                  {errors.number && <span className="lg-error-message">{errors.number}</span>}
                 </div>
                 
-                <div className="form-group">
-                  <label className="form-label">Contraseña</label>
+                <div className="lg-form-group">
+                  <label className="lg-form-label">Contraseña</label>
                   <input 
                     type="password" 
-                    className={`form-input ${errors.password ? 'input-error' : ''}`} 
+                    className={`lg-form-input ${errors.password ? 'lg-input-error' : ''}`} 
                     placeholder="••••••••" 
                     value={registerData.password} 
                     name='password' 
                     onChange={handleChangeRegister} 
                   />
-                  {errors.password && <span className="error-message">{errors.password}</span>}
+                  {errors.password && <span className="lg-error-message">{errors.password}</span>}
                 </div>
                 
-                <div className="form-group">
-                  <label className="form-label">Confirmar Contraseña</label>
+                <div className="lg-form-group">
+                  <label className="lg-form-label">Confirmar Contraseña</label>
                   <input 
                     type="password" 
-                    className={`form-input ${errors.password2 ? 'input-error' : ''}`} 
+                    className={`lg-form-input ${errors.password2 ? 'lg-input-error' : ''}`} 
                     placeholder="••••••••" 
                     value={registerData.password2} 
                     name='password2' 
                     onChange={handleChangeRegister} 
                   />
-                  {errors.password2 && <span className="error-message">{errors.password2}</span>}
+                  {errors.password2 && <span className="lg-error-message">{errors.password2}</span>}
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Tipo de Servicio</label>
+                <div className="lg-form-group">
+                  <label className="lg-form-label">Tipo de Servicio</label>
                   <select 
-                    className={`form-input ${errors.service ? 'input-error' : ''}`}
+                    className={`lg-form-input ${errors.service ? 'lg-input-error' : ''}`}
                     value={registerData.service} 
                     name='service' 
                     onChange={handleChangeRegister}
@@ -439,26 +439,26 @@ const login = () => {
                     <option value="producto">Evento Coorporativo</option>
                     <option value="dron">Otros</option>
                   </select>
-                  {errors.service && <span className="error-message">{errors.service}</span>}
+                  {errors.service && <span className="lg-error-message">{errors.service}</span>}
                 </div>
 
-                <div className="form-checkbox-group">
+                <div className="lg-form-checkbox-group">
                   <input 
                     type="checkbox" 
-                    className={`form-checkbox ${errors.acceptTerm ? 'checkbox-error' : ''}`} 
+                    className={`lg-form-checkbox ${errors.acceptTerm ? 'lg-checkbox-error' : ''}`} 
                     name='acceptTerm' 
                     onChange={handleChangeRegister} 
                     checked={registerData.acceptTerm}
                   />
-                  <span className="checkbox-text">
-                    Acepto los <a href="#" className="terms-link">términos y condiciones</a>
+                  <span className="lg-checkbox-text">
+                    Acepto los <a href="#" className="lg-terms-link">términos y condiciones</a>
                   </span>
-                  {errors.acceptTerm && <span className="error-message">{errors.acceptTerm}</span>}
+                  {errors.acceptTerm && <span className="lg-error-message">{errors.acceptTerm}</span>}
                 </div>
                 
                 <button 
                   type="submit" 
-                  className="submit-button"
+                  className="lg-submit-button"
                 >
                   Crear Cuenta
                 </button>
@@ -468,40 +468,40 @@ const login = () => {
         </div>
       </div>
 
-            {showModal && (
+      {showModal && (
         <div 
-          className="modal-overlay"
+          className="lg-modal-overlay"
           onClick={closeDemoModal}
         >
           <div 
-            className={`modal-content ${modalType === 'error' ? 'modal-error' : 'modal-success'}`}
+            className={`lg-modal-content ${modalType === 'error' ? 'lg-modal-error' : 'lg-modal-success'}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="modal-icon">
+            <div className="lg-modal-icon">
               {modalType === 'error' ? (
-                <svg className="modal-error-icon" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="lg-modal-error-icon" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                 </svg>
               ) : (
-                <svg className="modal-success-icon" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="lg-modal-success-icon" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
                 </svg>
               )}
             </div>
-            <h3 className="modal-title">
+            <h3 className="lg-modal-title">
               {modalType === 'error' ? '¡Error!' : '¡Éxito!'}
             </h3>
-            <p className="modal-message">{modalMessage}</p>
+            <p className="lg-modal-message">{modalMessage}</p>
             <button 
               onClick={closeDemoModal} 
-              className={`modal-button ${modalType === 'error' ? 'modal-button-error' : 'modal-button-success'}`}
+              className={`lg-modal-button ${modalType === 'error' ? 'lg-modal-button-error' : 'lg-modal-button-success'}`}
             >
               Aceptar
             </button>
           </div>
         </div>
       )}
-            {showForgotPassword && (
+      {showForgotPassword && (
         <ForgotPassword onClose={() => setShowForgotPassword(false)} />
       )}
     </div>

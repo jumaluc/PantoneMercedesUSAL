@@ -195,8 +195,8 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
             <div className="video-client-info">
                 <FontAwesomeIcon icon={faUser} />
                 <span>
-                    {video.client?.first_name} {video.client?.last_name}
-                    {video.client?.email && ` (${video.client.email})`}
+                    {video.first_name} {video.last_name}
+                    {video.email && ` (${video.email})`}
                 </span>
             </div>
 

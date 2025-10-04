@@ -13,7 +13,9 @@ import {
     faSearch,
     faFilter,
     faFileVideo,
-    faHistory
+    faHistory,
+    faEye,
+    faEyeSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import './ClientVideosSection.css';
@@ -40,6 +42,7 @@ const ClientVideosSection = ({ user }) => {
             
             if (response.ok) {
                 const data = await response.json();
+                console.log(data)
                 setVideos(data.videos || []);
             } else {
                 throw new Error('Error al cargar videos');
@@ -54,6 +57,11 @@ const ClientVideosSection = ({ user }) => {
     };
 
     const handleVideoPlay = (video) => {
+        // Solo permitir reproducir si el video está completado
+        if (video.status !== 'completed') {
+            toast.info('El video no está disponible hasta que esté finalizado');
+            return;
+        }
         setPlayingVideo(playingVideo?.id === video.id ? null : video);
     };
 
@@ -65,6 +73,12 @@ const ClientVideosSection = ({ user }) => {
     };
 
     const handleDownloadVideo = async (video) => {
+        // Solo permitir descargar si el video está completado
+        if (video.status !== 'completed') {
+            toast.info('Solo puedes descargar videos finalizados');
+            return;
+        }
+
         setDownloadingVideo(video.id);
         try {
             const response = await fetch(`http://localhost:3000/user/downloadVideo/${video.id}`, {
@@ -185,7 +199,7 @@ const ClientVideosSection = ({ user }) => {
 
     if (loading) {
         return (
-            <div className="video-section-loading">
+            <div className="cv-video-section-loading">
                 <FontAwesomeIcon icon={faSpinner} spin size="2x" />
                 <p>Cargando videos...</p>
             </div>
@@ -193,16 +207,16 @@ const ClientVideosSection = ({ user }) => {
     }
 
     return (
-        <div className="video-section-container">
+        <div className="cv-video-section-container">
             {/* Header */}
-            <div className="video-section-header">
+            <div className="cv-video-section-header">
                 <h1>Mis Videos</h1>
                 <p>Gestiona y descarga tus videos profesionales</p>
             </div>
 
             {/* Filtros y búsqueda */}
-            <div className="video-filters">
-                <div className="video-search-box">
+            <div className="cv-video-filters">
+                <div className="cv-video-search-box">
                     <FontAwesomeIcon icon={faSearch} />
                     <input 
                         type="text" 
@@ -211,27 +225,27 @@ const ClientVideosSection = ({ user }) => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="video-filter-buttons">
+                <div className="cv-video-filter-buttons">
                     <button 
-                        className={`video-filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
+                        className={`cv-video-filter-btn ${filterStatus === 'all' ? 'cv-active' : ''}`}
                         onClick={() => setFilterStatus('all')}
                     >
                         Todos
                     </button>
                     <button 
-                        className={`video-filter-btn ${filterStatus === 'waiting_selection' ? 'active' : ''}`}
+                        className={`cv-video-filter-btn ${filterStatus === 'waiting_selection' ? 'cv-active' : ''}`}
                         onClick={() => setFilterStatus('waiting_selection')}
                     >
                         Esperando selección
                     </button>
                     <button 
-                        className={`video-filter-btn ${filterStatus === 'in_editing' ? 'active' : ''}`}
+                        className={`cv-video-filter-btn ${filterStatus === 'in_editing' ? 'cv-active' : ''}`}
                         onClick={() => setFilterStatus('in_editing')}
                     >
                         En edición
                     </button>
                     <button 
-                        className={`video-filter-btn ${filterStatus === 'completed' ? 'active' : ''}`}
+                        className={`cv-video-filter-btn ${filterStatus === 'completed' ? 'cv-active' : ''}`}
                         onClick={() => setFilterStatus('completed')}
                     >
                         Finalizados
@@ -240,21 +254,22 @@ const ClientVideosSection = ({ user }) => {
             </div>
 
             {/* Lista de videos */}
-            <div className="videos-grid">
+            <div className="cv-videos-grid">
                 {filteredVideos.length > 0 ? (
                     filteredVideos.map((video) => {
                         const statusInfo = getStatusInfo(video.status);
                         const progressInfo = getProgressInfo(video.progress);
+                        const isVideoAvailable = video.status === 'completed';
                         
                         return (
-                            <div key={video.id} className="video-card">
-                                <div className="video-header">
-                                    <div className="video-title-section">
+                            <div key={video.id} className="cv-video-card">
+                                <div className="cv-video-header">
+                                    <div className="cv-video-title-section">
                                         <FontAwesomeIcon icon={faFileVideo} />
                                         <h3>{video.title}</h3>
                                     </div>
                                     <div 
-                                        className="video-status"
+                                        className="cv-video-status"
                                         style={{ color: statusInfo.color }}
                                     >
                                         <FontAwesomeIcon icon={statusInfo.icon} />
@@ -263,22 +278,22 @@ const ClientVideosSection = ({ user }) => {
                                 </div>
 
                                 {video.description && (
-                                    <div className="video-description">
+                                    <div className="cv-video-description">
                                         {video.description}
                                     </div>
                                 )}
 
                                 {/* Barra de progreso */}
-                                <div className="video-progress-section">
-                                    <div className="video-progress-header">
+                                <div className="cv-video-progress-section">
+                                    <div className="cv-video-progress-header">
                                         <span>Progreso: {video.progress}%</span>
                                         <span style={{ color: progressInfo.color }}>
                                             {progressInfo.label}
                                         </span>
                                     </div>
-                                    <div className="video-progress-bar">
+                                    <div className="cv-video-progress-bar">
                                         <div 
-                                            className="video-progress-fill"
+                                            className="cv-video-progress-fill"
                                             style={{ 
                                                 width: `${video.progress}%`,
                                                 backgroundColor: progressInfo.color
@@ -287,48 +302,40 @@ const ClientVideosSection = ({ user }) => {
                                     </div>
                                 </div>
 
-                                {/* Información del video */}
-                                {video.video_url && (
-                                    <div className="video-preview-section">
-                                        <div className="video-thumbnail">
-                                            {video.thumbnail_url ? (
-                                                <img 
-                                                    src={video.thumbnail_url} 
-                                                    alt={video.title}
-                                                    onClick={() => handleVideoPlay(video)}
+                                {/* Preview del video */}
+                                <div className="cv-video-preview-section">
+                                    <div className={`cv-video-thumbnail ${!isVideoAvailable ? 'cv-video-disabled' : ''}`}>
+
+                                        <div className="cv-video-overlay">
+                                            <button 
+                                                className="cv-video-play-btn"
+                                                onClick={() => handleVideoPlay(video)}
+                                                disabled={!isVideoAvailable}
+                                            >
+                                                <FontAwesomeIcon 
+                                                    icon={playingVideo?.id === video.id ? faPause : 
+                                                          isVideoAvailable ? faPlay : faEyeSlash} 
                                                 />
-                                            ) : (
-                                                <div 
-                                                    className="video-thumbnail-placeholder"
-                                                    onClick={() => handleVideoPlay(video)}
-                                                >
-                                                    <FontAwesomeIcon icon={faVideo} />
-                                                    <span>Ver Video</span>
-                                                </div>
-                                            )}
-                                            <div className="video-overlay">
-                                                <button 
-                                                    className="video-play-btn"
-                                                    onClick={() => handleVideoPlay(video)}
-                                                >
-                                                    <FontAwesomeIcon 
-                                                        icon={playingVideo?.id === video.id ? faPause : faPlay} 
-                                                    />
-                                                </button>
-                                            </div>
-                                            {video.duration && (
-                                                <div className="video-duration">
-                                                    {formatDuration(video.duration)}
-                                                </div>
-                                            )}
+                                            </button>
                                         </div>
+                                        {!isVideoAvailable && (
+                                            <div className="cv-video-disabled-overlay">
+                                                <FontAwesomeIcon icon={faEyeSlash} />
+                                                <span>Video no disponible</span>
+                                            </div>
+                                        )}
+                                        {video.duration && (
+                                            <div className="cv-video-duration">
+                                                {formatDuration(video.duration)}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                </div>
 
                                 {/* Meta información */}
-                                <div className="video-meta-info">
-                                    <div className="video-meta-row">
-                                        <div className="video-meta-item">
+                                <div className="cv-video-meta-info">
+                                    <div className="cv-video-meta-row">
+                                        <div className="cv-video-meta-item">
                                             <FontAwesomeIcon icon={faClock} />
                                             <span>
                                                 {video.estimated_delivery 
@@ -337,7 +344,7 @@ const ClientVideosSection = ({ user }) => {
                                                 }
                                             </span>
                                         </div>
-                                        <div className="video-meta-item">
+                                        <div className="cv-video-meta-item">
                                             <FontAwesomeIcon icon={faVideo} />
                                             <span>
                                                 {video.service_type || 'Video profesional'}
@@ -346,19 +353,19 @@ const ClientVideosSection = ({ user }) => {
                                     </div>
                                     
                                     {(video.file_size || video.resolution || video.download_count !== undefined) && (
-                                        <div className="video-meta-row">
+                                        <div className="cv-video-meta-row">
                                             {video.resolution && (
-                                                <span className="video-tech-info">
+                                                <span className="cv-video-tech-info">
                                                     Resolución: {video.resolution}
                                                 </span>
                                             )}
                                             {video.file_size && (
-                                                <span className="video-tech-info">
+                                                <span className="cv-video-tech-info">
                                                     Tamaño: {formatFileSize(video.file_size)}
                                                 </span>
                                             )}
                                             {video.download_count !== undefined && (
-                                                <span className="video-tech-info">
+                                                <span className="cv-video-tech-info">
                                                     <FontAwesomeIcon icon={faDownload} />
                                                     Descargas: {video.download_count}
                                                 </span>
@@ -368,22 +375,22 @@ const ClientVideosSection = ({ user }) => {
                                 </div>
 
                                 {/* Acciones */}
-                                <div className="video-actions">
+                                <div className="cv-video-actions">
                                     <button 
-                                        className="video-download-btn"
+                                        className={`cv-video-download-btn ${!isVideoAvailable ? 'cv-download-disabled' : ''}`}
                                         onClick={() => handleDownloadVideo(video)}
-                                        disabled={downloadingVideo === video.id || video.status !== 'completed'}
+                                        disabled={downloadingVideo === video.id || !isVideoAvailable}
                                     >
                                         {downloadingVideo === video.id ? (
                                             <FontAwesomeIcon icon={faSpinner} spin />
                                         ) : (
                                             <FontAwesomeIcon icon={faDownload} />
                                         )}
-                                        {video.status === 'completed' ? 'Descargar Video' : 'No disponible'}
+                                        {isVideoAvailable ? 'Descargar Video' : 'No disponible'}
                                     </button>
                                     
-                                    {video.status !== 'completed' && (
-                                        <div className="video-status-description">
+                                    {!isVideoAvailable && (
+                                        <div className="cv-video-status-description">
                                             <FontAwesomeIcon icon={statusInfo.icon} />
                                             {statusInfo.description}
                                         </div>
@@ -392,13 +399,13 @@ const ClientVideosSection = ({ user }) => {
 
                                 {/* Reproductor de video */}
                                 {playingVideo?.id === video.id && (
-                                    <div className="video-player-overlay">
-                                        <div className="video-player-container">
+                                    <div className="cv-video-player-overlay">
+                                        <div className="cv-video-player-container">
                                             <video 
                                                 controls
                                                 autoPlay
                                                 src={video.video_url}
-                                                className="video-player"
+                                                className="cv-video-player"
                                                 onTimeUpdate={(e) => 
                                                     handleVideoProgress(video.id, 
                                                         (e.target.currentTime / e.target.duration) * 100
@@ -408,7 +415,7 @@ const ClientVideosSection = ({ user }) => {
                                                 Tu navegador no soporta el elemento video.
                                             </video>
                                             <button 
-                                                className="video-close-btn"
+                                                className="cv-video-close-btn"
                                                 onClick={() => setPlayingVideo(null)}
                                             >
                                                 ×
@@ -420,7 +427,7 @@ const ClientVideosSection = ({ user }) => {
                         );
                     })
                 ) : (
-                    <div className="video-empty-state">
+                    <div className="cv-video-empty-state">
                         <FontAwesomeIcon icon={faVideo} size="3x" />
                         <h3>No hay videos disponibles</h3>
                         <p>Tu fotógrafo te notificará cuando tengas videos asignados</p>

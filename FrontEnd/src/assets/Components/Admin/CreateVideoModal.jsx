@@ -187,21 +187,6 @@ const CreateVideoModal = ({ isOpen, onClose, onVideoCreated, clients }) => {
                     </div>
 
                     <div className="form-row">
-                        <div className="form-group">
-                            <label>Tipo de Servicio</label>
-                            <select
-                                name="service_type"
-                                value={formData.service_type}
-                                onChange={handleInputChange}
-                            >
-                                <option value="">Seleccionar servicio</option>
-                                <option value="boda">Boda</option>
-                                <option value="evento">Evento</option>
-                                <option value="comercial">Comercial</option>
-                                <option value="personal">Personal</option>
-                                <option value="otros">Otros</option>
-                            </select>
-                        </div>
 
                         <div className="form-group">
                             <label>Fecha Estimada de Entrega</label>

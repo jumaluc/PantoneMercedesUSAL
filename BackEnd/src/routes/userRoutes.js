@@ -19,4 +19,5 @@ router.put('/updateImageComment', userController.updateImageComment)
 router.get('/getMyComments', userController.getMyComments);
 router.post("/createRequest",  userController.createRequest);
 router.get('/getMyRequests', userController.getMyRequests);
+router.get('/getMyVideos', userController.getMyVideos);
 module.exports = router;

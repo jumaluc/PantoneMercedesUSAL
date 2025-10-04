@@ -91,6 +91,43 @@ const StatsSection = () => {
         return icons[actionType] || faChartBar;
     };
 
+    const translateActionType = (actionType) => {
+        const translations = {
+            // Acciones generales
+            'CREATE': 'Creación',
+            'UPDATE': 'Actualización',
+            'DELETE': 'Eliminación',
+            'VIEW': 'Visualización',
+            'LOGIN': 'Inicio de Sesión',
+            
+            // Acciones de clientes
+            'CLIENT_CREATE': 'Creación de Cliente',
+            'CLIENT_UPDATE': 'Actualización de Cliente',
+            'CLIENT_DELETE': 'Eliminación de Cliente',
+            'CLIENT_VIEW': 'Visualización de Cliente',
+            
+            // Acciones de galerías
+            'GALLERY_CREATE': 'Creación de Galería',
+            'GALLERY_UPDATE': 'Actualización de Galería',
+            'GALLERY_DELETE': 'Eliminación de Galería',
+            'GALLERY_VIEW': 'Visualización de Galería'
+        };
+        
+        return translations[actionType] || actionType;
+    };
+
+    const translateResourceType = (resourceType) => {
+        const translations = {
+            'CLIENT': 'Cliente',
+            'GALLERY': 'Galería',
+            'USER': 'Usuario',
+            'ADMIN': 'Administrador',
+            'SYSTEM': 'Sistema'
+        };
+        
+        return translations[resourceType] || resourceType;
+    };
+
     const formatNumber = (num) => {
         if (num === null || num === undefined) return '0';
         return num.toLocaleString('es-ES');
@@ -222,7 +259,9 @@ const StatsSection = () => {
                                             <FontAwesomeIcon icon={getActionIcon(action.action_type)} />
                                         </div>
                                         <div className="activity-details">
-                                            <span className="activity-type">{action.action_type}</span>
+                                            <span className="activity-type">
+                                                {translateActionType(action.action_type)}
+                                            </span>
                                             <span className="activity-count">{formatNumber(action.count)} acciones</span>
                                         </div>
                                         <div 
@@ -260,10 +299,12 @@ const StatsSection = () => {
                                                 {formatDate(activity.created_at)}
                                             </span>
                                         </div>
-                                        <p className="activity-description">{activity.action_description}</p>
+                                        <p className="activity-description">
+                                            {translateActionType(activity.action_type)} - {activity.action_description}
+                                        </p>
                                         {activity.resource_type && (
                                             <span className="activity-resource">
-                                                {activity.resource_type}: {activity.resource_name || 'N/A'}
+                                                {translateResourceType(activity.resource_type)}: {activity.resource_name || 'N/A'}
                                             </span>
                                         )}
                                     </div>

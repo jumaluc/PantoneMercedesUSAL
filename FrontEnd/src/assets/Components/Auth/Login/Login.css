@@ -11,7 +11,7 @@ body {
 }
 
 /* Container Styles */
-.login-container {
+.lg-login-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
   display: flex;
@@ -21,7 +21,7 @@ body {
   padding: 20px;
 }
 
-.background-pattern {
+.lg-background-pattern {
   position: absolute;
   inset: 0;
   opacity: 0.05;
@@ -31,7 +31,7 @@ body {
   background-size: 100px 100px;
 }
 
-.main-container {
+.lg-main-container {
   position: relative;
   z-index: 10;
   width: 100%;
@@ -44,46 +44,46 @@ body {
 }
 
 /* Branding Section */
-.branding-section {
+.lg-branding-section {
   flex: 1;
   padding-right: 40px;
 }
 
-.branding-content {
+.lg-branding-content {
   text-align: center;
 }
 
-.camera-icon {
+.lg-camera-icon {
   margin-bottom: 32px;
-  animation: float 3s ease-in-out infinite;
+  animation: lg-float 3s ease-in-out infinite;
 }
 
-.camera-svg {
+.lg-camera-svg {
   width: 96px;
   height: 96px;
   margin: 0 auto;
   color: #FF8C00;
 }
 
-.brand-title {
+.lg-brand-title {
   font-size: 3rem;
   font-weight: 700;
   color: white;
   margin-bottom: 16px;
 }
 
-.brand-accent {
+.lg-brand-accent {
   color: #FF8C00;
 }
 
-.brand-description {
+.lg-brand-description {
   font-size: 1.25rem;
   color: #d1d5db;
   margin-bottom: 32px;
   line-height: 1.6;
 }
 
-.features-list {
+.lg-features-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -92,34 +92,34 @@ body {
   text-align: left;
 }
 
-.feature-item {
+.lg-feature-item {
   display: flex;
   align-items: center;
   color: #d1d5db;
 }
 
-.feature-dot {
+.lg-feature-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   margin-right: 16px;
 }
 
-.orange-dot {
+.lg-orange-dot {
   background-color: #FF8C00;
 }
 
-.yellow-dot {
+.lg-yellow-dot {
   background-color: #FFB347;
 }
 
 /* Form Section */
-.form-section {
+.lg-form-section {
   flex: 1;
   max-width: 400px;
 }
 
-.form-container {
+.lg-form-container {
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(10px);
   border: 1px solid #374151;
@@ -128,7 +128,7 @@ body {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-.tab-buttons {
+.lg-tab-buttons {
   display: flex;
   background: #111827;
   border-radius: 8px;
@@ -136,7 +136,7 @@ body {
   margin-bottom: 32px;
 }
 
-.tab-button {
+.lg-tab-button {
   flex: 1;
   padding: 12px 16px;
   font-size: 0.875rem;
@@ -147,29 +147,29 @@ body {
   transition: all 0.3s ease;
 }
 
-.tab-active {
+.lg-tab-active {
   color: white;
   background-color: #FF8C00;
 }
 
-.tab-inactive {
+.lg-tab-inactive {
   color: #9ca3af;
   background: transparent;
 }
 
-.tab-inactive:hover {
+.lg-tab-inactive:hover {
   color: white;
 }
 
-.form-content {
+.lg-form-content {
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.form-hidden {
+.lg-form-hidden {
   display: none;
 }
 
-.form-title {
+.lg-form-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: white;
@@ -177,38 +177,39 @@ body {
   text-align: center;
 }
 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.form-column {
+.lg-form {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.form-row {
+.lg-form-column {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lg-form-row {
   display: flex;
 }
 
-.form-group {
+.lg-form-group {
   display: flex;
   flex-direction: column;
 }
 
-.form-group.half {
+.lg-form-group.half {
   flex: 1;
 }
 
-.form-label {
+.lg-form-label {
   font-size: 0.875rem;
   font-weight: 500;
   color: #d1d5db;
   margin-bottom: 8px;
 }
 
-.form-input {
+.lg-form-input {
   padding: 12px 16px;
   background: #111827;
   border: 1px solid #374151;
@@ -218,30 +219,30 @@ body {
   transition: all 0.3s ease;
 }
 
-.form-input::placeholder {
+.lg-form-input::placeholder {
   color: #6b7280;
 }
 
-.form-input:focus {
+.lg-form-input:focus {
   outline: none;
   border-color: #FF8C00;
   box-shadow: 0 0 0 1px #FF8C00;
 }
 
-.form-options {
+.lg-form-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.checkbox-label {
+.lg-checkbox-label {
   display: flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
 }
 
-.form-checkbox {
+.lg-form-checkbox {
   width: 16px;
   height: 16px;
   background-color: #111827;
@@ -253,11 +254,13 @@ body {
   position: relative;
   transition: all 0.3s ease;
 }
-.form-checkbox:checked {
+
+.lg-form-checkbox:checked {
   background-color: #FF8C00;
   border-color: #FF8C00;
 }
-.form-checkbox:checked::before {
+
+.lg-form-checkbox:checked::before {
   content: '';
   position: absolute;
   top: 1px;
@@ -268,45 +271,48 @@ body {
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
-.form-checkbox:hover{
 
+.lg-form-checkbox:hover {
   opacity: 0.7;
 }
-.checkbox-text {
+
+.lg-checkbox-text {
   font-size: 0.875rem;
   color: #d1d5db;
 }
 
-.forgot-link {
+.lg-forgot-link {
   font-size: 0.875rem;
   color: #FF8C00;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
-.forgot-link:hover {
+.lg-forgot-link:hover {
   color: #FFB347;
 }
 
-.form-checkbox-group {
+.lg-form-checkbox-group {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.terms-link {
+.lg-terms-link {
   color: #FF8C00;
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
-.terms-link:hover {
+.lg-terms-link:hover {
   color: #FFB347;
 }
-#submit-button-login{
+
+#lg-submit-button-login {
   margin-top: 10px;
 }
-.submit-button {
+
+.lg-submit-button {
   padding: 12px 16px;
   background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
   color: black;
@@ -318,13 +324,13 @@ body {
   transform: scale(1);
 }
 
-.submit-button:hover {
+.lg-submit-button:hover {
   background: linear-gradient(135deg, #FFB347 0%, #FF8C00 100%);
   transform: scale(1.05);
 }
 
 /* Modal Styles */
-.modal-overlay {
+.lg-modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.8);
@@ -336,7 +342,7 @@ body {
   padding: 20px;
 }
 
-.modal-content {
+.lg-modal-content {
   background: #111827;
   border: 1px solid #374151;
   border-radius: 20px;
@@ -346,7 +352,7 @@ body {
   text-align: center;
 }
 
-.modal-icon {
+.lg-modal-icon {
   width: 64px;
   height: 64px;
   background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
@@ -357,25 +363,25 @@ body {
   margin: 0 auto 16px;
 }
 
-.modal-check {
+.lg-modal-check {
   width: 32px;
   height: 32px;
   color: black;
 }
 
-.modal-title {
+.lg-modal-title {
   font-size: 1.25rem;
   font-weight: 700;
   color: white;
   margin-bottom: 8px;
 }
 
-.modal-message {
+.lg-modal-message {
   color: #d1d5db;
   margin-bottom: 24px;
 }
 
-.modal-button {
+.lg-modal-button {
   padding: 8px 24px;
   background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
   color: black;
@@ -386,12 +392,12 @@ body {
   transition: all 0.3s ease;
 }
 
-.modal-button:hover {
+.lg-modal-button:hover {
   background: linear-gradient(135deg, #FFB347 0%, #FF8C00 100%);
 }
 
 /* Animations */
-@keyframes float {
+@keyframes lg-float {
   0%, 100% { 
     transform: translateY(0px); 
   }
@@ -402,59 +408,59 @@ body {
 
 /* Responsive Design */
 @media (max-width: 968px) {
-  .main-container {
+  .lg-main-container {
     flex-direction: column;
     gap: 60px;
   }
   
-  .branding-section {
+  .lg-branding-section {
     padding-right: 0;
     text-align: center;
   }
   
-  .features-list {
+  .lg-features-list {
     text-align: center;
   }
   
-  .feature-item {
+  .lg-feature-item {
     justify-content: center;
   }
 }
 
 @media (max-width: 480px) {
-  .form-container {
+  .lg-form-container {
     padding: 24px;
   }
   
-  .form-row {
+  .lg-form-row {
     flex-direction: column;
     gap: 16px;
   }
   
-  .form-group.half {
+  .lg-form-group.half {
     width: 100%;
   }
   
-  .brand-title {
+  .lg-brand-title {
     font-size: 2.5rem;
   }
   
-  .brand-description {
+  .lg-brand-description {
     font-size: 1.125rem;
   }
 }
 
 /* Estilos para errores */
-.input-error {
+.lg-input-error {
   border-color: #ef4444 !important;
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
 }
 
-.checkbox-error {
+.lg-checkbox-error {
   border-color: #ef4444 !important;
 }
 
-.error-message {
+.lg-error-message {
   color: #ef4444;
   font-size: 0.75rem;
   margin-top: 4px;
@@ -462,34 +468,37 @@ body {
 }
 
 /* Mejora el espaciado para los mensajes de error */
-.form-group {
+.lg-form-group {
   margin-bottom: 16px;
 }
 
-.form-checkbox-group {
+.lg-form-checkbox-group {
   position: relative;
   margin-bottom: 20px;
 }
 
 /* Ajustes para el modal de error */
-.modal-error {
+.lg-modal-error {
   background: #111827;
   border: 1px solid #ef4444;
 }
-.modal-success{
+
+.lg-modal-success {
   background: #111827;
   border: 1px solid #75cc03;
 }
-.modal-success-icon{
-    background: linear-gradient(135deg, #1de402 0%, #7ae202 100%);
-    border-radius: 50%;
 
+.lg-modal-success-icon {
+  background: linear-gradient(135deg, #1de402 0%, #7ae202 100%);
+  border-radius: 50%;
 }
-.modal-icon {
+
+.lg-modal-icon {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
+
 /* Estilos para el modal de recuperación */
-.modal-close-btn {
+.lg-modal-close-btn {
   position: absolute;
   top: 15px;
   right: 15px;
@@ -507,12 +516,12 @@ body {
   transition: background-color 0.3s ease;
 }
 
-.modal-close-btn:hover {
+.lg-modal-close-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Mensajes de éxito/error */
-.modal-message.success {
+.lg-modal-message.success {
   color: #4ade80;
   background-color: rgba(74, 222, 128, 0.1);
   padding: 10px;
@@ -521,7 +530,7 @@ body {
   margin: 10px 0;
 }
 
-.modal-message.error {
+.lg-modal-message.error {
   color: #ef4444;
   background-color: rgba(239, 68, 68, 0.1);
   padding: 10px;
@@ -531,48 +540,50 @@ body {
 }
 
 /* Botón deshabilitado */
-.submit-button:disabled {
+.lg-submit-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: scale(1);
 }
 
-.submit-button:disabled:hover {
+.lg-submit-button:disabled:hover {
   background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
   transform: scale(1);
 }
 
 /* Icono personalizado para recuperación */
-.modal-icon .modal-check {
+.lg-modal-icon .lg-modal-check {
   width: 32px;
   height: 32px;
 }
+
 /* Estilos específicos para el formulario de recuperación */
-.modal-content .form {
+.lg-modal-content .lg-form {
   margin: 20px 0;
 }
 
-.modal-content .form-group {
+.lg-modal-content .lg-form-group {
   margin-bottom: 20px;
 }
 
-.modal-content .form-input {
+.lg-modal-content .lg-form-input {
   width: 100%;
   margin-bottom: 0;
 }
+
 /* Estilos para el timer */
-.timer {
+.lg-timer {
   font-size: 14px;
   color: #FF8C00;
   margin: 10px 0;
 }
 
-.timer.expired {
+.lg-timer.expired {
   color: #ef4444;
 }
 
 /* Estilos para el input de código */
-.code-input {
+.lg-code-input {
   text-align: center;
   font-size: 18px;
   letter-spacing: 8px;
@@ -580,7 +591,7 @@ body {
 }
 
 /* Botón para reenviar código */
-.resend-button {
+.lg-resend-button {
   background: none;
   border: none;
   color: #FF8C00;
@@ -589,23 +600,24 @@ body {
   margin-top: 10px;
 }
 
-.resend-button:disabled {
+.lg-resend-button:disabled {
   color: #6b7280;
   cursor: not-allowed;
 }
 
 /* Estados de éxito */
-.modal-icon.success {
+.lg-modal-icon.success {
   background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
 }
-.code-input {
+
+.lg-code-input {
   text-align: center;
   font-size: 18px;
   letter-spacing: 8px;
   font-weight: bold;
 }
 
-.resend-button {
+.lg-resend-button {
   background: none;
   border: none;
   color: #FF8C00;
@@ -614,51 +626,17 @@ body {
   padding: 8px;
 }
 
-.resend-button:disabled {
+.lg-resend-button:disabled {
   color: #6b7280;
   cursor: not-allowed;
 }
 
-.resend-button:hover:not(:disabled) {
+.lg-resend-button:hover:not(:disabled) {
   color: #FFB347;
 }
-.password-strength {
+
+.lg-password-strength {
   margin-top: 5px;
   font-size: 12px;
   color: #666;
-}
-
-.password-match {
-  color: #4ade80;
-}
-
-.password-mismatch {
-  color: #ef4444;
-}
-
-.form-input[type="password"] {
-  letter-spacing: 1px;
-}
-.password-input-container {
-  position: relative;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #666;
-  padding: 4px;
-}
-
-.password-toggle:hover {
-  color: #333;
-}
-
-.form-input {
-  padding-right: 45px; /* Espacio para el botón */
 }

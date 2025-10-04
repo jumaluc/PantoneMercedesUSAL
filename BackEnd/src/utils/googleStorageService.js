@@ -1,12 +1,12 @@
 const { Storage } = require('@google-cloud/storage');
 const path = require('path');
 const fs = require('fs').promises;
-const { v4: uuidv4 } = require('uuid'); // ✅ Agregar esta importación
+const { v4: uuidv4 } = require('uuid'); 
 
 // Configuración
-const KEY_FILENAME = "C:\\Users\\HP\\OneDrive\\Escritorio\\PantoneMercedesUSAL\\BackEnd\\src\\config\\google-credentials.json";
+const KEY_FILENAME = "C:\\Users\\grete\\Desktop\\PantoneMercedes\\BackEnd\\src\\config\\google-credentials.json";
 const PROJECT_ID = 'Pantone-web';
-const BUCKET_NAME = 'pantone-almacen-imagenes'; // ✅ Usar constante consistente
+const BUCKET_NAME = 'pantone-almacen-imagenes'; 
 
 async function checkCredentials() {
   try {
@@ -28,22 +28,18 @@ const storage = new Storage({
 
 const bucket = storage.bucket(BUCKET_NAME);
 
-// ✅ FUNCIÓN PARA VIDEOS - Simplificada y corregida
 const uploadVideoToGCS = async (file, folder = 'videos', clientId = null) => {
   try {
-    // Verificar credenciales primero
     const hasCredentials = await checkCredentials();
     if (!hasCredentials) {
       throw new Error('Credenciales de Google Cloud no configuradas');
     }
 
-    // Generar nombre único para el archivo
     const fileExtension = path.extname(file.originalname);
     const fileName = clientId 
       ? `${folder}/client-${clientId}/${uuidv4()}${fileExtension}`
       : `${folder}/${uuidv4()}${fileExtension}`;
     
-    // Subir usando el método save (más simple que streams)
     const blob = bucket.file(fileName);
     
     await blob.save(file.buffer, {
@@ -60,7 +56,6 @@ const uploadVideoToGCS = async (file, folder = 'videos', clientId = null) => {
 
     console.log(`✓ Video subido: ${fileName}`);
     
-    // Obtener URL pública (NO usar makePublic si el bucket ya es público)
     const publicUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${fileName}`;
     
     return {
@@ -78,7 +73,6 @@ const uploadVideoToGCS = async (file, folder = 'videos', clientId = null) => {
   }
 };
 
-// ✅ FUNCIÓN PARA THUMBNAILS
 const uploadThumbnailToGCS = async (file, folder = 'thumbnails', clientId = null) => {
   try {
     const hasCredentials = await checkCredentials();
@@ -123,7 +117,6 @@ const uploadThumbnailToGCS = async (file, folder = 'thumbnails', clientId = null
   }
 };
 
-// ✅ FUNCIÓN PARA ELIMINAR ARCHIVOS
 const deleteFileFromGCS = async (fileName) => {
   try {
     await bucket.file(fileName).delete();
@@ -135,7 +128,6 @@ const deleteFileFromGCS = async (fileName) => {
   }
 };
 
-// ✅ Función original para imágenes (mantener si la necesitas)
 async function uploadFile(fileBuffer, fileName, folderName, mimetype) {
   try {
     const hasCredentials = await checkCredentials();
@@ -174,7 +166,6 @@ async function uploadFile(fileBuffer, fileName, folderName, mimetype) {
   }
 }
 
-// ✅ Mantener las otras funciones existentes
 async function getFileUrls(clientId, clientName) {
   try {
     const safeClientName = clientName.replace(/[^a-zA-Z0-9]/g, '-');
@@ -266,9 +257,9 @@ module.exports = {
   getFileUrls,
   downloadFile,
   getFileInfo,
-  deleteFile: deleteFileFromGCS, // ✅ Usar la función corregida
+  deleteFile: deleteFileFromGCS, 
   checkCredentials,
   getContentType,
-  uploadVideoToGCS, // ✅ Exportar la función corregida
-  uploadThumbnailToGCS // ✅ Exportar función de thumbnails
+  uploadVideoToGCS, 
+  uploadThumbnailToGCS 
 };
