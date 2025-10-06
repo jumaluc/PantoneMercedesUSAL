@@ -45,7 +45,7 @@ class User {
         return result[0];
     }
     static async getAllClients(){
-        const [result] = await pool.execute('SELECT id, first_name, last_name, email, number, service, has_gallery, videos_count, created_at FROM users WHERE role = "client"');
+        const [result] = await pool.execute('SELECT id, first_name, last_name, email, number, service, created_at FROM users WHERE role = "client"');
         return result;
     }
     static async deleteClient(id){

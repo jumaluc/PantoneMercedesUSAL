@@ -53,9 +53,9 @@ router.post('/createVideo',
   adminController.createVideo // Controller que sube a GCS
 );
     
-// Otras rutas de videos
 router.get('/getAllVideos', adminController.getAllVideos);
 router.put('/updateVideoStatus/:videoId', adminController.updateVideoStatus);
 router.put('/updateVideoProgress/:videoId', adminController.updateVideoProgress);
 router.delete('/deleteVideo/:videoId', adminController.deleteVideo);
+router.get('/getStats', adminController.getStats);
 module.exports = router;

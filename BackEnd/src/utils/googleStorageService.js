@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 const { v4: uuidv4 } = require('uuid'); 
 
 // Configuración
-const KEY_FILENAME = "C:\\Users\\grete\\Desktop\\PantoneMercedes\\BackEnd\\src\\config\\google-credentials.json";
+const KEY_FILENAME = "C:\\Users\\HP\\OneDrive\\Escritorio\\PantoneMercedesUSAL\\BackEnd\\src\\config\\google-credentials.json";
 const PROJECT_ID = 'Pantone-web';
 const BUCKET_NAME = 'pantone-almacen-imagenes'; 
 

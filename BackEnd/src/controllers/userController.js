@@ -7,6 +7,7 @@ const Comments = require('../moduls/Comments')
 const General_requests = require('../moduls/General_requests');
 const { getAllVideosById } = require('../moduls/Client_videos');
 const Video = require('../moduls/Video');
+const Stats = require('../moduls/Stats');
 const userController = {
 
     editProfile: async (req, res) => {
@@ -16,8 +17,10 @@ const userController = {
             
             const { id, first_name, last_name, email, number, service } = req.body;
             const result = await User.editProfile(id, first_name, last_name, email, number, service);
-
+            const stats = await Stats.addStat(req.session.user.id, 'client', 'edit', 'edicion del perfil', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
             if (result === 1) {
+
                 return res.status(200).json({
                     message: "Perfil actualizado correctamente",
                     data: {
@@ -138,6 +141,8 @@ downloadSingleImage: async (req, res) => {
     });
 
     readStream.pipe(res);
+    const stats = await Stats.addStat(req.session.user.id, 'client', 'download', 'descargó 1 foto', 'complete');
+    if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
   } catch (error) {
     console.error("Error en downloadSingleImage:", error);
     if (!res.headersSent) {
@@ -183,6 +188,7 @@ imageUrls.forEach((imageUrl, index) => {
     const file = bucket.file(fileName);
     const safeName = `imagen_${index + 1}.${fileName.split('.').pop() || 'jpg'}`;
     archive.append(file.createReadStream(), { name: safeName });
+    
   } catch (err) {
     console.error(`Error procesando ${imageUrl}:`, err);
   }
@@ -190,7 +196,9 @@ imageUrls.forEach((imageUrl, index) => {
 
     // Ahora sí cerrar el ZIP
     archive.finalize();
-
+    
+            const stats = await Stats.addStat(req.session.user.id, 'client', 'download', 'descargó '+imageUrls.length + ' fotos', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
   } catch (error) {
     console.error('Error en downloadImages:', error);
     if (!res.headersSent) {
@@ -213,7 +221,8 @@ confirmSelection: async (req, res) => {
         // Aquí va la lógica para actualizar la base de datos
         // Por ejemplo:
         const result = await Gallery_images.updateSelectionStatus(imageIds, true);
-        
+                    const stats = await Stats.addStat(req.session.user.id, 'client', 'confirm selection', 'confirmó selección de '+imageIds.length + ' fotos', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
         if (result) {
             res.status(200).json({ 
                 message: `Se confirmaron ${imageIds.length} imágenes correctamente`,
@@ -241,11 +250,13 @@ addComment : async (req,res) => {
     const commentId = await Comments.addComment(userId, gallery_id, comment, image_id);
 
     if(!commentId) return res.status(500).json({message : "Error en el servidor"});
-
+            const stats = await Stats.addStat(req.session.user.id, 'client', 'comment', 'comentó una foto', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
     return res.status(200).json({
       message: "Comentario agregado correctamente", 
       commentId: commentId // Cambia esto para que coincida con el frontend
     });
+
   }
   catch(err) {
     console.log(err);
@@ -283,7 +294,8 @@ deleteImageComment: async (req, res) => {
     const result = await Comments.deleteImageComment(commentId);
 
     if (!result || result === 0) return res.status(500).json({ message: "Error en el servidor o comentario no encontrado" });
-    
+                const stats = await Stats.addStat(req.session.user.id, 'client', 'comment', 'eliminó un comentario', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
     return res.status(200).json({ message: "Comentario eliminado correctamente" }); // Cambiado a status 200 y json()
 
   } catch (err) {
@@ -306,7 +318,8 @@ updateImageComment: async (req, res) => {
     const result = await Comments.updateImageComment(comment_id, comment);
     console.log(result)
     if (!result || result === 0) return res.status(500).json({ message: "Error en el servidor o comentario no encontrado" });
-    
+                const stats = await Stats.addStat(req.session.user.id, 'client', 'comment', 'editó un comentario', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
     return res.status(200).json({ 
       message: "Comentario actualizado correctamente",
       affectedRows: result 
@@ -345,7 +358,8 @@ createRequest: async (req, res) =>{
     const idUser = req.session.user.id;
     const response = await General_requests.createRequest(idUser, type, subject, message, priority);
     if(!response || response < 0)return req.status(500).json({message : "Error en el servidor"});
-
+            const stats = await Stats.addStat(req.session.user.id, 'client', 'request', 'escrició una solicitud', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
     return res.status(200).json({message : "Solicitud creada correctamente"});
 
   }

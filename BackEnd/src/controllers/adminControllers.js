@@ -8,7 +8,7 @@ const Gallery_images = require('../moduls/Gallery_images');
 const path = require('path');
 const AdminLog = require('../moduls/AdminLog');
 const Video = require('../moduls/Video')
-
+const Stats = require('../moduls/Stats')
 const adminController = {
 
     getAllClients: async (req, res) => {
@@ -34,7 +34,8 @@ const adminController = {
             const result = await User.registerUser(first_name, last_name, email, number, service, hashPassword);
             
             if (result === 0) return res.status(500).json({ message: "Error en el servidor" });
-            
+            const stats = await Stats.addStat(req.session.user.id, 'admin', 'create', 'creó un nuevo cliente', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
             res.status(200).json({ 
                 message: 'Cliente creado correctamente',
                 data: { id: result.insertId }
@@ -52,7 +53,8 @@ const adminController = {
             
             const { id, first_name, last_name, email, number, service } = req.body;
             const result = await User.editProfile(id, first_name, last_name, email, number, service);
-            
+                        const stats = await Stats.addStat(req.session.user.id, 'admin', 'update', 'actualizó un cliente', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
             if (result === 1) {
                 res.status(200).json({ 
                     message: "Perfil actualizado correctamente", 
@@ -90,7 +92,8 @@ const adminController = {
 
             const result = await User.deleteClient(clientId);
             if (result === 0) return res.status(500).json({ message: "Error en el servidor" });
-            
+                        const stats = await Stats.addStat(req.session.user.id, 'admin', 'delete', 'eliminó un cliente', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
             res.status(200).json({ 
                 message: 'Cliente eliminado correctamente',
                 data: { deleted_client: clientName }
@@ -201,7 +204,8 @@ const adminController = {
                     console.error('Error insertando imagen:', img.storage_name);
                 }
             }
-
+            const stats = await Stats.addStat(req.session.user.id, 'admin', 'create', 'creó una nueva galería', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
             res.status(201).json({
                 message: 'Galería creada exitosamente',
                 data: {
@@ -275,7 +279,8 @@ const adminController = {
             if (!resultDeleteGallery || resultDeleteGallery === 0) {
                 return res.status(500).json({ message: 'Error al eliminar la galería' });
             }
-
+            const stats = await Stats.addStat(req.session.user.id, 'admin', 'delete', 'eliminó una galería', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
             res.status(200).json({ 
                 message: 'Galería eliminada correctamente',
                 data: { deleted_gallery: galleryName, deleted_files: allFilePath.length }
@@ -641,7 +646,8 @@ createVideo: async (req, res) => {
       console.log("VIDEO DATA EN EL CONTROLLER : ", videoData)
 
       const newVideo = await Video.create(videoData);
-
+            const stats = await Stats.addStat(req.session.user.id, 'admin', 'create', 'creó un nuevo video', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
       res.status(201).json({
         success: true,
         message: 'Video creado y subido correctamente',
@@ -699,7 +705,8 @@ createVideo: async (req, res) => {
       const { status } = req.body;
 
       const result = await Video.updateStatus(videoId, status);
-      
+                  const stats = await Stats.addStat(req.session.user.id, 'admin', 'update', 'actualizó status de video', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
       if (result) {
         res.json({
           success: true,
@@ -732,7 +739,8 @@ createVideo: async (req, res) => {
       const { progress } = req.body;
 
       const result = await Video.updateProgress(videoId, parseInt(progress));
-      
+                  const stats = await Stats.addStat(req.session.user.id, 'admin', 'update', 'actualizó progreso de video', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
       if (result > 0) {
         res.json({
           success: true,
@@ -775,7 +783,8 @@ createVideo: async (req, res) => {
       }
 
       const result = await Video.deleteVideo(videoId);
-      
+                  const stats = await Stats.addStat(req.session.user.id, 'admin', 'delete', 'eliminó un video', 'complete');
+            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
       if (result) {
         res.json({
           success: true,
@@ -795,7 +804,32 @@ createVideo: async (req, res) => {
         message: 'Error al eliminar el video'
       });
     }
-  }
+  },
+
+getStats: async(req,res) =>{
+    try{
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') {
+            return res.status(401).json({ success: false, message: 'Acceso no autorizado' });
+        }
+
+        const stats = await Stats.getAllStats();
+        console.log("STATS: ", stats);
+        
+        if(!stats) {
+            return res.status(500).json({ success: false, message: "Error en el servidor" });
+        }
+        
+        return res.status(200).json({ 
+            success: true, 
+            data: stats  // CORREGIDO: Cambiado de 'stats' a 'data'
+        });
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({ success: false, message: "Error interno del servidor" });
+    }
+}
 
 
 
