@@ -11,6 +11,8 @@ const recoverPasswRoutes = require('./src/routes/recoverPasswRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const publicRoutes = require('./src/routes/publicRoutes');
+const adminPublicRoutes = require('./src/routes/adminPublicRoutes');
 
 //MIDDLEWARE
 app.use(helmet());
@@ -36,6 +38,11 @@ app.use((req, res, next)=>{
 });
 
 
+// Rutas públicas
+app.use('/api/public', publicRoutes);
+
+// Rutas administrativas para contenido público
+app.use('/api/admin/public-content', adminPublicRoutes);
 app.use('/user',userRoutes);
 app.use('/auth',authRoutes);
 app.use('/recover',recoverPasswRoutes);

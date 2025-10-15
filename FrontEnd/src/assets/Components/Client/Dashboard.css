@@ -152,11 +152,12 @@
 
 .navbar-menu {
   display: flex;
-  gap: 15px;
+  gap: 5px;
+  margin-right: 80px;
 }
 
 .nav-btn-client {
-  padding: 12px 25px;
+  padding: 12px 19px;
   border: 2px solid transparent;
   background: none;
   color: var(--white);

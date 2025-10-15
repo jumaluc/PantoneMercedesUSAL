@@ -8,6 +8,7 @@ import {
     faUser, 
     faComment, 
     faEnvelope,
+    faHome,
     faVideo 
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -44,6 +45,13 @@ const Navbar = ({ user, activeSection, setActiveSection }) => {
       </div>
               
       <div className="navbar-menu">
+          <button 
+          className={`nav-btn-client ${activeSection === 'home' ? 'active' : ''}`}
+          onClick={() => setActiveSection('home')}
+        >
+          <FontAwesomeIcon icon={faHome} />
+          Home
+        </button>
         <button 
           className={`nav-btn-client ${activeSection === 'gallery' ? 'active' : ''}`}
           onClick={() => setActiveSection('gallery')}

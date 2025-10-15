@@ -5,7 +5,7 @@ import ClientCommentsAndRequests from './ClientCommentsAndRequests';
 import ClientVideosSection from './ClientVideosSection'; // Nueva importación
 import './Dashboard.css';
 import React, { useState, useEffect } from 'react';
-
+import PublicContent from '../PublicWebsite/PublicLayout'
 const Dashboard = () => {
   const [activeSection, setActiveSection] = useState('gallery');
   const [user, setUser] = useState(null);
@@ -51,6 +51,8 @@ const Dashboard = () => {
 
   const renderSection = () => {
     switch (activeSection) {
+      case 'home':
+        return <PublicContent/>
       case 'profile':
         return <ClientProfile user={user} />;
       case 'comments':

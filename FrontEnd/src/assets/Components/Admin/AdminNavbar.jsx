@@ -18,6 +18,7 @@ const AdminNavbar = ({ activeSection, setActiveSection, adminData }) => {
     { id: 'galleries', label: 'Galerías', icon: faImages },
     { id: 'videos', label: 'Videos', icon: faVideo },
     { id: 'audit', label: 'Historial', icon: faHistory },
+    { id: 'publicContent', label: 'Public', icon: faUserGear },
     { id: 'profile', label: 'Perfil', icon: faUserGear }
   ];
 

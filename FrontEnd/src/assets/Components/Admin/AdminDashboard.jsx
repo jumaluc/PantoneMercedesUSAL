@@ -4,6 +4,7 @@ import ClientsSection from './ClientsSection';
 import GalleriesSection from './Galery/GalleriesSection';
 import VideosSection from './VideosSection'; // Nueva importación
 import StatsSection from './StatsSection';
+import PublicContent from './PublicContentManagement';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import './AdminDashboard.css';
@@ -57,6 +58,7 @@ const AdminDashboard = () => {
       case 'galleries': return <GalleriesSection />;
       case 'videos': return <VideosSection />; //
       case 'audit': return <AuditSection />;
+      case 'publicContent': return <PublicContent/> 
       case 'profile': return <ProfileSection adminData={adminData} />;
       default: return <StatsSection />;
     }
