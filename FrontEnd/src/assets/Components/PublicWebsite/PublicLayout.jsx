@@ -1,36 +1,100 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar, faArrowRight, faCamera, faUsers, faTrophy } from '@fortawesome/free-solid-svg-icons';
+import { 
+    faStar, 
+    faArrowRight, 
+    faCamera, 
+    faUsers, 
+    faTrophy,
+    faEnvelope,
+    faPhone,
+    faUser,
+    faSignInAlt
+} from '@fortawesome/free-solid-svg-icons';
+import { faInstagram, faFacebook } from '@fortawesome/free-brands-svg-icons';
 import './PublicHome.css';
 
 const PublicHome = () => {
     const [companyInfo, setCompanyInfo] = useState(null);
-    const [featuredProjects, setFeaturedProjects] = useState([]);
     const [featuredTestimonials, setFeaturedTestimonials] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [userLoggedIn, setUserLoggedIn] = useState(false);
+    const navigate = useNavigate();
+    
+    // Referencia para la sección de especialidades
+    const specialtiesSectionRef = useRef(null);
+
+    // Imágenes preestablecidas para las categorías
+    const categoryImages = {
+        'Casamientos': '/casamiento-hero.jpeg',
+        'XV Años': '/xv.jpg',
+        'Bautizos': '/bautismo.jpg'
+    };
+
+    const categories = [
+        {
+            id: 'Casamientos',
+            name: 'Casamientos',
+            description: 'Capturamos el amor y la magia de tu día especial',
+            image: categoryImages['Casamientos'],
+            route: '/public/gallery/casamientos'
+        },
+        {
+            id: 'XV Años',
+            name: 'XV Años',
+            description: 'La celebración más importante de tus quince años',
+            image: categoryImages['XV Años'],
+            route: '/public/gallery/xv-anos'
+        },
+        {
+            id: 'Bautizos',
+            name: 'Bautizos',
+            description: 'Memorias eternas del primer sacramento',
+            image: categoryImages['Bautizos'],
+            route: '/public/gallery/bautizos'
+        }
+    ];
 
     useEffect(() => {
+        checkUserSession();
         fetchPublicData();
     }, []);
+
+    const checkUserSession = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/check-session', {
+                credentials: 'include' // Importante para enviar cookies
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.authenticated) {
+                    setUserLoggedIn(true);
+                    // Si el usuario está logueado, redirigir a su dashboard según el rol
+                    if (data.user.role === 'client') {
+                        navigate('/clientDashboard');
+                    } else if (data.user.role === 'admin') {
+                        navigate('/adminDashboard');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error checking session:', error);
+        }
+    };
 
     const fetchPublicData = async () => {
         try {
             setLoading(true);
-            const [companyRes, projectsRes, testimonialsRes] = await Promise.all([
+            const [companyRes, testimonialsRes] = await Promise.all([
                 fetch('http://localhost:3000/api/public/company-info'),
-                fetch('http://localhost:3000/api/public/projects?featured=true'),
                 fetch('http://localhost:3000/api/public/testimonials?featured=true')
             ]);
-            console.log(companyInfo, projectsRes, testimonialsRes)
+
             if (companyRes.ok) {
                 const companyData = await companyRes.json();
                 setCompanyInfo(companyData.data);
-            }
-
-            if (projectsRes.ok) {
-                const projectsData = await projectsRes.json();
-                setFeaturedProjects(projectsData.data || []);
             }
 
             if (testimonialsRes.ok) {
@@ -44,6 +108,25 @@ const PublicHome = () => {
         }
     };
 
+    const handleLoginClick = () => {
+        // Verificar sesión antes de redirigir al login
+        checkUserSession().then(() => {
+            // Si después de verificar no está logueado, redirigir al login
+            if (!userLoggedIn) {
+                navigate('/login');
+            }
+        });
+    };
+
+    const scrollToSpecialties = () => {
+        if (specialtiesSectionRef.current) {
+            specialtiesSectionRef.current.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    };
+
     const renderStars = (rating) => {
         return Array.from({ length: 5 }, (_, i) => (
             <FontAwesomeIcon 
@@ -52,6 +135,53 @@ const PublicHome = () => {
                 className={i < rating ? "public-home__star public-home__star--active" : "public-home__star"} 
             />
         ));
+    };
+
+    const renderSocialLinks = () => {
+        if (!companyInfo?.social_media) return null;
+
+        const socialMedia = companyInfo.social_media;
+        
+        return (
+            <div className="public-home__social-links">
+                {socialMedia.instagram && (
+                    <a 
+                        href={socialMedia.instagram} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="public-home__social-link public-home__social-link--instagram"
+                    >
+                        <FontAwesomeIcon icon={faInstagram} />
+                    </a>
+                )}
+                {socialMedia.facebook && (
+                    <a 
+                        href={socialMedia.facebook} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="public-home__social-link public-home__social-link--facebook"
+                    >
+                        <FontAwesomeIcon icon={faFacebook} />
+                    </a>
+                )}
+                {companyInfo.email && (
+                    <a 
+                        href={`mailto:${companyInfo.email}`}
+                        className="public-home__social-link public-home__social-link--email"
+                    >
+                        <FontAwesomeIcon icon={faEnvelope} />
+                    </a>
+                )}
+                {companyInfo.phone && (
+                    <a 
+                        href={`tel:${companyInfo.phone}`}
+                        className="public-home__social-link public-home__social-link--phone"
+                    >
+                        <FontAwesomeIcon icon={faPhone} />
+                    </a>
+                )}
+            </div>
+        );
     };
 
     if (loading) {
@@ -65,6 +195,15 @@ const PublicHome = () => {
 
     return (
         <div className="public-home">
+            {/* Botón fijo de login */}
+            <button 
+                onClick={handleLoginClick}
+                className="public-home__floating-login-btn"
+            >
+                <FontAwesomeIcon icon={faSignInAlt} />
+                <span>Acceder</span>
+            </button>
+
             {/* Hero Section */}
             <section className="public-home__hero">
                 <div className="public-home__hero-content">
@@ -75,48 +214,63 @@ const PublicHome = () => {
                         {companyInfo?.description || 'Capturamos momentos especiales con arte y profesionalismo'}
                     </p>
                     <div className="public-home__hero-actions">
-                        <Link to="/public/projects" className="public-home__cta-button public-home__cta-button--primary">
-                            Ver Nuestros Proyectos
-                        </Link>
-                        <Link to="/public/contact" className="public-home__cta-button public-home__cta-button--secondary">
-                            Contáctanos
-                        </Link>
+                        <button 
+                            onClick={scrollToSpecialties}
+                            className="public-home__cta-button public-home__cta-button--primary"
+                        >
+                            Ver Nuestras Galerías
+                        </button>
+                        <button 
+                            onClick={handleLoginClick}
+                            className="public-home__cta-button public-home__cta-button--secondary"
+                        >
+                            <FontAwesomeIcon icon={faUser} />
+                            Acceder a Mi Cuenta
+                        </button>
                     </div>
+                    {/* Redes Sociales en el Hero */}
+                    {renderSocialLinks()}
                 </div>
             </section>
 
-            {/* Featured Projects */}
-            <section className="public-home__section">
+            {/* Categorías Destacadas */}
+            <section 
+                ref={specialtiesSectionRef} 
+                className="public-home__section public-home__section--specialties"
+            >
                 <div className="public-home__container">
-                    <h2 className="public-home__section-title">Proyectos Destacados</h2>
-                    <div className="public-home__projects-grid">
-                        {featuredProjects.slice(0, 3).map(project => (
-                            <div key={project.id} className="public-home__project-card">
-                                <div className="public-home__project-image">
-                                    <img src={project.image_url || '/default-project.jpg'} alt={project.title} />
-                                </div>
-                                <div className="public-home__project-content">
-                                    <h3 className="public-home__project-title">{project.title}</h3>
-                                    <p className="public-home__project-description">
-                                        {project.description?.substring(0, 100)}...
-                                    </p>
-                                    <div className="public-home__project-meta">
-                                        <span className="public-home__project-client">{project.client_name}</span>
-                                        <span className="public-home__project-date">
-                                            {new Date(project.project_date).toLocaleDateString('es-ES')}
+                    <h2 className="public-home__section-title">Nuestras Especialidades</h2>
+                    <p className="public-home__section-subtitle">
+                        Descubre nuestros trabajos en cada categoría
+                    </p>
+                    <div className="public-home__categories-grid">
+                        {categories.map(category => (
+                            <Link 
+                                key={category.id} 
+                                to={category.route}
+                                className="public-home__category-card"
+                            >
+                                <div className="public-home__category-image">
+                                    <img 
+                                        src={category.image} 
+                                        alt={category.name}
+                                        onError={(e) => {
+                                            e.target.src = '/default-category.jpg';
+                                        }}
+                                    />
+                                    <div className="public-home__category-overlay">
+                                        <h3 className="public-home__category-name">{category.name}</h3>
+                                        <p className="public-home__category-description">
+                                            {category.description}
+                                        </p>
+                                        <span className="public-home__category-cta">
+                                            Ver Galería <FontAwesomeIcon icon={faArrowRight} />
                                         </span>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
-                    {featuredProjects.length > 0 && (
-                        <div className="public-home__section-actions">
-                            <Link to="/public/projects" className="public-home__view-all">
-                                Ver Todos los Proyectos <FontAwesomeIcon icon={faArrowRight} />
-                            </Link>
-                        </div>
-                    )}
                 </div>
             </section>
 
@@ -148,7 +302,7 @@ const PublicHome = () => {
                 <div className="public-home__container">
                     <h2 className="public-home__section-title">Lo Que Dicen Nuestros Clientes</h2>
                     <div className="public-home__testimonials-grid">
-                        {featuredTestimonials.slice(0, 3).map(testimonial => (
+                        {featuredTestimonials.map(testimonial => (
                             <div key={testimonial.id} className="public-home__testimonial-card">
                                 <div className="public-home__testimonial-content">
                                     <div className="public-home__testimonial-stars">
@@ -157,12 +311,6 @@ const PublicHome = () => {
                                     <p className="public-home__testimonial-text">"{testimonial.content}"</p>
                                 </div>
                                 <div className="public-home__testimonial-author">
-                                    <div className="public-home__testimonial-avatar">
-                                        <img 
-                                            src={testimonial.client_image || '/default-avatar.jpg'} 
-                                            alt={testimonial.client_name} 
-                                        />
-                                    </div>
                                     <div className="public-home__testimonial-info">
                                         <div className="public-home__testimonial-name">
                                             {testimonial.client_name}
@@ -178,17 +326,43 @@ const PublicHome = () => {
                 </div>
             </section>
 
-            {/* CTA Section */}
+            {/* CTA Section con Redes Sociales */}
             <section className="public-home__cta">
                 <div className="public-home__container">
                     <div className="public-home__cta-content">
                         <h2 className="public-home__cta-title">¿Listo para Capturar Tus Momentos Especiales?</h2>
                         <p className="public-home__cta-text">
-                            Contáctanos hoy mismo para discutir tu proyecto y obtener un presupuesto personalizado.
+                            Accede a tu cuenta para ver tus galerías personalizadas o contáctanos para más información
                         </p>
-                        <Link to="/public/contact" className="public-home__cta-button public-home__cta-button--primary">
-                            Solicitar Presupuesto
-                        </Link>
+                        <div className="public-home__cta-actions">
+                            <button 
+                                onClick={handleLoginClick}
+                                className="public-home__cta-button public-home__cta-button--primary"
+                            >
+                                <FontAwesomeIcon icon={faUser} />
+                                Acceder a Mi Cuenta
+                            </button>
+                            <Link to="/public/gallery" className="public-home__cta-button public-home__cta-button--secondary">
+                                Ver Galerías Públicas
+                            </Link>
+                        </div>
+                        <div className="public-home__cta-social">
+                            {renderSocialLinks()}
+                        </div>
+                        <div className="public-home__cta-contact">
+                            {companyInfo?.phone && (
+                                <a href={`tel:${companyInfo.phone}`} className="public-home__contact-link">
+                                    <FontAwesomeIcon icon={faPhone} />
+                                    {companyInfo.phone}
+                                </a>
+                            )}
+                            {companyInfo?.email && (
+                                <a href={`mailto:${companyInfo.email}`} className="public-home__contact-link">
+                                    <FontAwesomeIcon icon={faEnvelope} />
+                                    {companyInfo.email}
+                                </a>
+                            )}
+                        </div>
                     </div>
                 </div>
             </section>

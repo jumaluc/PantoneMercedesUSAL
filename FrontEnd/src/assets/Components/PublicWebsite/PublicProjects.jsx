@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
 import './PublicProjects.css';
@@ -9,10 +10,19 @@ const PublicProjects = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
+    
+    const location = useLocation();
 
     useEffect(() => {
+        // Obtener categoría de los query parameters
+        const urlParams = new URLSearchParams(location.search);
+        const categoryFromUrl = urlParams.get('category');
+        if (categoryFromUrl) {
+            setSelectedCategory(categoryFromUrl);
+        }
+        
         fetchProjects();
-    }, []);
+    }, [location]);
 
     useEffect(() => {
         filterProjects();
@@ -53,7 +63,7 @@ const PublicProjects = () => {
         setFilteredProjects(filtered);
     };
 
-    const categories = ['all', ...new Set(projects.map(p => p.category).filter(Boolean))];
+    const categories = ['all', 'Casamientos', 'XV Años', 'Bautizos', ...new Set(projects.map(p => p.category).filter(Boolean))];
 
     if (loading) {
         return (
@@ -68,9 +78,14 @@ const PublicProjects = () => {
         <div className="public-projects">
             <div className="public-projects__container">
                 <div className="public-projects__header">
-                    <h1 className="public-projects__title">Nuestros Proyectos</h1>
+                    <h1 className="public-projects__title">
+                        {selectedCategory !== 'all' ? `Galería de ${selectedCategory}` : 'Nuestra Galería'}
+                    </h1>
                     <p className="public-projects__subtitle">
-                        Descubre nuestra galería de trabajos realizados para clientes satisfechos
+                        {selectedCategory !== 'all' 
+                            ? `Descubre nuestros trabajos en ${selectedCategory.toLowerCase()}`
+                            : 'Explora todos nuestros proyectos y momentos capturados'
+                        }
                     </p>
                 </div>
 
@@ -108,9 +123,20 @@ const PublicProjects = () => {
                         filteredProjects.map(project => (
                             <div key={project.id} className="public-projects__card">
                                 <div className="public-projects__card-image">
-                                    <img src={project.image_url || '/default-project.jpg'} alt={project.title} />
+                                    <img 
+                                        src={project.image_url || '/default-project.jpg'} 
+                                        alt={project.title}
+                                        onError={(e) => {
+                                            e.target.src = '/default-project.jpg';
+                                        }}
+                                    />
                                     {project.featured && (
                                         <span className="public-projects__featured-badge">Destacado</span>
+                                    )}
+                                    {project.category && (
+                                        <span className="public-projects__category-badge">
+                                            {project.category}
+                                        </span>
                                     )}
                                 </div>
                                 <div className="public-projects__card-content">
@@ -125,20 +151,18 @@ const PublicProjects = () => {
                                         <div className="public-projects__card-date">
                                             <strong>Fecha:</strong> {new Date(project.project_date).toLocaleDateString('es-ES')}
                                         </div>
-                                        {project.category && (
-                                            <div className="public-projects__card-category">
-                                                <span className="public-projects__category-tag">
-                                                    {project.category}
-                                                </span>
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
                             </div>
                         ))
                     ) : (
                         <div className="public-projects__empty">
-                            <p>No se encontraron proyectos con los filtros aplicados.</p>
+                            <p>
+                                {selectedCategory !== 'all' 
+                                    ? `No hay proyectos en la categoría "${selectedCategory}"`
+                                    : 'No se encontraron proyectos con los filtros aplicados.'
+                                }
+                            </p>
                         </div>
                     )}
                 </div>

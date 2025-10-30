@@ -58,4 +58,8 @@ router.put('/updateVideoStatus/:videoId', adminController.updateVideoStatus);
 router.put('/updateVideoProgress/:videoId', adminController.updateVideoProgress);
 router.delete('/deleteVideo/:videoId', adminController.deleteVideo);
 router.get('/getStats', adminController.getStats);
+
+router.get('/public-content/getPublicGalleries', uploadGaleria ,adminController.getPublicGalleries);
+router.post('/public-content/createPublicGallery', uploadGaleria, adminController.createPublicGallery);
+
 module.exports = router;

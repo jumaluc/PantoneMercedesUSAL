@@ -99,6 +99,23 @@ static async getGalleriesGrowth(days = 30) {
     }
 }
 
+ static async getGalleryByServiceTypes(service) {
+    try{
+        const [result] = await pool.execute('SELECT * FROM galleries WHERE service_type = ?' ,[service])
+        return result;
+    }
+    catch(err){console.log(err)}
+ }
+
+ static async getPublicGalleries(){
+    try{
+
+        const [galeries] = await pool.execute('SELECT * from galleries WHERE service_type = "public-xv" || service_type = "public-casamientos" || service_type = "public-bautizos"');
+        return galeries;
+    }
+    catch(err){console.log(err)};
+ }
+
 }
 
 module.exports = Gallery;

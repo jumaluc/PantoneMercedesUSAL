@@ -9,7 +9,8 @@ import {
     faStar,
     faEdit,
     faTrash,
-    faPlus
+    faPlus,
+    faImage
 } from '@fortawesome/free-solid-svg-icons';
 import './PublicContentManagement.css';
 
@@ -18,7 +19,7 @@ const PublicContentManagement = () => {
 
     const tabs = [
         { id: 'company', label: 'Información Empresa', icon: faBuilding },
-        { id: 'projects', label: 'Proyectos', icon: faImages },
+        { id: 'galleries', label: 'Galerías Públicas', icon: faImages },
         { id: 'testimonials', label: 'Testimonios', icon: faCommentDots },
         { id: 'faqs', label: 'Preguntas Frecuentes', icon: faQuestionCircle },
         { id: 'policies', label: 'Políticas', icon: faFileContract }
@@ -28,8 +29,8 @@ const PublicContentManagement = () => {
         switch (activeTab) {
             case 'company':
                 return <CompanyInfoManagement />;
-            case 'projects':
-                return <ProjectsManagement />;
+            case 'galleries':
+                return <PublicGalleriesManagement />;
             case 'testimonials':
                 return <TestimonialsManagement />;
             case 'faqs':
@@ -72,7 +73,7 @@ const PublicContentManagement = () => {
     );
 };
 
-// Subcomponentes para cada sección
+// Componente para Información de la Empresa
 const CompanyInfoManagement = () => {
     const [companyInfo, setCompanyInfo] = useState({
         company_name: '',
@@ -84,8 +85,7 @@ const CompanyInfoManagement = () => {
             facebook: '',
             instagram: '',
             twitter: ''
-        },
-        logo_url: ''
+        }
     });
     const [loading, setLoading] = useState(false);
 
@@ -257,18 +257,6 @@ const CompanyInfoManagement = () => {
                             </div>
                         </div>
                     </div>
-
-                    <div className="company-info-management__form-group company-info-management__form-group--full">
-                        <label className="company-info-management__label">URL del Logo</label>
-                        <input
-                            type="url"
-                            name="logo_url"
-                            value={companyInfo.logo_url}
-                            onChange={handleChange}
-                            className="company-info-management__input"
-                            placeholder="https://ejemplo.com/logo.jpg"
-                        />
-                    </div>
                 </div>
 
                 <div className="company-info-management__actions">
@@ -285,334 +273,428 @@ const CompanyInfoManagement = () => {
     );
 };
 
-const ProjectsManagement = () => {
-    const [projects, setProjects] = useState([]);
+// Componente para Galerías Públicas
+const PublicGalleriesManagement = () => {
+    const [galleries, setGalleries] = useState([]);
     const [showForm, setShowForm] = useState(false);
-    const [editingProject, setEditingProject] = useState(null);
+    const [editingGallery, setEditingGallery] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
+        service_type: 'public-casamientos',
         description: '',
-        category: '',
-        image_url: '',
-        client_name: '',
-        project_date: '',
-        featured: false,
-        status: 'active'
+        images: []
     });
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
+
+    const serviceTypes = [
+        { value: 'public-casamientos', label: 'Casamientos' },
+        { value: 'public-xv', label: 'XV Años' },
+        { value: 'public-bautizos', label: 'Bautizos' }
+    ];
 
     useEffect(() => {
-        fetchProjects();
+        fetchPublicGalleries();
     }, []);
 
-    const fetchProjects = async () => {
+    const fetchPublicGalleries = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:3000/api/admin/public-content/projects', {
+            const response = await fetch('http://localhost:3000/admin/public-content/getPublicGalleries', {
                 credentials: 'include'
             });
             if (response.ok) {
                 const data = await response.json();
-                setProjects(data.data || []);
+                setGalleries(data.data || []);
             }
         } catch (error) {
-            console.error('Error fetching projects:', error);
+            console.error('Error fetching public galleries:', error);
         } finally {
             setLoading(false);
         }
     };
+const handleImageUpload = async (files) => {
+    setUploading(true);
+    const uploadedImages = [];
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const url = editingProject 
-                ? `http://localhost:3000/api/admin/public-content/projects/${editingProject.id}`
-                : 'http://localhost:3000/api/admin/public-content/projects';
-            
-            const method = editingProject ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(formData)
+    try {
+        for (let file of files) {
+            // Guardar el archivo File para enviarlo después
+            uploadedImages.push({
+                file: file, // Guardar el objeto File
+                image_url: URL.createObjectURL(file), // Para previsualización
+                original_filename: file.name,
+                storage_filename: file.name,
+                file_path: file.name,
+                is_primary: uploadedImages.length === 0
             });
-
-            if (response.ok) {
-                alert(editingProject ? 'Proyecto actualizado' : 'Proyecto creado');
-                setShowForm(false);
-                setEditingProject(null);
-                setFormData({
-                    title: '',
-                    description: '',
-                    category: '',
-                    image_url: '',
-                    client_name: '',
-                    project_date: '',
-                    featured: false,
-                    status: 'active'
-                });
-                fetchProjects();
-            }
-        } catch (error) {
-            console.error('Error saving project:', error);
-            alert('Error al guardar el proyecto');
         }
+
+        setFormData(prev => ({
+            ...prev,
+            images: [...prev.images, ...uploadedImages]
+        }));
+    } catch (error) {
+        console.error('Error processing images:', error);
+    } finally {
+        setUploading(false);
+    }
+};
+
+    const handleRemoveImage = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            images: prev.images.filter((_, i) => i !== index)
+        }));
     };
 
-    const handleEdit = (project) => {
-        setEditingProject(project);
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+        const url = editingGallery 
+            ? `http://localhost:3000/api/admin/public-content/public-galleries/${editingGallery.id}`
+            : 'http://localhost:3000/admin/public-content/createPublicGallery';
+
+        const method = editingGallery ? 'PUT' : 'POST';
+
+        // Usar FormData en lugar de JSON
+        const formDataToSend = new FormData();
+        formDataToSend.append('title', formData.title);
+        formDataToSend.append('service_type', formData.service_type);
+        formDataToSend.append('description', formData.description);
+        formDataToSend.append('status', 'active');
+
+        // Agregar las imágenes como archivos
+        formData.images.forEach((image, index) => {
+            // Si la imagen ya es un File (recién seleccionada)
+            if (image.file) {
+                formDataToSend.append('images', image.file);
+            }
+            // Si es una imagen existente con URL, necesitarías un approach diferente
+        });
+
+        console.log("Enviando FormData con:", {
+            title: formData.title,
+            service_type: formData.service_type,
+            imagesCount: formData.images.length
+        });
+
+        const response = await fetch(url, {
+            method,
+            credentials: 'include',
+            body: formDataToSend // NO establecer Content-Type header, el browser lo hará automáticamente
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            alert(editingGallery ? 'Galería actualizada' : 'Galería creada');
+            setShowForm(false);
+            setEditingGallery(null);
+            setFormData({
+                title: '',
+                service_type: 'public-casamientos',
+                description: '',
+                images: []
+            });
+            fetchPublicGalleries();
+        } else {
+            const error = await response.json();
+            alert(error.message || 'Error al guardar la galería');
+        }
+    } catch (error) {
+        console.error('Error saving gallery:', error);
+        alert('Error al guardar la galería');
+    }
+};
+
+    const handleEdit = (gallery) => {
+        setEditingGallery(gallery);
         setFormData({
-            title: project.title,
-            description: project.description,
-            category: project.category,
-            image_url: project.image_url,
-            client_name: project.client_name,
-            project_date: project.project_date,
-            featured: project.featured,
-            status: project.status
+            title: gallery.title,
+            service_type: gallery.service_type,
+            description: gallery.description || '',
+            images: gallery.images || []
         });
         setShowForm(true);
     };
 
     const handleDelete = async (id) => {
-        if (confirm('¿Estás seguro de eliminar este proyecto?')) {
+        if (confirm('¿Estás seguro de eliminar esta galería pública?')) {
             try {
-                const response = await fetch(`http://localhost:3000/api/admin/public-content/projects/${id}`, {
+                const response = await fetch(`http://localhost:3000/api/admin/public-content/public-galleries/${id}`, {
                     method: 'DELETE',
                     credentials: 'include'
                 });
 
                 if (response.ok) {
-                    alert('Proyecto eliminado');
-                    fetchProjects();
+                    alert('Galería eliminada');
+                    fetchPublicGalleries();
                 }
             } catch (error) {
-                console.error('Error deleting project:', error);
-                alert('Error al eliminar el proyecto');
+                console.error('Error deleting gallery:', error);
+                alert('Error al eliminar la galería');
             }
         }
     };
 
     const handleFormChange = (e) => {
-        const { name, value, type, checked } = e.target;
+        const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: value
         }));
+    };
+
+    const getServiceTypeLabel = (serviceType) => {
+        const type = serviceTypes.find(t => t.value === serviceType);
+        return type ? type.label : serviceType;
     };
 
     if (loading) {
         return (
             <div className="public-content-management__loading">
                 <div className="public-content-management__loading-spinner"></div>
-                <p>Cargando proyectos...</p>
+                <p>Cargando galerías públicas...</p>
             </div>
         );
     }
 
-    return (
-        <div className="projects-management">
-            <div className="projects-management__header">
-                <h2 className="projects-management__title">Gestión de Proyectos</h2>
-                <button 
-                    className="projects-management__add-btn"
-                    onClick={() => {
-                        setShowForm(true);
-                        setEditingProject(null);
-                        setFormData({
-                            title: '',
-                            description: '',
-                            category: '',
-                            image_url: '',
-                            client_name: '',
-                            project_date: new Date().toISOString().split('T')[0],
-                            featured: false,
-                            status: 'active'
-                        });
-                    }}
-                >
-                    <FontAwesomeIcon icon={faPlus} />
-                    Agregar Proyecto
-                </button>
-            </div>
+return (
+    <div className="public-galleries-management">
+        <div className="public-galleries-management__header">
+            <h2 className="public-galleries-management__title">Gestión de Galerías Públicas</h2>
+            <button 
+                className="public-galleries-management__add-btn"
+                onClick={() => {
+                    setShowForm(true);
+                    setEditingGallery(null);
+                    setFormData({
+                        title: '',
+                        service_type: 'public-casamientos',
+                        description: '',
+                        images: []
+                    });
+                }}
+            >
+                <FontAwesomeIcon icon={faPlus} />
+                Agregar Galería
+            </button>
+        </div>
 
-            {showForm && (
-                <div className="projects-management__form-overlay">
-                    <div className="projects-management__form">
-                        <h3>{editingProject ? 'Editar Proyecto' : 'Nuevo Proyecto'}</h3>
-                        <form onSubmit={handleSubmit}>
-                            <div className="company-info-management__form-grid">
-                                <div className="company-info-management__form-group company-info-management__form-group--full">
-                                    <label className="company-info-management__label">Título</label>
-                                    <input
-                                        type="text"
-                                        name="title"
-                                        value={formData.title}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__input"
-                                        required
-                                    />
-                                </div>
-                                <div className="company-info-management__form-group">
-                                    <label className="company-info-management__label">Categoría</label>
-                                    <input
-                                        type="text"
-                                        name="category"
-                                        value={formData.category}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__input"
-                                    />
-                                </div>
-                                <div className="company-info-management__form-group">
-                                    <label className="company-info-management__label">Cliente</label>
-                                    <input
-                                        type="text"
-                                        name="client_name"
-                                        value={formData.client_name}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__input"
-                                    />
-                                </div>
-                                <div className="company-info-management__form-group">
-                                    <label className="company-info-management__label">Fecha del Proyecto</label>
-                                    <input
-                                        type="date"
-                                        name="project_date"
-                                        value={formData.project_date}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__input"
-                                    />
-                                </div>
-                                <div className="company-info-management__form-group company-info-management__form-group--full">
-                                    <label className="company-info-management__label">URL de la Imagen</label>
-                                    <input
-                                        type="url"
-                                        name="image_url"
-                                        value={formData.image_url}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__input"
-                                        placeholder="https://ejemplo.com/imagen.jpg"
-                                    />
-                                </div>
-                                <div className="company-info-management__form-group company-info-management__form-group--full">
-                                    <label className="company-info-management__label">Descripción</label>
-                                    <textarea
-                                        name="description"
-                                        value={formData.description}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__textarea"
-                                        rows="4"
-                                    />
-                                </div>
-                                <div className="company-info-management__form-group">
-                                    <label className="company-info-management__label">
-                                        <input
-                                            type="checkbox"
-                                            name="featured"
-                                            checked={formData.featured}
-                                            onChange={handleFormChange}
-                                        />
-                                        Proyecto Destacado
-                                    </label>
-                                </div>
-                                <div className="company-info-management__form-group">
-                                    <label className="company-info-management__label">Estado</label>
-                                    <select
-                                        name="status"
-                                        value={formData.status}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__input"
-                                    >
-                                        <option value="active">Activo</option>
-                                        <option value="inactive">Inactivo</option>
-                                    </select>
-                                </div>
+        {showForm && (
+            <div className="public-galleries-management__form-overlay">
+                <div className="public-galleries-management__form">
+                    <h3>{editingGallery ? 'Editar Galería Pública' : 'Nueva Galería Pública'}</h3>
+                    <form onSubmit={handleSubmit}>
+                        <div className="company-info-management__form-grid">
+
+                            {/* Título */}
+                            <div className="company-info-management__form-group company-info-management__form-group--full">
+                                <label className="company-info-management__label">Título</label>
+                                <input
+                                    type="text"
+                                    name="title"
+                                    value={formData.title}
+                                    onChange={handleFormChange}
+                                    className="company-info-management__input"
+                                    required
+                                    placeholder="Ej: Casamiento de María y Juan"
+                                />
                             </div>
-                            <div className="projects-management__form-actions">
-                                <button type="submit" className="projects-management__save-btn">
-                                    {editingProject ? 'Actualizar' : 'Crear'} Proyecto
-                                </button>
-                                <button 
-                                    type="button" 
-                                    className="projects-management__cancel-btn"
-                                    onClick={() => setShowForm(false)}
+
+                            {/* Tipo de galería */}
+                            <div className="company-info-management__form-group">
+                                <label className="company-info-management__label">Tipo de Galería</label>
+                                <select
+                                    name="service_type"
+                                    value={formData.service_type}
+                                    onChange={handleFormChange}
+                                    className="company-info-management__input"
+                                    required
                                 >
-                                    Cancelar
-                                </button>
+                                    {serviceTypes.map(type => (
+                                        <option key={type.value} value={type.value}>
+                                            {type.label}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-                        </form>
-                    </div>
-                </div>
-            )}
 
-            {projects.length === 0 ? (
-                <div className="public-content-management__empty">
-                    <FontAwesomeIcon icon={faImages} className="public-content-management__empty-icon" />
-                    <p className="public-content-management__empty-text">No hay proyectos registrados</p>
-                    <button 
-                        className="projects-management__add-btn"
-                        onClick={() => setShowForm(true)}
-                    >
-                        <FontAwesomeIcon icon={faPlus} />
-                        Agregar Primer Proyecto
-                    </button>
-                </div>
-            ) : (
-                <div className="projects-management__grid">
-                    {projects.map(project => (
-                        <div key={project.id} className="projects-management__card">
-                            <div className="projects-management__card-image">
-                                <img src={project.image_url || '/default-project.jpg'} alt={project.title} />
-                                {project.featured && (
-                                    <span className="projects-management__featured-badge">Destacado</span>
+                            {/* Descripción */}
+                            <div className="company-info-management__form-group company-info-management__form-group--full">
+                                <label className="company-info-management__label">Descripción</label>
+                                <textarea
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleFormChange}
+                                    className="company-info-management__textarea"
+                                    rows="3"
+                                    placeholder="Descripción de la galería..."
+                                />
+                            </div>
+
+                            {/* Imágenes */}
+                            <div className="company-info-management__form-group company-info-management__form-group--full">
+                                <label className="company-info-management__label">
+                                    Imágenes ({formData.images.length} seleccionadas)
+                                    {uploading && (
+                                        <span style={{ color: '#e88f01', marginLeft: '10px' }}>
+                                            Subiendo...
+                                        </span>
+                                    )}
+                                </label>
+
+                                {/* Input mejorado */}
+                                <div className="public-galleries-management__file-upload-area">
+                                    <input
+                                        type="file"
+                                        multiple
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            if (e.target.files.length > 0) {
+                                                handleImageUpload(Array.from(e.target.files));
+                                            }
+                                            e.target.value = ''; // reset input
+                                        }}
+                                        className="public-galleries-management__file-input"
+                                        disabled={uploading}
+                                        id="gallery-images-upload"
+                                    />
+                                    <label 
+                                        htmlFor="gallery-images-upload" 
+                                        className="public-galleries-management__file-upload-label"
+                                    >
+                                        <FontAwesomeIcon icon={faPlus} />
+                                        Seleccionar Imágenes
+                                    </label>
+                                    <p className="public-galleries-management__file-help">
+                                        Puedes seleccionar múltiples imágenes (JPG, PNG, etc.)
+                                    </p>
+                                </div>
+
+                                {/* Previsualizaciones */}
+                                {formData.images.length > 0 && (
+                                    <div className="public-galleries-management__image-previews">
+                                        {formData.images.map((image, index) => (
+                                            <div key={index} className="public-galleries-management__image-item">
+                                                <img src={image.image_url} alt={image.original_filename} />
+                                                <button
+                                                    type="button"
+                                                    className="public-galleries-management__remove-image"
+                                                    onClick={() => handleRemoveImage(index)}
+                                                >
+                                                    ×
+                                                </button>
+                                                {image.is_primary && (
+                                                    <span className="public-galleries-management__primary-badge">
+                                                        Principal
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
                                 )}
                             </div>
-                            <div className="projects-management__card-content">
-                                <h3 className="projects-management__card-title">{project.title}</h3>
-                                <p className="projects-management__card-description">
-                                    {project.description?.substring(0, 100)}...
-                                </p>
-                                <div className="projects-management__card-meta">
-                                    <div className="projects-management__card-client">
-                                        <strong>Cliente:</strong> {project.client_name}
-                                    </div>
-                                    <div className="projects-management__card-date">
-                                        {new Date(project.project_date).toLocaleDateString('es-ES')}
-                                    </div>
-                                    {project.category && (
-                                        <div className="projects-management__card-category">
-                                            {project.category}
-                                        </div>
-                                    )}
+                        </div>
+
+                        {/* Botones */}
+                        <div className="public-galleries-management__form-actions">
+                            <button 
+                                type="submit" 
+                                className="public-galleries-management__save-btn"
+                                disabled={uploading || formData.images.length === 0}
+                            >
+                                {editingGallery ? 'Actualizar' : 'Crear'} Galería
+                            </button>
+                            <button 
+                                type="button" 
+                                className="public-galleries-management__cancel-btn"
+                                onClick={() => setShowForm(false)}
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        )}
+
+        {/* Listado de galerías */}
+        {galleries.length === 0 ? (
+            <div className="public-content-management__empty">
+                <FontAwesomeIcon icon={faImages} className="public-content-management__empty-icon" />
+                <p className="public-content-management__empty-text">
+                    No hay galerías públicas registradas
+                </p>
+                <button 
+                    className="public-galleries-management__add-btn"
+                    onClick={() => setShowForm(true)}
+                >
+                    <FontAwesomeIcon icon={faPlus} />
+                    Agregar Primera Galería
+                </button>
+            </div>
+        ) : (
+            <div className="public-galleries-management__grid">
+                {galleries.map(gallery => (
+                    <div key={gallery.id} className="public-galleries-management__card">
+                        <div className="public-galleries-management__card-image">
+                            {gallery.cover_image_url ? (
+                                <img src={gallery.cover_image_url} alt={gallery.title} />
+                            ) : (
+                                <div className="public-galleries-management__no-image">
+                                    <FontAwesomeIcon icon={faImage} />
+                                    <span>Sin imagen</span>
                                 </div>
-                                <div className="projects-management__card-actions">
-                                    <button 
-                                        onClick={() => handleEdit(project)}
-                                        className="projects-management__edit-btn"
-                                    >
-                                        <FontAwesomeIcon icon={faEdit} />
-                                        Editar
-                                    </button>
-                                    <button 
-                                        onClick={() => handleDelete(project.id)}
-                                        className="projects-management__delete-btn"
-                                    >
-                                        <FontAwesomeIcon icon={faTrash} />
-                                        Eliminar
-                                    </button>
+                            )}
+                            <span className="public-galleries-management__type-badge">
+                                {getServiceTypeLabel(gallery.service_type)}
+                            </span>
+                        </div>
+
+                        <div className="public-galleries-management__card-content">
+                            <h3 className="public-galleries-management__card-title">{gallery.title}</h3>
+                            <p className="public-galleries-management__card-description">
+                                {gallery.description || 'Sin descripción'}
+                            </p>
+
+                            <div className="public-galleries-management__card-meta">
+                                <div className="public-galleries-management__card-images">
+                                    <FontAwesomeIcon icon={faImage} />
+                                    {gallery.photos_count || 0} imágenes
+                                </div>
+                                <div className="public-galleries-management__card-date">
+                                    {new Date(gallery.created_at).toLocaleDateString('es-ES')}
                                 </div>
                             </div>
+
+                            <div className="public-galleries-management__card-actions">
+                                <button 
+                                    onClick={() => handleEdit(gallery)}
+                                    className="public-galleries-management__edit-btn"
+                                >
+                                    <FontAwesomeIcon icon={faEdit} />
+                                    Editar
+                                </button>
+                                <button 
+                                    onClick={() => handleDelete(gallery.id)}
+                                    className="public-galleries-management__delete-btn"
+                                >
+                                    <FontAwesomeIcon icon={faTrash} />
+                                    Eliminar
+                                </button>
+                            </div>
                         </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
+                    </div>
+                ))}
+            </div>
+        )}
+    </div>
+);
+
 };
 
+// Componente para Testimonios
 const TestimonialsManagement = () => {
     const [testimonials, setTestimonials] = useState([]);
     const [showForm, setShowForm] = useState(false);
@@ -935,6 +1017,7 @@ const TestimonialsManagement = () => {
     );
 };
 
+// Componente para Preguntas Frecuentes
 const FAQsManagement = () => {
     const [faqs, setFaqs] = useState([]);
     const [showForm, setShowForm] = useState(false);
@@ -1207,6 +1290,7 @@ const FAQsManagement = () => {
     );
 };
 
+// Componente para Políticas
 const PoliciesManagement = () => {
     const [policies, setPolicies] = useState([]);
     const [showForm, setShowForm] = useState(false);

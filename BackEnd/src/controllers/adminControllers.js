@@ -829,9 +829,162 @@ getStats: async(req,res) =>{
         console.log(err);
         return res.status(500).json({ success: false, message: "Error interno del servidor" });
     }
+},
+
+getPublicGalleries: async (req, res) =>{
+    try{
+        console.log( 'entro al getZ====================================D')
+        const user = req.session.user;
+        if(!user || user.role !== 'admin')return res.status(404).json({message : 'Acceso no autorizado'});
+        const galeries = await Gallery.getPublicGalleries();
+        if(!galeries)return res.status(404).json({message : 'No se encontraron galerias'});
+        console.log(galeries)
+        return res.status(200).json({data : galeries});
+    }
+    catch(err){console.log(err)};
+},
+
+createPublicGallery: async (req, res) => {
+    try {
+        console.log("CREATE PUBLIC GALLERY - Iniciando");
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') {
+            return res.status(401).json({ message: 'Acceso no autorizado' });
+        }
+        
+        console.log("Archivos recibidos:", req.files);
+        console.log("Body recibido:", req.body);
+
+        console.log(req.files);
+
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: 'No se subieron imágenes' });
+        }
+
+        const { title, service_type, description, status = 'active' } = req.body;
+        
+        // CORRECCIÓN: Cambié 'service' por 'service_type'
+        if (!title || !service_type) {
+            return res.status(400).json({ 
+                message: 'title y service_type son obligatorios' 
+            });
+        }
+
+        // Para galerías públicas, usamos el admin como "cliente"
+        const adminId = user.id;
+        
+        // Crear folder name para galerías públicas
+        const safeServiceName = service_type.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+        const folderName = `public-${safeServiceName}-${Date.now()}`;
+
+        const uploadedImages = [];
+        let photoCount = 0;
+
+        for (const file of req.files) {
+            try {
+                const fileExtension = path.extname(file.originalname);
+                const uniqueFileName = `${uuidv4()}${fileExtension}`;
+                const isPrimary = photoCount === 0;
+
+                console.log(`Subiendo archivo: ${file.originalname} como ${uniqueFileName}`);
+
+                const uploadResult = await uploadFile(
+                    file.buffer,
+                    uniqueFileName,
+                    folderName,
+                    file.mimetype
+                );
+
+                if (uploadResult.success) {
+                    uploadedImages.push({
+                        originalName: file.originalname,
+                        storageName: uniqueFileName,
+                        url: uploadResult.url,
+                        path: uploadResult.path,
+                        isPrimary: isPrimary
+                    });
+                    photoCount++;
+                    console.log(`Archivo subido exitosamente: ${uploadResult.url}`);
+                } else {
+                    console.error('Error subiendo archivo:', uploadResult.error);
+                }
+            } catch (fileError) {
+                console.error('Error procesando archivo:', fileError);
+            }
+        }
+
+        if (uploadedImages.length === 0) {
+            return res.status(500).json({ message: 'Error al subir las imágenes' });
+        }
+
+        // CORRECCIÓN: Usar adminId como client_id para galerías públicas
+        const newGallery = await Gallery.newGallery(
+            adminId, // client_id (admin para galerías públicas)
+            title, 
+            service_type, 
+            description, 
+            status, 
+            uploadedImages.length, 
+            uploadedImages[0].url, 
+            folderName, 
+            user.id // created_by
+        );
+
+        if (!newGallery || newGallery === 0) {
+            return res.status(500).json({ message: 'Error en el servidor al crear galería' });
+        }
+
+        console.log("Galería creada en BD con ID:", newGallery.insertId);
+
+        const galleryImages = uploadedImages.map((img, index) => ({
+            gallery_id: newGallery.insertId,
+            original_name: img.originalName,
+            storage_name: img.storageName,
+            image_url: img.url,
+            storage_path: img.path,
+            is_primary: img.isPrimary,
+            upload_order: index
+        }));
+
+        for (const img of galleryImages) {
+            const result = await Gallery_images.createImage(
+                img.gallery_id,
+                img.original_name,
+                img.storage_name,
+                img.image_url,
+                img.storage_path,
+                img.is_primary,
+                img.upload_order
+            );
+            
+            if (!result || result.affectedRows === 0) {
+                console.error('Error insertando imagen:', img.storage_name);
+            } else {
+                console.log("Imagen insertada en BD:", img.storage_name);
+            }
+        }
+
+        const stats = await Stats.addStat(user.id, 'admin', 'create', 'creó una nueva galería pública', 'complete');
+        if(!stats || stats < 1) {
+            console.warn("No se pudo registrar estadística");
+        }
+
+        console.log("Galería pública creada exitosamente");
+        res.status(201).json({
+            message: 'Galería pública creada exitosamente',
+            data: {
+                gallery: newGallery,
+                images: uploadedImages,
+                total_images: uploadedImages.length,
+                folder: folderName
+            }
+        });
+
+    } catch (err) {
+        console.error('Error en createPublicGallery:', err);
+        res.status(500).json({ message: 'Error del servidor: ' + err.message });
+    }
 }
-
-
 
 };
 

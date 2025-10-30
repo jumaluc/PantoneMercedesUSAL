@@ -6,17 +6,28 @@ import "react-toastify/dist/ReactToastify.css";
 import ClientDashboard from '../../Components/Client/ClientDashboard.jsx';
 import AdminDashboard from '../../Components/Admin/AdminDashboard.jsx';
 import { PrivateRoute } from '../../hooks/PrivateRoute.jsx';
+import PublicHome from '../../Components/PublicWebsite/PublicLayout.jsx';
+import PublicGallery from '../../Components/PublicWebsite/PublicGallery.jsx'; // Importa el componente correcto
 
 function App() {
-
-
   return (
     <>
       <Router>
         <div className="App">
           <Routes>
-            <Route path="/" element={<Navigate to="/login" />} />
+            {/* Ruta pública principal */}
+            <Route path="/" element={<PublicHome />} />
+            
+            {/* Rutas públicas para galerías */}
+            <Route path="/public/gallery" element={<PublicGallery />} />
+            <Route path="/public/gallery/casamientos" element={<PublicGallery category="casamientos" />} />
+            <Route path="/public/gallery/xv-anos" element={<PublicGallery category="xv-anos" />} />
+            <Route path="/public/gallery/bautizos" element={<PublicGallery category="bautizos" />} />
+            
+            {/* Ruta de login */}
             <Route path="/login" element={<Login />} />
+            
+            {/* Rutas protegidas */}
             <Route
               path="/clientDashboard"
               element={
@@ -25,7 +36,6 @@ function App() {
                 </PrivateRoute>
               }
             />
-
             <Route
               path="/adminDashboard"
               element={
@@ -34,7 +44,9 @@ function App() {
                 </PrivateRoute>
               }
             />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+            
+            {/* Redirección para rutas no encontradas */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </Router>
