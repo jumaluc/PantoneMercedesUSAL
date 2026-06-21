@@ -1,18 +1,7 @@
-:root {
-  --primary-dark: #1f1c1b;     
-  --primary-light: #2c5282;    
-  --accent-gold: #d4af37;      
-  --accent-cream: #f8f4e6;    
-  --text-light: #718096;      
-  --white: #ffffff;
-  --success: #38a169;          
-  --error: #e53e3e;           
-}
-
 .clients-section {
-  background-color: white;
+  background-color: #111827;
   padding: 2rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Inter', sans-serif;
   position: relative;
 }
 
@@ -20,18 +9,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .section-header h2 {
   font-size: 1.8rem;
-  color: #333;
+  color: #ffffff;
   margin: 0;
+  font-weight: 700;
 }
 
 .section-header span {
   font-size: 1rem;
-  color: #666;
+  color: #9ca3af;
 }
 
 .section-add-clients {
@@ -40,107 +30,114 @@
   gap: 15px;
 }
 
-/* 🔥 TABLA - ELIMINAR CUALQUIER Z-INDEX CONFLICTIVO */
+/* Tabla */
 .clients-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #fff;
-  border-radius: 8px;
+  background-color: #1f2937;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  /* 👇 ELIMINAR cualquier z-index aquí */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid #374151;
   position: relative;
 }
 
-.clients-table th, 
+.clients-table th,
 .clients-table td {
-  padding: 12px 16px;
+  padding: 13px 16px;
   text-align: left;
   font-size: 0.95rem;
-  border-bottom: 1px solid #f0f0f0;
-  /* 👇 Asegurar que las celdas no tengan z-index */
+  border-bottom: 1px solid #374151;
   position: static;
 }
 
 .clients-table th {
-  background-color: #f8f9fa;
-  color: #555;
+  background-color: #141517;
+  color: #9ca3af;
   font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   position: sticky;
   top: 0;
-  /* 👇 Z-index solo para headers sticky */
   z-index: 10;
 }
 
 .clients-table tbody tr {
-  background-color: #fff;
+  background-color: #1f2937;
   transition: background-color 0.2s ease;
-  /* 👇 ELIMINAR z-index de las filas */
   position: relative;
 }
 
 .clients-table tbody tr:hover {
-  background-color: #f9f9f9;
-  /* 👇 Mantener solo cambio de color, sin transform */
+  background-color: rgba(255, 140, 0, 0.05);
+}
+
+.clients-table td {
+  color: #d1d5db;
 }
 
 /* Botón crear */
 .btn-create-client {
-  background: #e88f01;
-  color: white;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: #000;
   border: none;
-  padding: 12px 20px;
+  padding: 11px 20px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 14px;
   transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn-create-client:hover {
-  background: #d47f01;
+  opacity: 0.9;
   transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
 }
 
-/* 🔥 MENÚ DE ACCIONES - POSICIÓN FIXED Y Z-INDEX ALTO */
+/* Menú de acciones */
 .actions-container {
   position: relative;
   display: flex;
   justify-content: center;
-  /* 👇 Crear nuevo contexto de apilamiento */
   isolation: isolate;
 }
 
 .actions-toggle {
   background: none;
-  border: none;
-  padding: 8px;
+  border: 1px solid #374151;
+  padding: 6px 10px;
   cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.3s;
+  border-radius: 6px;
   font-size: 1rem;
-  color: #555;
+  color: #9ca3af;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s;
   position: relative;
   z-index: 1;
 }
 
 .actions-toggle:hover {
-  background-color: #f0f0f0;
+  background: rgba(255, 140, 0, 0.1);
+  border-color: rgba(255, 140, 0, 0.3);
+  color: #FF8C00;
 }
 
-/* 🔥 MENÚ CON POSITION: FIXED Y CÁLCULO DE POSICIÓN */
 .actions-menu {
-  position: fixed !important; /* 👈 FIXED en lugar de absolute */
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  z-index: 9999 !important; /* 👈 Z-INDEX MUY ALTO */
+  position: fixed !important;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  z-index: 9999 !important;
   min-width: 160px;
-  animation: fadeIn 0.2s ease;
-  /* 👇 Eliminar cualquier transform que cause conflicto */
+  animation: fadeIn 0.15s ease;
   transform: none !important;
 }
 
@@ -149,162 +146,89 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 10px 12px;
+  padding: 10px 14px;
   border: none;
   background: none;
   cursor: pointer;
   text-align: left;
-  font-size: 0.9em;
+  font-size: 0.9rem;
   transition: background-color 0.2s ease;
+  color: #d1d5db;
 }
 
 .action-btn:hover {
-  background-color: #f8f9fa;
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
-.edit-btn {
-  color: #3498db;
+.action-btn.edit-btn {
+  color: #FF8C00;
 }
 
-.edit-btn:hover {
-  background-color: #ebf5fb;
+.action-btn.edit-btn:hover {
+  background-color: rgba(255, 140, 0, 0.1);
 }
 
-.delete-btn {
-  color: #e74c3c;
+.action-btn.delete-btn {
+  color: #ef4444;
 }
 
-.delete-btn:hover {
-  background-color: #fdedec;
+.action-btn.delete-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
 }
 
-/* Animaciones */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .loading {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px;
-  font-size: 1.1rem;
-  color: #666;
+  flex-direction: column;
+  gap: 1rem;
+  height: 300px;
+  font-size: 1rem;
+  color: #9ca3af;
 }
 
-/* 🔥 ELIMINAR CUALQUIER REGLA CONFLICTIVA */
+.loading::after {
+  content: "";
+  width: 38px;
+  height: 38px;
+  border: 3px solid #374151;
+  border-top: 3px solid #FF8C00;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .clients-table td:last-child {
   overflow: visible;
   position: relative;
 }
 
-/* Asegurar que la tabla no cree contextos de apilamiento conflictivos */
 .clients-table {
   transform-style: flat;
   contain: layout;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .clients-section {
-    padding: 1rem;
-  }
-  
-  .section-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-  
-  .section-add-clients {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  
-  .clients-table {
-    font-size: 0.9rem;
-  }
-  
-  .clients-table th,
-  .clients-table td {
-    padding: 8px 12px;
-  }
-  
-  .actions-menu {
-    min-width: 140px;
-    right: 10px !important;
-  }
-}
-/* ClientsSection.css - Agregar estas reglas */
-
-.sortable-header {
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.2s ease;
-}
-
-.sortable-header:hover {
-  background-color: #edf2f7;
-}
-
-.sort-icon {
-  margin-left: 8px;
-  font-size: 0.8em;
-  color: #a0aec0;
-  transition: color 0.2s ease;
-}
-
-.sortable-header:hover .sort-icon {
-  color: #4a5568;
-}
-
-.sort-asc {
-  color: #e88f01;
-}
-
-.sort-desc {
-  color: #e88f01;
-}
-
-.no-results {
-  text-align: center;
-  padding: 2rem;
-  color: #718096;
-}
-
-.clear-filters-btn {
-  background: #e88f01;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 1rem;
-}
-
-.clear-filters-btn:hover {
-  background: #d47f01;
-}
-/* Agregar al final de tu ClientsSection.css */
-
+/* Sort headers */
 .sortable-header {
   cursor: pointer;
   user-select: none;
   transition: background-color 0.2s ease;
   position: relative;
-  padding-right: 25px !important;
+  padding-right: 28px !important;
 }
 
 .sortable-header:hover {
-  background-color: #edf2f7;
+  background-color: rgba(255, 140, 0, 0.08);
+  color: #d1d5db;
 }
 
 .sort-icon {
@@ -313,75 +237,61 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: 0.8em;
-  color: #a0aec0;
+  color: #6b7280;
   transition: color 0.2s ease;
 }
 
-.sortable-header:hover .sort-icon {
-  color: #4a5568;
-}
-
-.sort-asc {
-  color: #e88f01;
-}
-
-.sort-desc {
-  color: #e88f01;
-}
+.sortable-header:hover .sort-icon { color: #9ca3af; }
+.sort-asc  { color: #FF8C00; }
+.sort-desc { color: #FF8C00; }
 
 .no-results {
   text-align: center;
   padding: 2rem;
-  color: #718096;
-  background: #f8f9fa;
+  color: #9ca3af;
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   margin-top: 1rem;
+  border: 1px solid #374151;
 }
 
 .clear-filters-btn {
-  background: #e88f01;
-  color: white;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: #000;
   border: none;
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
   margin-top: 1rem;
   transition: all 0.3s ease;
 }
 
 .clear-filters-btn:hover {
-  background: #d47f01;
+  opacity: 0.9;
   transform: translateY(-1px);
 }
 
-/* Asegurar que la tabla se vea bien con los headers sortables */
-.clients-table th {
-  position: relative;
-}
+/* Responsive */
+@media (max-width: 768px) {
+  .clients-section { padding: 1rem; }
 
-/* Loading state mejorado */
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 300px;
-  font-size: 1.1rem;
-  color: #666;
-  flex-direction: column;
-  gap: 1rem;
-}
+  .section-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
 
-.loading::after {
-  content: "";
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #e88f01;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
+  .section-add-clients {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  .clients-table { font-size: 0.9rem; }
+
+  .clients-table th,
+  .clients-table td { padding: 8px 12px; }
+
+  .actions-menu { min-width: 140px; right: 10px !important; }
 }

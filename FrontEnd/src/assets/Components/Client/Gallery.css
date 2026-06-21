@@ -1,25 +1,28 @@
 /* Variables */
 :root {
-  --primary-color: #3498db;
-  --secondary-color: #2c3e50;
+  --primary-color: #FF8C00;
+  --primary-hover: #e67e00;
+  --secondary-color: #1f2937;
   --accent-color: #e74c3c;
   --success-color: #27ae60;
-  --background-color: #f8f9fa;
-  --text-color: #2c3e50;
+  --background-color: #111827;
+  --text-color: #d1d5db;
+  --border-color: #374151;
   --border-radius: 12px;
-  --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-
+  --shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  --transition: all 0.3s ease;
 }
 
 /* Header con animación de fade */
 .galeria-header {
-  background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+  background: linear-gradient(135deg, #141517 0%, #1f2937 100%);
+  border-bottom: 1px solid rgba(255, 140, 0, 0.3);
   color: white;
   padding: 2rem;
   margin: 1rem;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 140, 0, 0.2);
   transition: all 0.3s ease;
   opacity: 1;
   transform: translateY(0);
@@ -84,9 +87,9 @@
 }
 
 .edit-selection-btn:hover {
-  background: white;
+  background: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(255, 140, 0, 0.2);
 }
 
 /* Ajustes responsive para el sticky */
@@ -155,6 +158,7 @@
   padding-bottom: 2rem;
   transition: padding 0.3s ease;
   margin-top: 30px !important;
+  color: var(--text-color);
 }
 
 /* Efecto de desvanecimiento suave */
@@ -167,17 +171,18 @@
   min-height: 100vh;
   background: var(--background-color);
   padding-bottom: 2rem;
+  color: var(--text-color);
 }
 
 /* Header Mejorado */
 .galeria-header {
-  background: linear-gradient(135deg, #1f1c1b 0%, #1f1c1b 100%);
+  background: linear-gradient(135deg, #141517 0%, #1f2937 100%);
   color: white;
   padding: 2rem;
   margin: 1rem;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 140, 0, 0.2);
 }
 
 .galeria-header-content {
@@ -199,9 +204,8 @@
 
 .galeria-service {
   font-size: 1.1rem;
-  opacity: 0.9;
   margin: 0;
-  color: #e2e8f0;
+  color: #FFB347;
   font-weight: 500;
 }
 
@@ -307,9 +311,9 @@
 }
 
 .download-selection-btn:hover {
-  background: white;
+  background: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(255, 140, 0, 0.2);
 }
 
 /* Main Gallery Grid */
@@ -317,7 +321,7 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
-    background-color: rgb(253, 242, 242);
+    background-color: var(--background-color);
     display: flex;
     flex-direction: column;
     position: relative;
@@ -462,25 +466,25 @@
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  width: 56px;
-  height: 56px;
-  background: var(--primary-color);
-  color: white;
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: #000;
   border: none;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;
-  box-shadow: var(--shadow);
+  font-size: 1.2rem;
+  box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
   transition: var(--transition);
   z-index: 100;
 }
 
 .scroll-top-btn:hover {
   transform: translateY(-3px) scale(1.1);
-  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+  box-shadow: 0 8px 25px rgba(255, 140, 0, 0.5);
 }
 
 /* Overlay de imagen ampliada */
@@ -634,12 +638,18 @@
   justify-content: center;
   align-items: center;
   height: 50vh;
-  color: #666;
+  color: #9ca3af;
+}
+
+.gallery-loading svg,
+.gallery-empty svg {
+  color: #FF8C00;
+  margin-bottom: 1rem;
 }
 
 .gallery-empty h3 {
   margin: 1rem 0 0.5rem 0;
-  color: #333;
+  color: #d1d5db;
 }
 
 /* Responsive */
@@ -827,7 +837,7 @@
 }
 
 .preview-content {
-  background: white;
+  background: #1f2937;
   border-radius: 16px;
   width: 90%;
   max-width: 1200px;
@@ -840,7 +850,8 @@
 
 .preview-header {
   padding: 1.5rem 2rem;
-  background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+  background: linear-gradient(135deg, #141517 0%, #1f2937 100%);
+  border-bottom: 1px solid #FF8C00;
   color: white;
   display: flex;
   justify-content: space-between;
@@ -894,7 +905,7 @@
 }
 
 .preview-item {
-  background: #f8f9fa;
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -975,9 +986,9 @@
 }
 
 .preview-download-btn {
-  background: #3498db;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
   border: none;
-  color: white;
+  color: #000;
   width: 32px;
   height: 32px;
   border-radius: 6px;
@@ -989,18 +1000,18 @@
 }
 
 .preview-download-btn:hover {
-  background: #2980b9;
+  opacity: 0.9;
   transform: scale(1.1);
 }
 
 /* Preview Actions */
 .preview-actions {
   padding: 1.5rem 2rem;
-  background: #f8f9fa;
+  background: #141517;
   display: flex;
   gap: 1rem;
   justify-content: center;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #374151;
 }
 
 .preview-confirm-btn,
@@ -1023,8 +1034,8 @@
 }
 
 .preview-download-all-btn {
-  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-  color: white;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: #000;
 }
 
 .preview-clear-btn {
@@ -1064,8 +1075,8 @@
 }
 
 .preview-selection-btn {
-  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-  color: white;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: #000;
   border: none;
   padding: 0.7rem 1.2rem;
   border-radius: 25px;
@@ -1079,7 +1090,7 @@
 
 .preview-selection-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+  box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
 }
 
 /* Responsive */
@@ -1118,8 +1129,8 @@
   position: fixed;
   bottom: 2rem;
   left: 2rem;
-  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-  color: white;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: #000;
   border: none;
   padding: 0.8rem 1.5rem;
   border-radius: 25px;
@@ -1129,13 +1140,13 @@
   align-items: center;
   gap: 0.5rem;
   z-index: 100;
-  box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+  box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
   transition: all 0.3s ease;
 }
 
 .comments-toggle-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(155, 89, 182, 0.4);
+  box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4);
 }
 
 .comments-overlay {
@@ -1153,7 +1164,7 @@
 }
 
 .comments-content {
-  background: white;
+  background: #1f2937;
   border-radius: 16px;
   width: 90%;
   max-width: 600px;
@@ -1166,7 +1177,8 @@
 
 .comments-header {
   padding: 1.5rem;
-  background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+  background: linear-gradient(135deg, #141517 0%, #1f2937 100%);
+  border-bottom: 1px solid #FF8C00;
   color: white;
   display: flex;
   justify-content: space-between;
@@ -1199,27 +1211,29 @@
 
 .comments-tabs {
   display: flex;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #374151;
 }
 
 .tab-btn {
   flex: 1;
   padding: 1rem;
   border: none;
-  background: #f8f9fa;
+  background: rgba(0, 0, 0, 0.3);
+  color: #9ca3af;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
 }
 
 .tab-btn.active {
-  background: white;
-  border-bottom: 3px solid #3498db;
-  color: #3498db;
+  background: rgba(0, 0, 0, 0.5);
+  border-bottom: 3px solid #FF8C00;
+  color: #FF8C00;
 }
 
 .tab-btn:hover:not(.active) {
-  background: #e2e8f0;
+  background: rgba(255, 140, 0, 0.05);
+  color: #d1d5db;
 }
 
 .comments-tab,
@@ -1238,17 +1252,19 @@
 .add-request textarea {
   width: 100%;
   padding: 0.8rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #374151;
   border-radius: 8px;
   resize: vertical;
   font-family: inherit;
   font-size: 0.9rem;
+  background: #111827;
+  color: #ffffff;
 }
 
 .add-comment textarea:focus,
 .add-request textarea:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: #FF8C00;
 }
 
 .comment-actions,
@@ -1265,8 +1281,8 @@
 }
 
 .send-btn {
-  background: #3498db;
-  color: white;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: #000;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -1275,11 +1291,13 @@
   align-items: center;
   gap: 0.3rem;
   font-size: 0.9rem;
+  font-weight: 600;
   transition: all 0.3s ease;
 }
 
 .send-btn:hover {
-  background: #2980b9;
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .comments-list,
@@ -1291,10 +1309,12 @@
 
 .comment-item,
 .request-item {
-  background: #f8f9fa;
+  background: rgba(0, 0, 0, 0.3);
   padding: 1rem;
   border-radius: 8px;
-  border-left: 4px solid #3498db;
+  border-left: 4px solid #FF8C00;
+  border: 1px solid #374151;
+  border-left: 4px solid #FF8C00;
 }
 
 .comment-text,
@@ -1309,7 +1329,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.8rem;
-  color: #718096;
+  color: #9ca3af;
 }
 
 .comment-date,
@@ -1334,11 +1354,11 @@
 }
 
 .edit-btn {
-  color: #3498db;
+  color: #FF8C00;
 }
 
 .edit-btn:hover {
-  background: #ebf8ff;
+  background: rgba(255, 140, 0, 0.1);
 }
 
 .delete-btn {
@@ -1346,7 +1366,7 @@
 }
 
 .delete-btn:hover {
-  background: #fed7d7;
+  background: rgba(229, 62, 62, 0.15);
 }
 
 .comment-edit-actions,
@@ -1376,18 +1396,20 @@
 }
 
 .cancel-btn {
-  background: #e2e8f0;
-  color: #4a5568;
+  background: rgba(0, 0, 0, 0.3);
+  color: #9ca3af;
+  border: 1px solid #374151;
   margin-left: 0.5rem;
 }
 
 .cancel-btn:hover {
-  background: #cbd5e0;
+  background: rgba(0, 0, 0, 0.5);
+  color: #d1d5db;
 }
 
 .no-items {
   text-align: center;
-  color: #718096;
+  color: #9ca3af;
   font-style: italic;
   padding: 2rem;
 }
@@ -1425,8 +1447,8 @@
 
 /* Nuevos estilos para el botón de comentarios */
 .galeria-item-overlay .comment-btn {
-  background-color: #28a745;
-  color: white;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: #000;
   border: none;
   border-radius: 50%;
   width: 35px;
@@ -1440,7 +1462,7 @@
 }
 
 .galeria-item-overlay .comment-btn:hover {
-  background-color: #218838;
+  opacity: 0.9;
   transform: scale(1.1);
 }
 
@@ -1460,7 +1482,7 @@
 }
 
 .image-comments-content {
-  background-color: white;
+  background-color: #1f2937;
   border-radius: 10px;
   width: 90%;
   max-width: 900px;
@@ -1479,13 +1501,13 @@
   background: none;
   border: none;
   font-size: 24px;
-  color: #666;
+  color: #9ca3af;
   cursor: pointer;
   z-index: 10;
 }
 
 .image-comments-close:hover {
-  color: #000;
+  color: #ffffff;
 }
 
 .image-comments-container {
@@ -1500,8 +1522,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8f9fa;
-  min-height: 0; /* Permite que se ajuste correctamente */
+  background-color: #111827;
+  min-height: 0;
 }
 
 .image-comments-preview img {
@@ -1522,23 +1544,24 @@
 .image-comments-section h3 {
   margin-top: 0;
   margin-bottom: 15px;
-  color: #333;
-  flex-shrink: 0; /* Evita que se encoja */
+  color: #ffffff;
+  flex-shrink: 0;
 }
 
 .image-comments-list {
-  flex: 1; /* Ocupa el espacio disponible */
-  overflow-y: auto; /* Scroll interno */
+  flex: 1;
+  overflow-y: auto;
   margin-bottom: 15px;
-  border: 1px solid #eee;
+  border: 1px solid #374151;
   border-radius: 5px;
   padding: 10px;
-  min-height: 0; /* Permite que se ajuste correctamente */
+  min-height: 0;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .image-comment-item {
   padding: 10px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #374151;
   position: relative;
 }
 
@@ -1548,7 +1571,7 @@
 
 .image-comment-text {
   margin: 0 0 5px 0;
-  color: #333;
+  color: #d1d5db;
   word-break: break-word;
 }
 
@@ -1579,11 +1602,11 @@
 }
 
 .edit-comment-btn {
-  color: #007bff;
+  color: #FF8C00;
 }
 
 .edit-comment-btn:hover {
-  background-color: #e6f2ff;
+  background-color: rgba(255, 140, 0, 0.1);
 }
 
 .delete-comment-btn {
@@ -1591,28 +1614,30 @@
 }
 
 .delete-comment-btn:hover {
-  background-color: #ffe6e6;
+  background-color: rgba(220, 53, 69, 0.15);
 }
 
 .comment-edit-mode {
   margin-bottom: 10px;
-  background-color: #f8f9fa;
+  background-color: rgba(0, 0, 0, 0.3);
   padding: 10px;
   border-radius: 5px;
-  border: 1px solid #dee2e6;
+  border: 1px solid #374151;
 }
 
 .comment-edit-textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #374151;
   border-radius: 4px;
   resize: vertical;
   margin-bottom: 10px;
   font-family: inherit;
   font-size: 14px;
-  min-height: 80px; /* Altura mínima fija */
-  max-height: 120px; /* Altura máxima fija */
+  min-height: 80px;
+  max-height: 120px;
+  background: #111827;
+  color: #ffffff;
 }
 
 .comment-edit-actions {
@@ -1659,27 +1684,29 @@
 
 .no-comments {
   text-align: center;
-  color: #888;
+  color: #9ca3af;
   padding: 20px;
 }
 
 .image-add-comment {
-  border-top: 1px solid #eee;
+  border-top: 1px solid #374151;
   padding-top: 15px;
-  flex-shrink: 0; /* Evita que se encoja */
+  flex-shrink: 0;
 }
 
 .image-add-comment textarea {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #374151;
   border-radius: 5px;
   resize: vertical;
   margin-bottom: 10px;
   font-family: inherit;
   font-size: 14px;
-  min-height: 80px; /* Altura mínima fija */
-  max-height: 120px; /* Altura máxima fija */
+  min-height: 80px;
+  max-height: 120px;
+  background: #111827;
+  color: #ffffff;
 }
 
 .image-comment-form-actions {
@@ -1694,8 +1721,8 @@
 }
 
 .send-image-comment-btn {
-  background-color: #007bff;
-  color: white;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: #000;
   border: none;
   border-radius: 5px;
   padding: 8px 15px;
@@ -1704,10 +1731,12 @@
   align-items: center;
   gap: 5px;
   font-size: 14px;
+  font-weight: 600;
 }
 
 .send-image-comment-btn:hover:not(:disabled) {
-  background-color: #0069d9;
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .send-image-comment-btn:disabled {
@@ -1765,8 +1794,8 @@
   position: absolute;
   top: 70px;
   right: 15px;
-  background-color: #28a745;
-  color: white;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: #000;
   border: none;
   border-radius: 50%;
   width: 40px;
@@ -1780,7 +1809,7 @@
 }
 
 .overlay-comment-btn:hover {
-  background-color: #218838;
+  opacity: 0.9;
   transform: scale(1.1);
 }
 

@@ -4,9 +4,9 @@ const fs = require('fs').promises;
 const { v4: uuidv4 } = require('uuid'); 
 
 // Configuración
-const KEY_FILENAME = "C:\\Users\\HP\\OneDrive\\Escritorio\\PantoneMercedesUSAL\\BackEnd\\src\\config\\google-credentials.json";
-const PROJECT_ID = 'Pantone-web';
-const BUCKET_NAME = 'pantone-almacen-imagenes'; 
+const KEY_FILENAME = process.env.GOOGLE_CREDENTIALS_PATH || path.join(__dirname, '../config/google-credentials.json');
+const PROJECT_ID = process.env.PROJECTID || 'Pantone-web';
+const BUCKET_NAME = process.env.BUCKETNAME || 'pantone-almacen-imagenes';
 
 async function checkCredentials() {
   try {

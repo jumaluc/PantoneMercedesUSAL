@@ -1,9 +1,9 @@
-/* Stats Section Styles - Namespaced */
+/* Stats Section */
 .stats-section {
     padding: 20px;
     max-width: 1400px;
     margin: 0 auto;
-    background: #f8f9fa;
+    background: #111827;
     min-height: 100vh;
 }
 
@@ -13,25 +13,28 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
-    padding: 20px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px 24px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid #374151;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .stats-section__title {
-    color: #2c3e50;
-    font-size: 28px;
+    color: #ffffff;
+    font-size: 26px;
     font-weight: 700;
     margin: 0;
 }
 
 .stats-section__time-selector {
     display: flex;
-    gap: 10px;
-    background: #f8f9fa;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.3);
     padding: 5px;
     border-radius: 10px;
+    border: 1px solid #374151;
 }
 
 .stats-section__time-btn {
@@ -41,19 +44,21 @@
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
+    font-size: 13px;
     transition: all 0.3s ease;
-    color: #6c757d;
+    color: #9ca3af;
 }
 
 .stats-section__time-btn--active {
-    background: #3498db;
-    color: white;
-    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+    background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+    color: #000;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
 }
 
 .stats-section__time-btn:hover:not(.stats-section__time-btn--active) {
-    background: #e9ecef;
-    color: #495057;
+    background: rgba(255, 140, 0, 0.1);
+    color: #d1d5db;
 }
 
 /* Stats Cards */
@@ -65,47 +70,50 @@
 }
 
 .stats-section__card {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    padding: 24px;
+    border-radius: 14px;
+    border: 1px solid #374151;
     display: flex;
     align-items: center;
     gap: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid #e9ecef;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .stats-section__card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 140, 0, 0.3);
 }
 
 .stats-section__card-icon {
-    width: 70px;
-    height: 70px;
-    border-radius: 15px;
+    width: 65px;
+    height: 65px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
+    font-size: 26px;
     color: white;
+    flex-shrink: 0;
 }
 
-.stats-section__card-icon--clients { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.stats-section__card-icon--clients   { background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%); }
 .stats-section__card-icon--galleries { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-.stats-section__card-icon--actions { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-.stats-section__card-icon--images { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+.stats-section__card-icon--actions   { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.stats-section__card-icon--images    { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
 
 .stats-section__card-info h3 {
     font-size: 32px;
     font-weight: 700;
-    color: #2c3e50;
-    margin: 0 0 5px 0;
+    color: #ffffff;
+    margin: 0 0 4px 0;
 }
 
 .stats-section__card-info p {
-    color: #6c757d;
+    color: #9ca3af;
     margin: 0 0 8px 0;
     font-size: 14px;
     font-weight: 500;
@@ -115,23 +123,26 @@
     font-size: 12px;
     color: #27ae60;
     font-weight: 600;
-    background: #d5f4e6;
+    background: rgba(39, 174, 96, 0.15);
     padding: 4px 8px;
     border-radius: 12px;
+    border: 1px solid rgba(39, 174, 96, 0.25);
 }
 
 /* Activity Summary */
 .stats-section__summary {
-    background: white;
-    border-radius: 15px;
-    padding: 25px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid #374151;
+    border-radius: 14px;
+    padding: 24px;
     margin-bottom: 30px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .stats-section__summary-title {
-    color: #2c3e50;
-    font-size: 22px;
+    color: #ffffff;
+    font-size: 20px;
     font-weight: 600;
     margin-bottom: 20px;
 }
@@ -139,15 +150,16 @@
 .stats-section__summary-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .stats-section__summary-item {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 15px;
-    background: #f8f9fa;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid #374151;
     border-radius: 10px;
     position: relative;
     overflow: hidden;
@@ -160,8 +172,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
+    background: rgba(255, 140, 0, 0.15);
     font-size: 18px;
+    flex-shrink: 0;
 }
 
 .stats-section__summary-details {
@@ -173,11 +186,11 @@
 
 .stats-section__summary-type {
     font-weight: 600;
-    color: #2c3e50;
+    color: #d1d5db;
 }
 
 .stats-section__summary-count {
-    color: #6c757d;
+    color: #9ca3af;
     font-size: 14px;
 }
 
@@ -186,16 +199,18 @@
     left: 0;
     top: 0;
     height: 100%;
-    opacity: 0.1;
+    opacity: 0.08;
     transition: width 0.3s ease;
 }
 
 /* Activities Section */
 .stats-section__activities {
-    background: white;
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid #374151;
+    border-radius: 14px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     margin-bottom: 30px;
 }
 
@@ -203,12 +218,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 24px;
 }
 
 .stats-section__activities-title {
-    color: #2c3e50;
-    font-size: 22px;
+    color: #ffffff;
+    font-size: 20px;
     font-weight: 600;
     margin: 0;
 }
@@ -216,46 +231,49 @@
 .stats-section__activities-controls {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 .stats-section__refresh-btn {
-    background: #3498db;
-    color: white;
+    background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+    color: #000;
     border: none;
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 0.3s ease;
+    font-size: 15px;
+    transition: all 0.3s ease;
 }
 
 .stats-section__refresh-btn:hover:not(:disabled) {
-    background: #2980b9;
+    opacity: 0.85;
+    transform: scale(1.05);
 }
 
 .stats-section__refresh-btn:disabled {
-    opacity: 0.6;
+    opacity: 0.4;
     cursor: not-allowed;
 }
 
 .stats-section__filter-badge {
-    background: #f8f9fa;
-    padding: 8px 12px;
+    background: rgba(255, 140, 0, 0.1);
+    border: 1px solid rgba(255, 140, 0, 0.25);
+    padding: 6px 12px;
     border-radius: 20px;
     font-size: 12px;
-    color: #6c757d;
+    color: #FFB347;
     font-weight: 500;
 }
 
 /* Filters */
 .stats-section__filters {
     display: flex;
-    gap: 15px;
-    margin-bottom: 25px;
+    gap: 12px;
+    margin-bottom: 24px;
     flex-wrap: wrap;
     align-items: center;
 }
@@ -263,74 +281,75 @@
 .stats-section__filter-group {
     display: flex;
     align-items: center;
-    background: #f8f9fa;
+    background: #111827;
     border-radius: 10px;
-    padding: 0 15px;
-    border: 1px solid #e9ecef;
+    padding: 0 14px;
+    border: 1px solid #374151;
     flex: 1;
     min-width: 200px;
+    transition: border-color 0.2s;
+}
+
+.stats-section__filter-group:focus-within {
+    border-color: #FF8C00;
 }
 
 .stats-section__filter-icon {
-    color: #6c757d;
+    color: #9ca3af;
     margin-right: 10px;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .stats-section__filter-input {
     background: transparent;
     border: none;
-    padding: 12px 0;
+    padding: 11px 0;
     font-size: 14px;
     width: 100%;
     outline: none;
-    color: #495057;
+    color: #d1d5db;
 }
 
 .stats-section__filter-input::placeholder {
-    color: #adb5bd;
+    color: #6b7280;
 }
 
 .stats-section__clear-filters-btn {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    padding: 12px 20px;
+    background: transparent;
+    color: #ef4444;
+    border: 2px solid #ef4444;
+    padding: 10px 18px;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: background 0.3s ease;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
     white-space: nowrap;
-    align-self: center;
 }
 
 .stats-section__clear-filters-btn:hover {
-    background: #c0392b;
-}
-
-.stats-section__clear-filters-btn--center {
-    align-self: center;
-    margin-top: 10px;
+    background: rgba(239, 68, 68, 0.1);
 }
 
 /* Activities Table */
 .stats-section__activities-table {
-    background: white;
+    background: #111827;
     border-radius: 10px;
     overflow: hidden;
-    border: 1px solid #e9ecef;
+    border: 1px solid #374151;
 }
 
 .stats-section__table-header {
     display: grid;
     grid-template-columns: 1.5fr 1.2fr 1.5fr 2fr 1.5fr 1fr;
-    background: #f8f9fa;
-    padding: 15px 20px;
+    background: #141517;
+    padding: 14px 20px;
     font-weight: 600;
-    color: #495057;
-    font-size: 14px;
-    border-bottom: 1px solid #e9ecef;
+    color: #9ca3af;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #374151;
 }
 
 .stats-section__table-body {
@@ -341,14 +360,14 @@
 .stats-section__table-row {
     display: grid;
     grid-template-columns: 1.5fr 1.2fr 1.5fr 2fr 1.5fr 1fr;
-    padding: 15px 20px;
-    border-bottom: 1px solid #f8f9fa;
+    padding: 14px 20px;
+    border-bottom: 1px solid #374151;
     transition: background 0.2s ease;
     align-items: center;
 }
 
 .stats-section__table-row:hover {
-    background: #f8f9fa;
+    background: rgba(255, 140, 0, 0.04);
 }
 
 .stats-section__table-row:last-child {
@@ -356,49 +375,33 @@
 }
 
 .stats-section__table-col {
-    padding: 5px 0;
+    padding: 4px 0;
 }
 
-/* User Column */
-.stats-section__user-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
+/* User column */
 .stats-section__user-name {
     font-weight: 600;
-    color: #2c3e50;
+    color: #d1d5db;
     font-size: 14px;
 }
 
-/* User Type Column */
+/* User type badge */
 .stats-section__user-type {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.stats-section__user-type-icon {
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-}
-
 .stats-section__user-type-badge {
-    padding: 4px 8px;
+    padding: 3px 8px;
     border-radius: 12px;
     font-size: 11px;
     font-weight: 600;
     color: white;
-    text-align: center;
     display: inline-block;
 }
 
-/* Action Column */
+/* Action column */
 .stats-section__action-type {
     display: flex;
     align-items: center;
@@ -412,44 +415,39 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f8f9fa;
-    font-size: 14px;
-}
-
-/* Description Column */
-.stats-section__table-col--description {
-    color: #495057;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-/* Date Column */
-.stats-section__table-col--date {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #6c757d;
+    background: rgba(255, 140, 0, 0.1);
     font-size: 13px;
 }
 
-.stats-section__date-icon {
-    font-size: 12px;
-    opacity: 0.7;
+/* Description */
+.stats-section__table-col--description {
+    color: #9ca3af;
+    font-size: 13px;
+    line-height: 1.4;
 }
 
-/* Status Column */
+/* Date */
+.stats-section__table-col--date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+/* Status badge */
 .stats-section__status-badge {
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: white;
     text-align: center;
     display: inline-block;
-    min-width: 80px;
+    min-width: 70px;
 }
 
-/* Loading States */
+/* Loading */
 .stats-section__loading,
 .stats-section__activities-loading {
     display: flex;
@@ -461,64 +459,58 @@
 }
 
 .stats-section__loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
+    width: 38px;
+    height: 38px;
+    border: 4px solid #374151;
+    border-top: 4px solid #FF8C00;
     border-radius: 50%;
     animation: stats-section-spin 1s linear infinite;
     margin-bottom: 15px;
 }
 
 @keyframes stats-section-spin {
-    0% { transform: rotate(0deg); }
+    0%   { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
 .stats-section__loading p,
 .stats-section__activities-loading p {
-    color: #6c757d;
-    font-size: 16px;
+    color: #9ca3af;
+    font-size: 15px;
     margin: 0;
 }
 
-/* No Activities State */
+/* Empty state */
 .stats-section__no-activities {
     text-align: center;
     padding: 60px 20px;
-    color: #6c757d;
+    color: #9ca3af;
 }
 
 .stats-section__no-activities svg {
     margin-bottom: 20px;
-    opacity: 0.5;
+    opacity: 0.4;
+    color: #FF8C00;
 }
 
 .stats-section__no-activities-text {
-    font-size: 16px;
-    margin-bottom: 20px;
+    font-size: 15px;
+    margin-bottom: 15px;
+    color: #d1d5db;
 }
 
 .stats-section__no-data {
     text-align: center;
-    color: #6c757d;
+    color: #9ca3af;
     padding: 20px;
     font-style: italic;
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 1200px) {
-    .stats-section {
-        padding: 15px;
-    }
-    
-    .stats-section__filters {
-        flex-direction: column;
-    }
-    
-    .stats-section__filter-group {
-        min-width: 100%;
-    }
+    .stats-section { padding: 15px; }
+    .stats-section__filters { flex-direction: column; }
+    .stats-section__filter-group { min-width: 100%; }
 }
 
 @media (max-width: 768px) {
@@ -527,44 +519,36 @@
         gap: 15px;
         align-items: stretch;
     }
-    
-    .stats-section__time-selector {
-        justify-content: center;
-    }
-    
-    .stats-section__cards-grid {
-        grid-template-columns: 1fr;
-    }
-    
+
+    .stats-section__time-selector { justify-content: center; }
+    .stats-section__cards-grid { grid-template-columns: 1fr; }
+
     .stats-section__activities-header {
         flex-direction: column;
         gap: 15px;
         align-items: stretch;
     }
-    
-    .stats-section__activities-controls {
-        justify-content: space-between;
-    }
-    
+
+    .stats-section__activities-controls { justify-content: space-between; }
+
     .stats-section__table-header,
     .stats-section__table-row {
         grid-template-columns: 1fr;
-        gap: 10px;
-        padding: 15px;
+        gap: 8px;
+        padding: 14px;
     }
-    
+
     .stats-section__table-col::before {
         content: attr(data-label);
         font-weight: 600;
-        color: #495057;
-        font-size: 12px;
+        color: #9ca3af;
+        font-size: 11px;
+        text-transform: uppercase;
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 3px;
     }
-    
-    .stats-section__table-header {
-        display: none;
-    }
+
+    .stats-section__table-header { display: none; }
 }
 
 @media (max-width: 480px) {
@@ -573,24 +557,13 @@
         text-align: center;
         padding: 20px;
     }
-    
-    .stats-section__activities {
-        padding: 20px 15px;
-    }
-    
-    .stats-section__clear-filters-btn {
-        width: 100%;
-    }
-    
+
+    .stats-section__activities { padding: 18px 14px; }
+    .stats-section__clear-filters-btn { width: 100%; }
+
     .stats-section__summary-details {
         flex-direction: column;
         align-items: flex-start;
-        gap: 5px;
-    }
-    
-    .stats-section__user-type {
-        flex-direction: column;
-        gap: 5px;
-        align-items: flex-start;
+        gap: 4px;
     }
 }

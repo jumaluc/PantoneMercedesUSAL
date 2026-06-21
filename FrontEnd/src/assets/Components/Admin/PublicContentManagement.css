@@ -3,7 +3,7 @@
     padding: 2rem;
     max-width: 1400px;
     margin: 0 auto;
-    background: #f8f9fa;
+    background: #111827;
     min-height: 100vh;
 }
 
@@ -14,25 +14,26 @@
 
 .public-content-management__title {
     font-size: 2.5rem;
-    color: #2c3e50;
+    color: #ffffff;
     margin-bottom: 0.5rem;
     font-weight: 700;
 }
 
 .public-content-management__subtitle {
     font-size: 1.1rem;
-    color: #7f8c8d;
+    color: #9ca3af;
     margin-bottom: 0;
 }
 
 /* Tabs Navigation */
 .public-content-management__tabs {
     display: flex;
-    background: white;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid #374151;
     border-radius: 10px;
     padding: 0.5rem;
     margin-bottom: 2rem;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     flex-wrap: wrap;
     gap: 0.5rem;
 }
@@ -47,7 +48,7 @@
     border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
-    color: #7f8c8d;
+    color: #9ca3af;
     transition: all 0.3s ease;
     flex: 1;
     min-width: 200px;
@@ -55,14 +56,15 @@
 }
 
 .public-content-management__tab:hover {
-    background: #f8f9fa;
-    color: #3498db;
+    background: rgba(255,140,0,0.08);
+    color: #FF8C00;
 }
 
 .public-content-management__tab--active {
-    background: #3498db;
-    color: white;
-    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+    color: #000;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255,140,0,0.3);
 }
 
 .public-content-management__tab-icon {
@@ -70,10 +72,12 @@
 }
 
 .public-content-management__content {
-    background: white;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid #374151;
     border-radius: 15px;
     padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     min-height: 500px;
 }
 
@@ -85,14 +89,14 @@
 
 .company-info-management__title {
     font-size: 1.8rem;
-    color: #2c3e50;
+    color: #ffffff;
     margin-bottom: 2rem;
-    border-bottom: 2px solid #3498db;
+    border-bottom: 2px solid #FF8C00;
     padding-bottom: 0.5rem;
 }
 
 .company-info-management__form {
-    background: #f8f9fa;
+    background: #111827;
     padding: 2rem;
     border-radius: 10px;
 }
@@ -115,7 +119,7 @@
 
 .company-info-management__label {
     font-weight: 600;
-    color: #2c3e50;
+    color: #ffffff;
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
 }
@@ -123,18 +127,19 @@
 .company-info-management__input,
 .company-info-management__textarea {
     padding: 0.75rem 1rem;
-    border: 2px solid #e9ecef;
+    border: 1px solid #374151;
     border-radius: 8px;
     font-size: 1rem;
     transition: all 0.3s ease;
-    background: white;
+    background: #111827;
+    color: #ffffff;
 }
 
 .company-info-management__input:focus,
 .company-info-management__textarea:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    border-color: #FF8C00;
+    box-shadow: 0 0 0 1px #FF8C00;
 }
 
 .company-info-management__textarea {
@@ -166,7 +171,7 @@
     justify-content: flex-end;
     gap: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid #374151;
 }
 
 .company-info-management__submit-btn {
@@ -206,17 +211,17 @@
     align-items: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid #e9ecef;
+    border: 1px solid #374151;
 }
 
 .projects-management__title {
     font-size: 1.8rem;
-    color: #2c3e50;
+    color: #ffffff;
     margin: 0;
 }
 
 .projects-management__add-btn {
-    background: #3498db;
+    background: #FF8C00;
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -230,7 +235,7 @@
 }
 
 .projects-management__add-btn:hover {
-    background: #2980b9;
+    background: #e67e00;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
 }
@@ -243,8 +248,8 @@
 }
 
 .projects-management__card {
-    background: white;
-    border: 1px solid #e9ecef;
+    background: #1f2937;
+    border: 1px solid #374151;
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -260,7 +265,7 @@
     width: 100%;
     height: 200px;
     object-fit: cover;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid #374151;
 }
 
 .projects-management__card-content {
@@ -269,12 +274,12 @@
 
 .projects-management__card-content h3 {
     margin: 0 0 0.5rem 0;
-    color: #2c3e50;
+    color: #ffffff;
     font-size: 1.2rem;
 }
 
 .projects-management__card-content p {
-    color: #7f8c8d;
+    color: #9ca3af;
     margin-bottom: 1rem;
     line-height: 1.5;
 }
@@ -295,12 +300,12 @@
 }
 
 .projects-management__card-actions button:first-child {
-    background: #3498db;
+    background: #FF8C00;
     color: white;
 }
 
 .projects-management__card-actions button:first-child:hover {
-    background: #2980b9;
+    background: #e67e00;
 }
 
 .projects-management__card-actions button:last-child {
@@ -328,7 +333,7 @@
 }
 
 .projects-management__form {
-    background: white;
+    background: #1f2937;
     padding: 2rem;
     border-radius: 15px;
     width: 100%;
@@ -340,7 +345,7 @@
 
 .projects-management__form h3 {
     margin: 0 0 1.5rem 0;
-    color: #2c3e50;
+    color: #ffffff;
     font-size: 1.5rem;
 }
 
@@ -350,7 +355,7 @@
     justify-content: flex-end;
     margin-top: 2rem;
     padding-top: 1rem;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid #374151;
 }
 
 .projects-management__form-actions button {
@@ -393,12 +398,12 @@
     align-items: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid #e9ecef;
+    border: 1px solid #374151;
 }
 
 .testimonials-management__title {
     font-size: 1.8rem;
-    color: #2c3e50;
+    color: #ffffff;
     margin: 0;
 }
 
@@ -426,8 +431,8 @@
 }
 
 .testimonials-management__card {
-    background: white;
-    border: 1px solid #e9ecef;
+    background: #1f2937;
+    border: 1px solid #374151;
     border-radius: 10px;
     padding: 1.5rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -468,11 +473,11 @@
 
 .testimonials-management__client-details h4 {
     margin: 0 0 0.25rem 0;
-    color: #2c3e50;
+    color: #ffffff;
 }
 
 .testimonials-management__client-project {
-    color: #7f8c8d;
+    color: #9ca3af;
     font-size: 0.9rem;
     margin: 0;
 }
@@ -505,12 +510,12 @@
 }
 
 .testimonials-management__card-actions button:first-child {
-    background: #3498db;
+    background: #FF8C00;
     color: white;
 }
 
 .testimonials-management__card-actions button:first-child:hover {
-    background: #2980b9;
+    background: #e67e00;
 }
 
 .testimonials-management__card-actions button:last-child {
@@ -534,12 +539,12 @@
     align-items: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid #e9ecef;
+    border: 1px solid #374151;
 }
 
 .faqs-management__title {
     font-size: 1.8rem;
-    color: #2c3e50;
+    color: #ffffff;
     margin: 0;
 }
 
@@ -567,8 +572,8 @@
 }
 
 .faqs-management__item {
-    background: white;
-    border: 1px solid #e9ecef;
+    background: #1f2937;
+    border: 1px solid #374151;
     border-radius: 10px;
     padding: 1.5rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -581,7 +586,7 @@
 
 .faqs-management__question {
     font-weight: 600;
-    color: #2c3e50;
+    color: #ffffff;
     margin-bottom: 0.75rem;
     font-size: 1.1rem;
 }
@@ -597,11 +602,11 @@
     justify-content: space-between;
     align-items: center;
     font-size: 0.9rem;
-    color: #7f8c8d;
+    color: #9ca3af;
 }
 
 .faqs-management__category {
-    background: #3498db;
+    background: #FF8C00;
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
@@ -623,12 +628,12 @@
 }
 
 .faqs-management__item-actions button:first-child {
-    background: #3498db;
+    background: #FF8C00;
     color: white;
 }
 
 .faqs-management__item-actions button:first-child:hover {
-    background: #2980b9;
+    background: #e67e00;
 }
 
 .faqs-management__item-actions button:last-child {
@@ -652,12 +657,12 @@
     align-items: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid #e9ecef;
+    border: 1px solid #374151;
 }
 
 .policies-management__title {
     font-size: 1.8rem;
-    color: #2c3e50;
+    color: #ffffff;
     margin: 0;
 }
 
@@ -685,8 +690,8 @@
 }
 
 .policies-management__item {
-    background: white;
-    border: 1px solid #e9ecef;
+    background: #1f2937;
+    border: 1px solid #374151;
     border-radius: 10px;
     padding: 1.5rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -707,7 +712,7 @@
 
 .policies-management__item-title {
     font-size: 1.2rem;
-    color: #2c3e50;
+    color: #ffffff;
     margin: 0 0 0.5rem 0;
 }
 
@@ -742,12 +747,12 @@
 }
 
 .policies-management__item-actions button:first-child {
-    background: #3498db;
+    background: #FF8C00;
     color: white;
 }
 
 .policies-management__item-actions button:first-child:hover {
-    background: #2980b9;
+    background: #e67e00;
 }
 
 .policies-management__item-actions button:last-child {
@@ -763,7 +768,7 @@
 .public-content-management__empty {
     text-align: center;
     padding: 3rem 2rem;
-    color: #7f8c8d;
+    color: #9ca3af;
 }
 
 .public-content-management__empty-icon {
@@ -784,14 +789,14 @@
     align-items: center;
     justify-content: center;
     padding: 3rem 2rem;
-    color: #7f8c8d;
+    color: #9ca3af;
 }
 
 .public-content-management__loading-spinner {
     width: 40px;
     height: 40px;
     border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
+    border-top: 4px solid #FF8C00;
     border-radius: 50%;
     animation: public-content-spin 1s linear infinite;
     margin-bottom: 1rem;
@@ -884,7 +889,7 @@
 }
 
 .public-galleries-management__title {
-    color: #2d3748;
+    color: #ffffff;
     margin: 0;
 }
 
@@ -922,7 +927,7 @@
 }
 
 .public-galleries-management__form {
-    background: white;
+    background: #1f2937;
     padding: 2rem;
     border-radius: 12px;
     max-width: 600px;
@@ -933,7 +938,7 @@
 
 .public-galleries-management__form h3 {
     margin-bottom: 1.5rem;
-    color: #2d3748;
+    color: #ffffff;
 }
 
 .company-info-management__file-input {
@@ -1035,7 +1040,7 @@
 }
 
 .public-galleries-management__card {
-    background: white;
+    background: #1f2937;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -1064,8 +1069,8 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    background: #f8f9fa;
-    color: #6c757d;
+    background: #111827;
+    color: #9ca3af;
     gap: 0.5rem;
 }
 
@@ -1087,13 +1092,13 @@
 
 .public-galleries-management__card-title {
     margin: 0 0 0.5rem 0;
-    color: #2d3748;
+    color: #ffffff;
     font-size: 1.1rem;
     font-weight: 600;
 }
 
 .public-galleries-management__card-description {
-    color: #6c757d;
+    color: #9ca3af;
     margin-bottom: 1rem;
     font-size: 0.9rem;
 }
@@ -1104,7 +1109,7 @@
     align-items: center;
     margin-bottom: 1rem;
     font-size: 0.8rem;
-    color: #6c757d;
+    color: #9ca3af;
 }
 
 .public-galleries-management__card-images {
@@ -1200,6 +1205,6 @@
 
 .public-galleries-management__file-help {
     margin-top: 0.5rem;
-    color: #6c757d;
+    color: #9ca3af;
     font-size: 0.9rem;
 }

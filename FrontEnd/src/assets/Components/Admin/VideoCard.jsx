@@ -113,8 +113,8 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
             title: '¿Eliminar video?',
             html: `
                 <div style="text-align: left;">
-                    <p style="margin-bottom: 10px; color: #666;">¿Estás seguro de que quieres eliminar este video?</p>
-                    <div style="background: #f8f9fa; padding: 10px; border-radius: 6px;">
+                    <p style="margin-bottom: 10px; color: #9ca3af;">¿Estás seguro de que quieres eliminar este video?</p>
+                    <div style="background: rgba(0,0,0,0.3); border: 1px solid #374151; padding: 10px; border-radius: 6px; color: #d1d5db;">
                         <strong>Video:</strong> ${video.title}<br>
                         <strong>Cliente:</strong> ${video.client?.first_name} ${video.client?.last_name}
                     </div>
