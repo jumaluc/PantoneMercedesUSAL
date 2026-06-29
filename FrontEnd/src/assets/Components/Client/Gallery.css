@@ -33,70 +33,73 @@
   border: 1px solid rgba(255, 140, 0, 0.2);
 }
 
-/* ── Barra de selección fija ── */
-.selection-bar {
-  position: fixed;
-  top: 70px;
-  left: 0;
-  right: 0;
-  z-index: 999;
-  background: #141517;
-  border-top: 1px solid #374151;
-  border-bottom: 2px solid var(--primary-color);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
-  animation: selBarIn 0.22s ease-out;
-}
-
-@keyframes selBarIn {
-  from { transform: translateY(-100%); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-}
-
-.selection-bar--locked {
-  background: #141517;
-  border-bottom-color: #22c55e;
-}
-
-.selection-bar-content {
+/* ── Bloque de selección dentro del header ── */
+.ghs-locked,
+.ghs-selecting {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 1rem;
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 0.65rem 2rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ghs-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.selection-bar-info {
+.ghs-row--songs {
+  opacity: 0.85;
+}
+
+.ghs-info {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   font-weight: 600;
   color: white;
+  flex-wrap: wrap;
 }
 
-.selection-bar-icon {
-  color: var(--primary-color);
-  font-size: 1.1rem;
-}
-
-.selection-bar-count {
+.ghs-icon {
   font-size: 1rem;
 }
 
-.selection-bar-gallery {
-  font-size: 0.85rem;
+.ghs-icon--green { color: #22c55e; }
+.ghs-icon--orange { color: var(--primary-color); }
+
+.ghs-label {
+  font-size: 0.95rem;
+}
+
+.ghs-desc {
+  font-size: 0.82rem;
   color: #9ca3af;
   font-weight: 400;
 }
 
-.selection-bar-actions {
+.ghs-actions {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
-/* Botones de la barra */
+/* Fila de canciones en barra de selección confirmada */
+.selection-songs-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 0.5rem;
+  padding-bottom: 0.65rem;
+}
+
+/* Botones */
 .sel-btn {
   display: flex;
   align-items: center;

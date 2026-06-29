@@ -443,7 +443,7 @@ const Gallery = ({ user }) => {
   }
 
   return (
-    <div className={`galeria-container ${selectedImages.size > 0 ? 'with-selection' : ''}`}>
+    <div className="galeria-container">
 
       {currentGallery && (
         <header className="galeria-header">
@@ -476,64 +476,62 @@ const Gallery = ({ user }) => {
               </div>
             </div>
           </div>
-        </header>
-      )}
 
-      {selectionLocked ? (
-        <div className="selection-bar selection-bar--locked">
-          <div className="selection-bar-content">
-            <div className="selection-bar-info">
-              <FontAwesomeIcon icon={faCheckCircle} className="selection-bar-icon" />
-              <span className="selection-bar-count">Selección confirmada</span>
-              <span className="selection-bar-gallery">— Tu fotógrafo ya recibió tu elección de fotos</span>
+          {/* Estado de selección dentro del header */}
+          {selectionLocked ? (
+            <div className="ghs-locked">
+              <div className="ghs-row">
+                <div className="ghs-info">
+                  <FontAwesomeIcon icon={faCheckCircle} className="ghs-icon ghs-icon--green" />
+                  <span className="ghs-label">Selección confirmada</span>
+                  <span className="ghs-desc">Tu fotógrafo ya recibió tu elección de fotos</span>
+                </div>
+                <button className="sel-btn sel-btn--danger" onClick={cancelSelectionByClient}>
+                  <FontAwesomeIcon icon={faTrash} /> Borrar selección
+                </button>
+              </div>
+              {songSelection && (
+                <div className="ghs-row ghs-row--songs">
+                  <div className="ghs-info">
+                    <span className="ghs-icon">🎵</span>
+                    <span className="ghs-label">Canciones</span>
+                    <span className="ghs-desc">
+                      {songSelection.let_admin_choose
+                        ? 'El equipo de Pantone las elegirá'
+                        : [songSelection.song_1, songSelection.song_2, songSelection.song_3].filter(Boolean).join(' · ')}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="selection-bar-actions">
-              <button className="sel-btn sel-btn--danger" onClick={cancelSelectionByClient} title="Borrar tu selección actual y volver a elegir">
-                <FontAwesomeIcon icon={faTrash} /> Borrar selección
-              </button>
-            </div>
-          </div>
-          {songSelection && (
-            <div className="selection-bar-content selection-songs-row">
-              <div className="selection-bar-info">
-                <span className="selection-bar-icon">🎵</span>
-                <span className="selection-bar-count">Canciones</span>
-                <span className="selection-bar-gallery">
-                  {songSelection.let_admin_choose
-                    ? '— El equipo de Pantone las elegirá'
-                    : '— ' + [songSelection.song_1, songSelection.song_2, songSelection.song_3].filter(Boolean).join(' · ')}
-                </span>
+          ) : selectedImages.size > 0 && (
+            <div className="ghs-selecting">
+              <div className="ghs-row">
+                <div className="ghs-info">
+                  <FontAwesomeIcon icon={faCheckCircle} className="ghs-icon ghs-icon--orange" />
+                  <span className="ghs-label">
+                    {selectedImages.size} imagen{selectedImages.size !== 1 ? 'es' : ''} seleccionada{selectedImages.size !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className="ghs-actions">
+                  <button className="sel-btn sel-btn--primary" onClick={confirmSelection}>
+                    <FontAwesomeIcon icon={faCheckCircle} /> Confirmar
+                  </button>
+                  <button className="sel-btn sel-btn--secondary" onClick={downloadSelected} disabled={downloading}>
+                    {downloading ? <FontAwesomeIcon icon={faSpinner} spin /> : <FontAwesomeIcon icon={faDownload} />}
+                    Descargar
+                  </button>
+                  <button className="sel-btn sel-btn--ghost" onClick={previewSelected}>
+                    <FontAwesomeIcon icon={faEye} /> Previsualizar
+                  </button>
+                  <button className="sel-btn sel-btn--danger" onClick={clearSelection}>
+                    <FontAwesomeIcon icon={faTimes} /> Limpiar
+                  </button>
+                </div>
               </div>
             </div>
           )}
-        </div>
-      ) : selectedImages.size > 0 && (
-        <div className="selection-bar">
-          <div className="selection-bar-content">
-            <div className="selection-bar-info">
-              <FontAwesomeIcon icon={faCheckCircle} className="selection-bar-icon" />
-              <span className="selection-bar-count">
-                {selectedImages.size} imagen{selectedImages.size !== 1 ? 'es' : ''} seleccionada{selectedImages.size !== 1 ? 's' : ''}
-              </span>
-              <span className="selection-bar-gallery">— {currentGallery?.gallery?.title}</span>
-            </div>
-            <div className="selection-bar-actions">
-              <button className="sel-btn sel-btn--primary" onClick={confirmSelection}>
-                <FontAwesomeIcon icon={faCheckCircle} /> Confirmar
-              </button>
-              <button className="sel-btn sel-btn--secondary" onClick={downloadSelected} disabled={downloading}>
-                {downloading ? <FontAwesomeIcon icon={faSpinner} spin /> : <FontAwesomeIcon icon={faDownload} />}
-                Descargar
-              </button>
-              <button className="sel-btn sel-btn--ghost" onClick={previewSelected}>
-                <FontAwesomeIcon icon={faEye} /> Previsualizar
-              </button>
-              <button className="sel-btn sel-btn--danger" onClick={clearSelection}>
-                <FontAwesomeIcon icon={faTimes} /> Limpiar
-              </button>
-            </div>
-          </div>
-        </div>
+        </header>
       )}
 
       <main className="galeria-main">
