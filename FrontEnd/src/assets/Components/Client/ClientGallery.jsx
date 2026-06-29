@@ -494,27 +494,16 @@ const Gallery = ({ user }) => {
             </div>
           </div>
           {songSelection && (
-            <div className="selection-songs-panel">
-              <div className="selection-songs-title">
-                🎵 {songSelection.let_admin_choose
-                  ? 'Dejaste que el equipo elija las canciones'
-                  : 'Tus canciones elegidas'}
+            <div className="selection-bar-content selection-songs-row">
+              <div className="selection-bar-info">
+                <span className="selection-bar-icon">🎵</span>
+                <span className="selection-bar-count">Canciones</span>
+                <span className="selection-bar-gallery">
+                  {songSelection.let_admin_choose
+                    ? '— El equipo de Pantone las elegirá'
+                    : '— ' + [songSelection.song_1, songSelection.song_2, songSelection.song_3].filter(Boolean).join(' · ')}
+                </span>
               </div>
-              {!songSelection.let_admin_choose && (
-                <div className="selection-songs-list">
-                  {[songSelection.song_1, songSelection.song_2, songSelection.song_3]
-                    .filter(Boolean)
-                    .map((song, i) => (
-                      <span key={i} className="selection-song-item">
-                        <span className="selection-song-num">{i + 1}</span>
-                        {song}
-                      </span>
-                    ))}
-                </div>
-              )}
-              {songSelection.notes && (
-                <p className="selection-songs-notes">Aclaraciones: {songSelection.notes}</p>
-              )}
             </div>
           )}
         </div>
