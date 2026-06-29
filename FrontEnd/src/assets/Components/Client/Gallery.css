@@ -1852,18 +1852,18 @@
 /* Panel de canciones en barra de selección confirmada */
 .selection-songs-panel {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 10px 20px 12px;
+  padding: 8px 2rem 12px;
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .selection-songs-title {
   font-size: 0.82rem;
   font-weight: 600;
   color: #d1d5db;
-  flex-shrink: 0;
 }
 
 .selection-songs-list {
