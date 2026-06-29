@@ -1839,13 +1839,70 @@
   .image-comments-container {
     flex-direction: column;
   }
-  
+
   .image-comments-preview {
     max-height: 40vh;
   }
-  
+
   .image-comments-section {
     max-height: 50vh;
   }
+}
+
+/* Panel de canciones en barra de selección confirmada */
+.selection-songs-panel {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 20px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.selection-songs-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #d1d5db;
+  flex-shrink: 0;
+}
+
+.selection-songs-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selection-song-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 20px;
+  padding: 3px 12px 3px 6px;
+  font-size: 0.8rem;
+  color: #c4b5fd;
+}
+
+.selection-song-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 50%;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #a78bfa;
+  flex-shrink: 0;
+}
+
+.selection-songs-notes {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0;
+  width: 100%;
+  font-style: italic;
 }
 

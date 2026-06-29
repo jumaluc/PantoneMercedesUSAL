@@ -216,11 +216,11 @@ const SelectionsSection = () => {
                           El cliente dejó que el equipo elija las canciones
                         </p>
                       ) : (
-                        <ol className="sel-songs-list">
+                        <ul className="sel-songs-list">
                           {[sel.song_1, sel.song_2, sel.song_3].filter(Boolean).map((song, i) => (
-                            <li key={i}>{song}</li>
+                            <li key={i} data-num={i + 1}>{song}</li>
                           ))}
-                        </ol>
+                        </ul>
                       )}
                       {sel.song_notes && (
                         <p className="sel-songs-notes">

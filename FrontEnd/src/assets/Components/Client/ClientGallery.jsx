@@ -31,6 +31,7 @@ const Gallery = ({ user }) => {
   const [commentsImage, setCommentsImage] = useState(null);
   const [showSongModal, setShowSongModal] = useState(false);
   const [confirmingSelection, setConfirmingSelection] = useState(false);
+  const [songSelection, setSongSelection] = useState(null);
 
   // Obtener la galería actual
   const currentGallery = galleriesData[currentGalleryIndex] || null;
@@ -49,6 +50,20 @@ const Gallery = ({ user }) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Cargar canciones cuando la selección está confirmada
+  useEffect(() => {
+    if (!currentGalleryId || !selectionLocked) {
+      setSongSelection(null);
+      return;
+    }
+    fetch(`http://localhost:3000/user/getSongSelection?gallery_id=${currentGalleryId}`, {
+      credentials: 'include'
+    })
+      .then(r => r.json())
+      .then(data => setSongSelection(data.selection || null))
+      .catch(() => setSongSelection(null));
+  }, [currentGalleryId, selectionLocked]);
 
   // Cargar/restaurar la selección cada vez que cambia la galería activa o su estado locked
   useEffect(() => {
@@ -478,6 +493,30 @@ const Gallery = ({ user }) => {
               </button>
             </div>
           </div>
+          {songSelection && (
+            <div className="selection-songs-panel">
+              <div className="selection-songs-title">
+                🎵 {songSelection.let_admin_choose
+                  ? 'Dejaste que el equipo elija las canciones'
+                  : 'Tus canciones elegidas'}
+              </div>
+              {!songSelection.let_admin_choose && (
+                <div className="selection-songs-list">
+                  {[songSelection.song_1, songSelection.song_2, songSelection.song_3]
+                    .filter(Boolean)
+                    .map((song, i) => (
+                      <span key={i} className="selection-song-item">
+                        <span className="selection-song-num">{i + 1}</span>
+                        {song}
+                      </span>
+                    ))}
+                </div>
+              )}
+              {songSelection.notes && (
+                <p className="selection-songs-notes">Aclaraciones: {songSelection.notes}</p>
+              )}
+            </div>
+          )}
         </div>
       ) : selectedImages.size > 0 && (
         <div className="selection-bar">
