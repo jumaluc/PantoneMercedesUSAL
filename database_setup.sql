@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS image_comments (
   image_id    INT UNSIGNED  NOT NULL,
   user_id     INT UNSIGNED  NOT NULL,
   comment     TEXT          NOT NULL,
+  admin_seen  TINYINT(1)    NOT NULL DEFAULT 0,
   created_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_comment_gallery FOREIGN KEY (gallery_id) REFERENCES galleries(id)  ON DELETE CASCADE,
@@ -84,14 +85,16 @@ CREATE TABLE IF NOT EXISTS image_comments (
 -- TABLA: general_requests
 -- ============================================================
 CREATE TABLE IF NOT EXISTS general_requests (
-  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  tipo        VARCHAR(100)  NOT NULL,
-  user_id     INT UNSIGNED  NOT NULL,
-  priority    VARCHAR(50)   NOT NULL DEFAULT 'normal',
-  issue       VARCHAR(255)  NOT NULL,
-  request     TEXT          NOT NULL,
-  created_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  tipo           VARCHAR(100)  NOT NULL,
+  user_id        INT UNSIGNED  NOT NULL,
+  priority       VARCHAR(50)   NOT NULL DEFAULT 'normal',
+  issue          VARCHAR(255)  NOT NULL,
+  request        TEXT          NOT NULL,
+  status         VARCHAR(50)   NOT NULL DEFAULT 'pending',
+  admin_response TEXT          DEFAULT NULL,
+  created_at     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_request_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -108,7 +111,7 @@ CREATE TABLE IF NOT EXISTS client_videos (
   storage_path        VARCHAR(500)  DEFAULT NULL,
   file_name           VARCHAR(255)  DEFAULT NULL,
   original_filename   VARCHAR(255)  DEFAULT NULL,
-  status              ENUM('processing','ready','delivered','pending') NOT NULL DEFAULT 'processing',
+  status              ENUM('waiting_selection','in_editing','completed','cancelled') NOT NULL DEFAULT 'waiting_selection',
   file_size           BIGINT        DEFAULT NULL,
   duration            VARCHAR(50)   DEFAULT NULL,
   resolution          VARCHAR(50)   DEFAULT NULL,
@@ -257,6 +260,21 @@ CREATE TABLE IF NOT EXISTS review_likes (
   CONSTRAINT fk_like_review FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE,
   CONSTRAINT fk_like_user  FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================
+-- MIGRACIONES: columnas agregadas después del deploy inicial
+-- Ejecutar solo si la BD ya existía antes de estos cambios
+-- ============================================================
+
+ALTER TABLE image_comments
+  ADD COLUMN IF NOT EXISTS admin_seen TINYINT(1) NOT NULL DEFAULT 0;
+
+ALTER TABLE general_requests
+  ADD COLUMN IF NOT EXISTS status         VARCHAR(50) NOT NULL DEFAULT 'pending',
+  ADD COLUMN IF NOT EXISTS admin_response TEXT        DEFAULT NULL;
+
+ALTER TABLE client_videos
+  MODIFY COLUMN status ENUM('waiting_selection','in_editing','completed','cancelled') NOT NULL DEFAULT 'waiting_selection';
 
 -- ============================================================
 -- USUARIO ADMIN inicial (password: admin123 — cambialo después)
