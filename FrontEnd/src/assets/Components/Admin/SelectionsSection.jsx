@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCheckCircle, faImages, faUser, faDownload,
   faTimes, faSpinner, faChevronDown, faChevronUp,
-  faTrash, faEye, faCalendar, faLayerGroup
+  faTrash, faEye, faCalendar, faLayerGroup, faMusic
 } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
@@ -179,6 +179,12 @@ const SelectionsSection = () => {
                     <FontAwesomeIcon icon={faCheckCircle} />
                     {sel.selected_count} foto{sel.selected_count !== 1 ? 's' : ''}
                   </span>
+                  {(sel.song_1 || sel.song_2 || sel.song_3 || sel.let_admin_choose) && (
+                    <span className="sel-music-badge" title="Canciones seleccionadas">
+                      <FontAwesomeIcon icon={faMusic} />
+                      {sel.let_admin_choose ? 'A elección' : [sel.song_1, sel.song_2, sel.song_3].filter(Boolean).length + ' canción' + ([sel.song_1, sel.song_2, sel.song_3].filter(Boolean).length !== 1 ? 'es' : '')}
+                    </span>
+                  )}
                   <button
                     className="sel-btn-cancel"
                     onClick={e => { e.stopPropagation(); cancelSelection(sel.gallery_id, sel.title); }}
@@ -198,6 +204,32 @@ const SelectionsSection = () => {
 
               {expandedGallery === sel.gallery_id && (
                 <div className="sel-card-body">
+                  {/* Panel de canciones */}
+                  {(sel.song_1 || sel.song_2 || sel.song_3 || sel.let_admin_choose) && (
+                    <div className="sel-songs-panel">
+                      <div className="sel-songs-header">
+                        <FontAwesomeIcon icon={faMusic} />
+                        <span>Canciones elegidas por el cliente</span>
+                      </div>
+                      {sel.let_admin_choose ? (
+                        <p className="sel-songs-admin-choice">
+                          El cliente dejó que el equipo elija las canciones
+                        </p>
+                      ) : (
+                        <ol className="sel-songs-list">
+                          {[sel.song_1, sel.song_2, sel.song_3].filter(Boolean).map((song, i) => (
+                            <li key={i}>{song}</li>
+                          ))}
+                        </ol>
+                      )}
+                      {sel.song_notes && (
+                        <p className="sel-songs-notes">
+                          <strong>Aclaraciones:</strong> {sel.song_notes}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   {loadingImages[sel.gallery_id] ? (
                     <div className="sel-images-loading">
                       <FontAwesomeIcon icon={faSpinner} spin /> Cargando imágenes...

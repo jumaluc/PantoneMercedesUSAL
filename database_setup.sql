@@ -236,6 +236,25 @@ CREATE TABLE IF NOT EXISTS service_policies (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================
+-- TABLA: song_selections
+-- ============================================================
+CREATE TABLE IF NOT EXISTS song_selections (
+  id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  gallery_id       INT UNSIGNED  NOT NULL,
+  user_id          INT UNSIGNED  NOT NULL,
+  song_1           VARCHAR(300)  DEFAULT NULL,
+  song_2           VARCHAR(300)  DEFAULT NULL,
+  song_3           VARCHAR(300)  DEFAULT NULL,
+  let_admin_choose TINYINT(1)    NOT NULL DEFAULT 0,
+  notes            TEXT          DEFAULT NULL,
+  created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_gallery_user (gallery_id, user_id),
+  CONSTRAINT fk_song_gallery FOREIGN KEY (gallery_id) REFERENCES galleries(id) ON DELETE CASCADE,
+  CONSTRAINT fk_song_user    FOREIGN KEY (user_id)    REFERENCES users(id)     ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================
 -- TABLA: reviews
 -- ============================================================
 CREATE TABLE IF NOT EXISTS reviews (
@@ -268,6 +287,22 @@ CREATE TABLE IF NOT EXISTS review_likes (
 
 ALTER TABLE image_comments
   ADD COLUMN IF NOT EXISTS admin_seen TINYINT(1) NOT NULL DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS song_selections (
+  id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  gallery_id       INT UNSIGNED  NOT NULL,
+  user_id          INT UNSIGNED  NOT NULL,
+  song_1           VARCHAR(300)  DEFAULT NULL,
+  song_2           VARCHAR(300)  DEFAULT NULL,
+  song_3           VARCHAR(300)  DEFAULT NULL,
+  let_admin_choose TINYINT(1)    NOT NULL DEFAULT 0,
+  notes            TEXT          DEFAULT NULL,
+  created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_gallery_user (gallery_id, user_id),
+  CONSTRAINT fk_song_gallery FOREIGN KEY (gallery_id) REFERENCES galleries(id) ON DELETE CASCADE,
+  CONSTRAINT fk_song_user    FOREIGN KEY (user_id)    REFERENCES users(id)     ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE general_requests
   ADD COLUMN IF NOT EXISTS status         VARCHAR(50) NOT NULL DEFAULT 'pending',

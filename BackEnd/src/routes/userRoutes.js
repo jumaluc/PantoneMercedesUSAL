@@ -24,4 +24,6 @@ router.post('/submitReview', userController.submitReview);
 router.get('/getMyReview', userController.getMyReview);
 router.get('/getAllReviews', userController.getAllReviews);
 router.post('/toggleLike/:id', userController.toggleLike);
+router.post('/saveSongSelection', userController.saveSongSelection);
+router.get('/getSongSelection', userController.getSongSelection);
 module.exports = router;

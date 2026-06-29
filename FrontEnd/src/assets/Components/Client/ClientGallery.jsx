@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import './Gallery.css';
 import CommentsSection from './CommentSection';
 import ImageCommentsOverlay from './ImageCommentsOverlay';
+import SongSelectionModal from './SongSelectionModal';
 
 const Gallery = ({ user }) => {
   const [galleriesData, setGalleriesData] = useState([]);
@@ -28,6 +29,8 @@ const Gallery = ({ user }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [showCommentsOverlay, setShowCommentsOverlay] = useState(false);
   const [commentsImage, setCommentsImage] = useState(null);
+  const [showSongModal, setShowSongModal] = useState(false);
+  const [confirmingSelection, setConfirmingSelection] = useState(false);
 
   // Obtener la galería actual
   const currentGallery = galleriesData[currentGalleryIndex] || null;
@@ -306,49 +309,46 @@ const Gallery = ({ user }) => {
     }
   };
 
-  const confirmSelection = async () => {
+  const confirmSelection = () => {
     if (selectedImages.size === 0) {
       toast.info('No hay imágenes seleccionadas para confirmar');
       return;
     }
-    const result = await Swal.fire({
-      title: '¿Confirmar selección?',
-      html: `Vas a confirmar <strong>${selectedImages.size}</strong> imagen${selectedImages.size !== 1 ? 'es' : ''} seleccionada${selectedImages.size !== 1 ? 's' : ''}.<br>Esta acción marcará las imágenes como seleccionadas en la base de datos.`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, confirmar',
-      cancelButtonText: 'Cancelar',
-      reverseButtons: true,
-      backdrop: true
-    });
-    if (result.isConfirmed) {
-      try {
-        const response = await fetch('http://localhost:3000/user/confirmSelection', {
+    setShowSongModal(true);
+  };
+
+  const handleSongConfirm = async (songs, letAdminChoose, notes) => {
+    setConfirmingSelection(true);
+    try {
+      const [imagesRes, songsRes] = await Promise.all([
+        fetch('http://localhost:3000/user/confirmSelection', {
           method: 'POST',
           credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            imageIds: Array.from(selectedImages),
-            galleryId: currentGalleryId
-          })
-        });
-        if (response.ok) {
-          const result = await response.json();
-          toast.success(result.message || 'Selección confirmada correctamente');
-          localStorage.removeItem(storageKey(currentGalleryId));
-          fetchGalleries(); // Recargar para actualizar datos (el useEffect restaura desde DB)
-        } else {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Error al confirmar la selección');
-        }
-      } catch (error) {
-        console.error('Error confirmando selección:', error);
-        toast.error(error.message || 'Error al confirmar la selección');
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageIds: Array.from(selectedImages), galleryId: currentGalleryId })
+        }),
+        fetch('http://localhost:3000/user/saveSongSelection', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ galleryId: currentGalleryId, songs, letAdminChoose, notes })
+        })
+      ]);
+
+      if (!imagesRes.ok) {
+        const err = await imagesRes.json();
+        throw new Error(err.error || 'Error al confirmar imágenes');
       }
+
+      setShowSongModal(false);
+      localStorage.removeItem(storageKey(currentGalleryId));
+      toast.success('¡Selección confirmada! Tu fotógrafo ya recibió tus fotos y canciones.');
+      fetchGalleries();
+    } catch (error) {
+      console.error('Error confirmando selección:', error);
+      toast.error(error.message || 'Error al confirmar la selección');
+    } finally {
+      setConfirmingSelection(false);
     }
   };
 
@@ -664,6 +664,15 @@ const Gallery = ({ user }) => {
       />
       
       <CommentsSection user={user} galleryId={currentGalleryId} />
+
+      <SongSelectionModal
+        isOpen={showSongModal}
+        onClose={() => setShowSongModal(false)}
+        onConfirm={handleSongConfirm}
+        imageCount={selectedImages.size}
+        galleryTitle={currentGallery?.gallery?.title || ''}
+        loading={confirmingSelection}
+      />
     </div>
   );
 };

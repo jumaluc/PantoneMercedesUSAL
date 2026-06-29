@@ -8,6 +8,7 @@ const General_requests = require('../moduls/General_requests');
 const { getAllVideosById } = require('../moduls/Client_videos');
 const Video = require('../moduls/Video');
 const Stats = require('../moduls/Stats');
+const SongSelection = require('../moduls/SongSelection');
 const Reviews = require('../moduls/Reviews');
 const userController = {
 
@@ -508,11 +509,50 @@ cancelSelection: async (req, res) => {
         if (!isOwner) return res.status(403).json({ message: 'No tienes permiso para cancelar esta selección' });
 
         await Gallery_images.resetSelection(galleryId);
+        await SongSelection.deleteByGallery(galleryId);
         Stats.addStat(user.id, 'client', 'update', `canceló su selección de la galería ${galleryId}`, 'complete').catch(err => console.error('Stats error:', err));
 
         return res.status(200).json({ message: 'Selección cancelada. Ya podés volver a seleccionar tus fotos.' });
     } catch (err) {
         console.error('Error en cancelSelection:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+saveSongSelection: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso denegado' });
+
+        const { galleryId, songs, letAdminChoose, notes } = req.body;
+        if (!galleryId) return res.status(400).json({ message: 'galleryId es requerido' });
+
+        const galleries = await Gallery.getByClientId(user.id);
+        const isOwner = galleries && galleries.some(g => g.id === parseInt(galleryId));
+        if (!isOwner) return res.status(403).json({ message: 'No tienes permiso para esta galería' });
+
+        await SongSelection.save(galleryId, user.id, songs || [], letAdminChoose, notes);
+        Stats.addStat(user.id, 'client', 'songs', 'guardó selección de canciones', 'complete').catch(err => console.error('Stats error:', err));
+
+        return res.status(200).json({ message: 'Canciones guardadas correctamente' });
+    } catch (err) {
+        console.error('Error en saveSongSelection:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+getSongSelection: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso denegado' });
+
+        const { gallery_id } = req.query;
+        if (!gallery_id) return res.status(400).json({ message: 'gallery_id es requerido' });
+
+        const selection = await SongSelection.getByGalleryAndUser(gallery_id, user.id);
+        return res.status(200).json({ selection });
+    } catch (err) {
+        console.error('Error en getSongSelection:', err);
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 }

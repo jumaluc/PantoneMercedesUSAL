@@ -157,4 +157,6 @@ router.delete('/reviews/:id', withAdminLog('REVIEW_DELETE', (req) => ({
   resource_id: req.params.id
 })), adminController.deleteReview);
 
+router.get('/song-selections', adminController.getAllSongSelections);
+
 module.exports = router;

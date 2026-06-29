@@ -10,6 +10,7 @@ const AdminLog = require('../moduls/AdminLog');
 const Video = require('../moduls/Video')
 const Stats = require('../moduls/Stats')
 const Reviews = require('../moduls/Reviews')
+const SongSelection = require('../moduls/SongSelection')
 const adminController = {
 
     getAllClients: async (req, res) => {
@@ -993,11 +994,18 @@ getClientSelections: async (req, res) => {
                 u.last_name,
                 u.email,
                 COUNT(gi.id) AS selected_count,
-                MAX(gi.updated_at) AS confirmed_at
+                MAX(gi.updated_at) AS confirmed_at,
+                ss.song_1,
+                ss.song_2,
+                ss.song_3,
+                ss.let_admin_choose,
+                ss.notes AS song_notes
             FROM galleries g
             JOIN users u ON g.client_id = u.id
             JOIN gallery_images gi ON g.id = gi.gallery_id AND gi.is_selected = 1
-            GROUP BY g.id, g.title, g.service_type, g.client_id, u.first_name, u.last_name, u.email
+            LEFT JOIN song_selections ss ON ss.gallery_id = g.id AND ss.user_id = g.client_id
+            GROUP BY g.id, g.title, g.service_type, g.client_id, u.first_name, u.last_name, u.email,
+                     ss.song_1, ss.song_2, ss.song_3, ss.let_admin_choose, ss.notes
             ORDER BY confirmed_at DESC
         `);
 
@@ -1088,6 +1096,7 @@ cancelSelection: async (req, res) => {
 
         const { galleryId } = req.params;
         await Gallery_images.resetSelection(galleryId);
+        await SongSelection.deleteByGallery(galleryId);
 
         const Stats = require('../moduls/Stats');
         Stats.addStat(user.id, 'admin', 'update', `canceló la selección de la galería ${galleryId}`, 'complete').catch(err => console.error('Stats error:', err));
@@ -1245,6 +1254,18 @@ deleteReview: async (req, res) => {
         return res.status(200).json({ message: 'Reseña eliminada correctamente' });
     } catch (err) {
         console.error('Error en deleteReview (admin):', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+getAllSongSelections: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+        const selections = await SongSelection.getAllForAdmin();
+        return res.status(200).json({ data: selections });
+    } catch (err) {
+        console.error('Error en getAllSongSelections:', err);
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 },
