@@ -44,37 +44,40 @@ class AdminLog {
     static async getLogs(filters = {}) {
         try {
             let query = `
-                SELECT * FROM admin_activity_logs 
+                SELECT al.*,
+                       COALESCE(CONCAT(u.first_name, ' ', u.last_name), al.admin_name) AS admin_name
+                FROM admin_activity_logs al
+                LEFT JOIN users u ON u.id = al.admin_id
                 WHERE 1=1
             `;
             const params = [];
 
             if (filters.admin_id) {
-                query += ' AND admin_id = ?';
+                query += ' AND al.admin_id = ?';
                 params.push(filters.admin_id);
             }
 
             if (filters.action_type) {
-                query += ' AND action_type = ?';
+                query += ' AND al.action_type = ?';
                 params.push(filters.action_type);
             }
 
             if (filters.resource_type) {
-                query += ' AND resource_type = ?';
+                query += ' AND al.resource_type = ?';
                 params.push(filters.resource_type);
             }
 
             if (filters.start_date) {
-                query += ' AND created_at >= ?';
+                query += ' AND al.created_at >= ?';
                 params.push(filters.start_date);
             }
 
             if (filters.end_date) {
-                query += ' AND created_at <= ?';
+                query += ' AND al.created_at <= ?';
                 params.push(filters.end_date);
             }
 
-            query += ' ORDER BY created_at DESC';
+            query += ' ORDER BY al.created_at DESC';
             
             if (filters.limit) {
                 query += ' LIMIT ?';
@@ -114,28 +117,28 @@ class AdminLog {
     static async getLogsCount(filters = {}) {
         try {
             let query = `
-                SELECT COUNT(*) as total FROM admin_activity_logs 
+                SELECT COUNT(*) as total FROM admin_activity_logs al
                 WHERE 1=1
             `;
             const params = [];
 
             if (filters.admin_id) {
-                query += ' AND admin_id = ?';
+                query += ' AND al.admin_id = ?';
                 params.push(filters.admin_id);
             }
 
             if (filters.action_type) {
-                query += ' AND action_type = ?';
+                query += ' AND al.action_type = ?';
                 params.push(filters.action_type);
             }
 
             if (filters.start_date) {
-                query += ' AND created_at >= ?';
+                query += ' AND al.created_at >= ?';
                 params.push(filters.start_date);
             }
 
             if (filters.end_date) {
-                query += ' AND created_at <= ?';
+                query += ' AND al.created_at <= ?';
                 params.push(filters.end_date);
             }
 

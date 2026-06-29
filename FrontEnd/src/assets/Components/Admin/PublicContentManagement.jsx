@@ -20,7 +20,7 @@ const PublicContentManagement = () => {
     const tabs = [
         { id: 'company', label: 'Información Empresa', icon: faBuilding },
         { id: 'galleries', label: 'Galerías Públicas', icon: faImages },
-        { id: 'testimonials', label: 'Testimonios', icon: faCommentDots },
+        { id: 'reviews', label: 'Reseñas', icon: faCommentDots },
         { id: 'faqs', label: 'Preguntas Frecuentes', icon: faQuestionCircle },
         { id: 'policies', label: 'Políticas', icon: faFileContract }
     ];
@@ -31,8 +31,8 @@ const PublicContentManagement = () => {
                 return <CompanyInfoManagement />;
             case 'galleries':
                 return <PublicGalleriesManagement />;
-            case 'testimonials':
-                return <TestimonialsManagement />;
+            case 'reviews':
+                return <ReviewsManagement />;
             case 'faqs':
                 return <FAQsManagement />;
             case 'policies':
@@ -694,138 +694,77 @@ return (
 
 };
 
-// Componente para Testimonios
-const TestimonialsManagement = () => {
-    const [testimonials, setTestimonials] = useState([]);
-    const [showForm, setShowForm] = useState(false);
-    const [editingTestimonial, setEditingTestimonial] = useState(null);
-    const [formData, setFormData] = useState({
-        client_name: '',
-        client_image: '',
-        content: '',
-        rating: 5,
-        project_type: '',
-        featured: false,
-        status: 'active'
-    });
+// Componente para Reseñas (admin)
+const ReviewsManagement = () => {
+    const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        fetchTestimonials();
-    }, []);
+    useEffect(() => { fetchReviews(); }, []);
 
-    const fetchTestimonials = async () => {
+    const fetchReviews = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:3000/api/admin/public-content/testimonials', {
-                credentials: 'include'
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setTestimonials(data.data || []);
+            const res = await fetch('http://localhost:3000/admin/reviews', { credentials: 'include' });
+            if (res.ok) {
+                const data = await res.json();
+                setReviews(data.reviews || []);
             }
         } catch (error) {
-            console.error('Error fetching testimonials:', error);
+            console.error('Error fetching reviews:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleToggleLike = async (id) => {
         try {
-            const url = editingTestimonial 
-                ? `http://localhost:3000/api/admin/public-content/testimonials/${editingTestimonial.id}`
-                : 'http://localhost:3000/api/admin/public-content/testimonials';
-            
-            const method = editingTestimonial ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(formData)
+            const res = await fetch(`http://localhost:3000/user/toggleLike/${id}`, {
+                method: 'POST',
+                credentials: 'include'
             });
-
-            if (response.ok) {
-                alert(editingTestimonial ? 'Testimonio actualizado' : 'Testimonio creado');
-                setShowForm(false);
-                setEditingTestimonial(null);
-                setFormData({
-                    client_name: '',
-                    client_image: '',
-                    content: '',
-                    rating: 5,
-                    project_type: '',
-                    featured: false,
-                    status: 'active'
-                });
-                fetchTestimonials();
-            }
+            if (!res.ok) return;
+            setReviews(prev => prev.map(r => {
+                if (r.id !== id) return r;
+                const liked = Number(r.user_has_liked) === 1;
+                return {
+                    ...r,
+                    user_has_liked: liked ? 0 : 1,
+                    likes_count: liked ? Number(r.likes_count) - 1 : Number(r.likes_count) + 1
+                };
+            }));
         } catch (error) {
-            console.error('Error saving testimonial:', error);
-            alert('Error al guardar el testimonio');
+            console.error('Error toggling like:', error);
         }
-    };
-
-    const handleEdit = (testimonial) => {
-        setEditingTestimonial(testimonial);
-        setFormData({
-            client_name: testimonial.client_name,
-            client_image: testimonial.client_image,
-            content: testimonial.content,
-            rating: testimonial.rating,
-            project_type: testimonial.project_type,
-            featured: testimonial.featured,
-            status: testimonial.status
-        });
-        setShowForm(true);
     };
 
     const handleDelete = async (id) => {
-        if (confirm('¿Estás seguro de eliminar este testimonio?')) {
-            try {
-                const response = await fetch(`http://localhost:3000/api/admin/public-content/testimonials/${id}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-
-                if (response.ok) {
-                    alert('Testimonio eliminado');
-                    fetchTestimonials();
-                }
-            } catch (error) {
-                console.error('Error deleting testimonial:', error);
-                alert('Error al eliminar el testimonio');
+        if (!confirm('¿Eliminar esta reseña definitivamente?')) return;
+        try {
+            const res = await fetch(`http://localhost:3000/admin/reviews/${id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            if (res.ok) {
+                setReviews(prev => prev.filter(r => r.id !== id));
             }
+        } catch (error) {
+            console.error('Error deleting review:', error);
         }
     };
 
-    const handleFormChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
-    };
-
-    const renderStars = (rating) => {
-        return Array.from({ length: 5 }, (_, i) => (
-            <FontAwesomeIcon 
-                key={i} 
-                icon={faStar} 
-                className={i < rating ? "testimonials-management__star--active" : "testimonials-management__star"} 
-            />
-        ));
-    };
+    const renderStars = (rating) => Array.from({ length: 5 }, (_, i) => (
+        <FontAwesomeIcon
+            key={i}
+            icon={faStar}
+            className={i < rating ? 'testimonials-management__star--active' : 'testimonials-management__star'}
+        />
+    ));
 
     if (loading) {
         return (
             <div className="public-content-management__loading">
                 <div className="public-content-management__loading-spinner"></div>
-                <p>Cargando testimonios...</p>
+                <p>Cargando reseñas...</p>
             </div>
         );
     }
@@ -833,184 +772,71 @@ const TestimonialsManagement = () => {
     return (
         <div className="testimonials-management">
             <div className="testimonials-management__header">
-                <h2 className="testimonials-management__title">Gestión de Testimonios</h2>
-                <button 
-                    className="testimonials-management__add-btn"
-                    onClick={() => {
-                        setShowForm(true);
-                        setEditingTestimonial(null);
-                        setFormData({
-                            client_name: '',
-                            client_image: '',
-                            content: '',
-                            rating: 5,
-                            project_type: '',
-                            featured: false,
-                            status: 'active'
-                        });
-                    }}
-                >
-                    <FontAwesomeIcon icon={faPlus} />
-                    Agregar Testimonio
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h2 className="testimonials-management__title">Reseñas</h2>
+                    <span className="admin-reviews__count">{reviews.length} reseña{reviews.length !== 1 ? 's' : ''}</span>
+                </div>
             </div>
 
-            {showForm && (
-                <div className="projects-management__form-overlay">
-                    <div className="projects-management__form">
-                        <h3>{editingTestimonial ? 'Editar Testimonio' : 'Nuevo Testimonio'}</h3>
-                        <form onSubmit={handleSubmit}>
-                            <div className="company-info-management__form-grid">
-                                <div className="company-info-management__form-group">
-                                    <label className="company-info-management__label">Nombre del Cliente</label>
-                                    <input
-                                        type="text"
-                                        name="client_name"
-                                        value={formData.client_name}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__input"
-                                        required
-                                    />
-                                </div>
-                                <div className="company-info-management__form-group">
-                                    <label className="company-info-management__label">Rating</label>
-                                    <select
-                                        name="rating"
-                                        value={formData.rating}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__input"
-                                    >
-                                        {[1,2,3,4,5].map(num => (
-                                            <option key={num} value={num}>{num} Estrellas</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="company-info-management__form-group">
-                                    <label className="company-info-management__label">Tipo de Proyecto</label>
-                                    <input
-                                        type="text"
-                                        name="project_type"
-                                        value={formData.project_type}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__input"
-                                    />
-                                </div>
-                                <div className="company-info-management__form-group">
-                                    <label className="company-info-management__label">URL de la Imagen</label>
-                                    <input
-                                        type="url"
-                                        name="client_image"
-                                        value={formData.client_image}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__input"
-                                        placeholder="https://ejemplo.com/avatar.jpg"
-                                    />
-                                </div>
-                                <div className="company-info-management__form-group company-info-management__form-group--full">
-                                    <label className="company-info-management__label">Contenido</label>
-                                    <textarea
-                                        name="content"
-                                        value={formData.content}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__textarea"
-                                        rows="4"
-                                        required
-                                    />
-                                </div>
-                                <div className="company-info-management__form-group">
-                                    <label className="company-info-management__label">
-                                        <input
-                                            type="checkbox"
-                                            name="featured"
-                                            checked={formData.featured}
-                                            onChange={handleFormChange}
-                                        />
-                                        Testimonio Destacado
-                                    </label>
-                                </div>
-                                <div className="company-info-management__form-group">
-                                    <label className="company-info-management__label">Estado</label>
-                                    <select
-                                        name="status"
-                                        value={formData.status}
-                                        onChange={handleFormChange}
-                                        className="company-info-management__input"
-                                    >
-                                        <option value="active">Activo</option>
-                                        <option value="inactive">Inactivo</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="projects-management__form-actions">
-                                <button type="submit" className="projects-management__save-btn">
-                                    {editingTestimonial ? 'Actualizar' : 'Crear'} Testimonio
-                                </button>
-                                <button 
-                                    type="button" 
-                                    className="projects-management__cancel-btn"
-                                    onClick={() => setShowForm(false)}
-                                >
-                                    Cancelar
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {testimonials.length === 0 ? (
+            {reviews.length === 0 ? (
                 <div className="public-content-management__empty">
                     <FontAwesomeIcon icon={faCommentDots} className="public-content-management__empty-icon" />
-                    <p className="public-content-management__empty-text">No hay testimonios registrados</p>
-                    <button 
-                        className="testimonials-management__add-btn"
-                        onClick={() => setShowForm(true)}
-                    >
-                        <FontAwesomeIcon icon={faPlus} />
-                        Agregar Primer Testimonio
-                    </button>
+                    <p className="public-content-management__empty-text">Todavía no hay reseñas de clientes</p>
                 </div>
             ) : (
                 <div className="testimonials-management__grid">
-                    {testimonials.map(testimonial => (
-                        <div key={testimonial.id} className="testimonials-management__card">
-                            <div className="testimonials-management__card-header">
-                                <div className="testimonials-management__client-info">
-                                    <div className="testimonials-management__client-avatar">
-                                        <img src={testimonial.client_image || '/default-avatar.jpg'} alt={testimonial.client_name} />
+                    {reviews.map(review => {
+                        const initials = `${review.first_name[0]}${review.last_name[0]}`.toUpperCase();
+                        const liked = Number(review.user_has_liked) === 1;
+                        return (
+                            <div key={review.id} className="testimonials-management__card admin-review-card">
+                                <div className="testimonials-management__card-header">
+                                    <div className="testimonials-management__client-info">
+                                        <div className="admin-review-avatar">{initials}</div>
+                                        <div className="testimonials-management__client-details">
+                                            <h4 className="testimonials-management__client-name">
+                                                {review.first_name} {review.last_name}
+                                            </h4>
+                                            <p className="testimonials-management__client-project">
+                                                {review.service || 'Cliente'}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="testimonials-management__client-details">
-                                        <h4 className="testimonials-management__client-name">{testimonial.client_name}</h4>
-                                        <p className="testimonials-management__client-project">
-                                            {testimonial.project_type}
-                                        </p>
+                                    <div className="testimonials-management__rating">
+                                        {renderStars(review.rating)}
                                     </div>
                                 </div>
-                                <div className="testimonials-management__rating">
-                                    {renderStars(testimonial.rating)}
+
+                                <div className="testimonials-management__content">
+                                    "{review.message}"
+                                </div>
+
+                                <div className="admin-review-footer">
+                                    <span className="admin-review-date">
+                                        {new Date(review.created_at).toLocaleDateString('es-AR', {
+                                            year: 'numeric', month: 'short', day: 'numeric'
+                                        })}
+                                    </span>
+                                    <div className="admin-review-actions">
+                                        <button
+                                            className={`admin-review-like-btn ${liked ? 'admin-review-like-btn--active' : ''}`}
+                                            onClick={() => handleToggleLike(review.id)}
+                                            title={liked ? 'Quitar like' : 'Dar like'}
+                                        >
+                                            ♥ {review.likes_count > 0 ? review.likes_count : ''}
+                                        </button>
+                                        <button
+                                            className="testimonials-management__delete-btn"
+                                            onClick={() => handleDelete(review.id)}
+                                        >
+                                            <FontAwesomeIcon icon={faTrash} />
+                                            Eliminar
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="testimonials-management__content">
-                                "{testimonial.content}"
-                            </div>
-                            <div className="testimonials-management__card-actions">
-                                <button 
-                                    onClick={() => handleEdit(testimonial)}
-                                    className="testimonials-management__edit-btn"
-                                >
-                                    <FontAwesomeIcon icon={faEdit} />
-                                    Editar
-                                </button>
-                                <button 
-                                    onClick={() => handleDelete(testimonial.id)}
-                                    className="testimonials-management__delete-btn"
-                                >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                    Eliminar
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>
@@ -1266,19 +1092,11 @@ const FAQsManagement = () => {
                                     {faq.category || 'General'}
                                 </div>
                                 <div className="faqs-management__item-actions">
-                                    <button 
-                                        onClick={() => handleEdit(faq)}
-                                        className="faqs-management__edit-btn"
-                                    >
-                                        <FontAwesomeIcon icon={faEdit} />
-                                        Editar
+                                    <button onClick={() => handleEdit(faq)} className="faqs-management__edit-btn">
+                                        <FontAwesomeIcon icon={faEdit} /> Editar
                                     </button>
-                                    <button 
-                                        onClick={() => handleDelete(faq.id)}
-                                        className="faqs-management__delete-btn"
-                                    >
-                                        <FontAwesomeIcon icon={faTrash} />
-                                        Eliminar
+                                    <button onClick={() => handleDelete(faq.id)} className="faqs-management__delete-btn">
+                                        <FontAwesomeIcon icon={faTrash} /> Eliminar
                                     </button>
                                 </div>
                             </div>
@@ -1538,19 +1356,11 @@ const PoliciesManagement = () => {
                                 {policy.content}
                             </div>
                             <div className="policies-management__item-actions">
-                                <button 
-                                    onClick={() => handleEdit(policy)}
-                                    className="policies-management__edit-btn"
-                                >
-                                    <FontAwesomeIcon icon={faEdit} />
-                                    Editar
+                                <button onClick={() => handleEdit(policy)} className="policies-management__edit-btn">
+                                    <FontAwesomeIcon icon={faEdit} /> Editar
                                 </button>
-                                <button 
-                                    onClick={() => handleDelete(policy.id)}
-                                    className="policies-management__delete-btn"
-                                >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                    Eliminar
+                                <button onClick={() => handleDelete(policy.id)} className="policies-management__delete-btn">
+                                    <FontAwesomeIcon icon={faTrash} /> Eliminar
                                 </button>
                             </div>
                         </div>

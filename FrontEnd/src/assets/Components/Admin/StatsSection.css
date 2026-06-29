@@ -375,7 +375,12 @@
 }
 
 .stats-section__table-col {
-    padding: 4px 0;
+    padding: 4px 12px;
+    border-right: 1px solid #374151;
+}
+
+.stats-section__table-col--status {
+    border-right: none;
 }
 
 /* User column */
@@ -406,6 +411,11 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.stats-section__action-type span {
+    color: #d1d5db;
+    font-size: 14px;
 }
 
 .stats-section__action-icon {
@@ -536,6 +546,11 @@
         grid-template-columns: 1fr;
         gap: 8px;
         padding: 14px;
+    }
+
+    .stats-section__table-col {
+        border-right: none;
+        padding: 4px 0;
     }
 
     .stats-section__table-col::before {

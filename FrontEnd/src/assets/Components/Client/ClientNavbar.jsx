@@ -2,14 +2,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-    faSignOutAlt, 
-    faImages, 
-    faUser, 
-    faComment, 
+import {
+    faSignOutAlt,
+    faImages,
+    faUser,
+    faComment,
     faEnvelope,
     faHome,
-    faVideo 
+    faVideo,
+    faStar
 } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = ({ user, activeSection, setActiveSection }) => {
@@ -76,7 +77,15 @@ const Navbar = ({ user, activeSection, setActiveSection }) => {
           Comentarios & Solicitudes
         </button>
         
-        <button 
+        <button
+          className={`nav-btn-client ${activeSection === 'reviews' ? 'active' : ''}`}
+          onClick={() => setActiveSection('reviews')}
+        >
+          <FontAwesomeIcon icon={faStar} />
+          Reseñas
+        </button>
+
+        <button
           className={`nav-btn-client ${activeSection === 'profile' ? 'active' : ''}`}
           onClick={() => setActiveSection('profile')}
         >

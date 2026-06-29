@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { toast } from "react-toastify";
+import toast from 'react-hot-toast';
 
-const ClientProfile = ({ user }) => {
+const ClientProfile = ({ user, setUser }) => {
   const [profileData, setProfileData] = useState({
     first_name: user.first_name,
     last_name: user.last_name,
@@ -29,18 +29,19 @@ const ClientProfile = ({ user }) => {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(profileData),
+        body: JSON.stringify({ id: user.id, ...profileData }),
       });
 
       if (response.ok) {
-        toast.success('Perfil actualizado correctamente');
+        toast.success('Perfil actualizado correctamente', { id: 'profile-update' });
+        setUser(prev => ({ ...prev, ...profileData }));
         setIsEditing(false);
       } else {
         throw new Error('Error al actualizar perfil');
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Error al actualizar el perfil');
+      toast.error('Error al actualizar el perfil', { id: 'profile-update-error' });
     }
   };
 

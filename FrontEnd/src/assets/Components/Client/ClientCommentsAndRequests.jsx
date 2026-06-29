@@ -37,10 +37,18 @@ const ClientCommentsAndRequests = ({ user }) => {
     });
     const [filter, setFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const [lightboxImage, setLightboxImage] = useState(null);
 
     useEffect(() => {
         fetchData();
     }, [activeTab]);
+
+    useEffect(() => {
+        if (!lightboxImage) return;
+        const handleKey = (e) => { if (e.key === 'Escape') setLightboxImage(null); };
+        document.addEventListener('keydown', handleKey);
+        return () => document.removeEventListener('keydown', handleKey);
+    }, [lightboxImage]);
 
     const fetchData = async () => {
         try {
@@ -266,15 +274,15 @@ const ClientCommentsAndRequests = ({ user }) => {
     };
 
     const filteredComments = comments.filter(comment => {
-        const matchesSearch = searchTerm === '' || 
+        const matchesSearch = searchTerm === '' ||
             comment.image_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             comment.comment_text?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             comment.comment?.toLowerCase().includes(searchTerm.toLowerCase());
-        
+
         if (filter === 'all') return matchesSearch;
-        if (filter === 'replied') return matchesSearch && comment.admin_reply;
-        if (filter === 'pending') return matchesSearch && !comment.admin_reply;
-        
+        if (filter === 'replied') return matchesSearch && comment.admin_seen;
+        if (filter === 'pending') return matchesSearch && !comment.admin_seen;
+
         return matchesSearch;
     });
 
@@ -327,6 +335,7 @@ const ClientCommentsAndRequests = ({ user }) => {
     }
 
     return (
+        <>
         <div className="comment-comments-requests-container">
             {/* Header */}
             <div className="comment-cr-header">
@@ -381,17 +390,17 @@ const ClientCommentsAndRequests = ({ user }) => {
                                 >
                                     Todos
                                 </button>
-                                <button 
+                                <button
                                     className={`comment-filter-btn ${filter === 'replied' ? 'comment-active' : ''}`}
                                     onClick={() => setFilter('replied')}
                                 >
-                                    Con respuesta
+                                    Vistos
                                 </button>
-                                <button 
+                                <button
                                     className={`comment-filter-btn ${filter === 'pending' ? 'comment-active' : ''}`}
                                     onClick={() => setFilter('pending')}
                                 >
-                                    Pendientes
+                                    Sin ver
                                 </button>
                             </div>
                         </div>
@@ -404,12 +413,19 @@ const ClientCommentsAndRequests = ({ user }) => {
                                         <div className="comment-comment-header">
                                             <div className="comment-image-info">
                                                 {comment.image_url && (
-                                                    <div className="comment-image-container">
-                                                        <img 
-                                                            src={comment.image_url} 
-                                                            alt={comment.image_name || 'Imagen'} 
+                                                    <div
+                                                        className="comment-image-container comment-image-clickable"
+                                                        onClick={() => setLightboxImage({ url: comment.image_url, name: comment.image_name })}
+                                                        title="Clic para ampliar"
+                                                    >
+                                                        <img
+                                                            src={comment.image_url}
+                                                            alt={comment.image_name || 'Imagen'}
                                                             className="comment-image-preview"
                                                         />
+                                                        <div className="comment-image-expand-hint">
+                                                            <FontAwesomeIcon icon={faEye} />
+                                                        </div>
                                                     </div>
                                                 )}
                                                 <div className="comment-image-details">
@@ -450,20 +466,12 @@ const ClientCommentsAndRequests = ({ user }) => {
                                                 </div>
                                             </div>
 
-                                            {comment.admin_reply && (
-                                                <div className="comment-admin-reply">
-                                                    <div className="comment-reply-header">
-                                                        <FontAwesomeIcon icon={faReply} />
-                                                        <strong>Respuesta del administrador:</strong>
-                                                        <span className="comment-reply-date">{formatDate(comment.updated_at)}</span>
-                                                    </div>
-                                                    <div className="comment-admin-comment-bubble">
-                                                        <p className="comment-reply-text">{comment.admin_reply}</p>
-                                                    </div>
+                                            {comment.admin_seen ? (
+                                                <div className="comment-comment-status comment-seen">
+                                                    <FontAwesomeIcon icon={faCheckCircle} />
+                                                    Visto por el administrador
                                                 </div>
-                                            )}
-
-                                            {!comment.admin_reply && (
+                                            ) : (
                                                 <div className="comment-comment-status comment-pending">
                                                     <FontAwesomeIcon icon={faClock} />
                                                     Esperando respuesta del administrador
@@ -693,6 +701,33 @@ const ClientCommentsAndRequests = ({ user }) => {
                 )}
             </div>
         </div>
+
+        {/* Lightbox */}
+        {lightboxImage && (
+            <div className="comment-lightbox-overlay" onClick={() => setLightboxImage(null)}>
+                <div className="comment-lightbox-content" onClick={(e) => e.stopPropagation()}>
+                    <button
+                        className="comment-lightbox-close"
+                        onClick={() => setLightboxImage(null)}
+                        aria-label="Cerrar"
+                    >
+                        <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                    <img
+                        src={lightboxImage.url}
+                        alt={lightboxImage.name || 'Imagen'}
+                        className="comment-lightbox-image"
+                    />
+                    {lightboxImage.name && (
+                        <div className="comment-lightbox-caption">
+                            <FontAwesomeIcon icon={faImage} />
+                            {lightboxImage.name}
+                        </div>
+                    )}
+                </div>
+            </div>
+        )}
+        </>
     );
 };
 

@@ -48,8 +48,44 @@ static async updateImageComment(comment_id, comment) {
 
 static async getMyComments(idUser){
     try{
-        const [result] = await pool.execute('SELECT image_comments.id, image_comments.image_id, comment, image_comments.created_at, image_comments.updated_at, gallery_images.image_url FROM image_comments INNER JOIN gallery_images ON image_comments.image_id = gallery_images.id WHERE image_comments.user_id = ?',[idUser])
+        const [result] = await pool.execute(
+            `SELECT ic.id, ic.image_id, ic.comment, ic.created_at, ic.updated_at,
+                    ic.admin_seen, gi.image_url
+             FROM image_comments ic
+             INNER JOIN gallery_images gi ON ic.image_id = gi.id
+             WHERE ic.user_id = ?`,
+            [idUser]
+        );
         return result;
+    }
+    catch(err){console.log(err)}
+}
+
+static async getAllForAdmin(){
+    try{
+        const [result] = await pool.execute(
+            `SELECT ic.id, ic.comment, ic.created_at, ic.admin_seen,
+                    u.first_name, u.last_name, u.email,
+                    gi.image_url, gi.original_filename,
+                    g.title AS gallery_title
+             FROM image_comments ic
+             INNER JOIN users u ON ic.user_id = u.id
+             INNER JOIN gallery_images gi ON ic.image_id = gi.id
+             INNER JOIN galleries g ON ic.gallery_id = g.id
+             ORDER BY ic.admin_seen ASC, ic.created_at DESC`
+        );
+        return result;
+    }
+    catch(err){console.log(err)}
+}
+
+static async markAsSeen(commentId){
+    try{
+        const [result] = await pool.execute(
+            'UPDATE image_comments SET admin_seen = 1 WHERE id = ?',
+            [commentId]
+        );
+        return result.affectedRows;
     }
     catch(err){console.log(err)}
 }

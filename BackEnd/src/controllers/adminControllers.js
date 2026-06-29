@@ -9,6 +9,7 @@ const path = require('path');
 const AdminLog = require('../moduls/AdminLog');
 const Video = require('../moduls/Video')
 const Stats = require('../moduls/Stats')
+const Reviews = require('../moduls/Reviews')
 const adminController = {
 
     getAllClients: async (req, res) => {
@@ -34,8 +35,7 @@ const adminController = {
             const result = await User.registerUser(first_name, last_name, email, number, service, hashPassword);
             
             if (result === 0) return res.status(500).json({ message: "Error en el servidor" });
-            const stats = await Stats.addStat(req.session.user.id, 'admin', 'create', 'creó un nuevo cliente', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+            Stats.addStat(req.session.user.id, 'admin', 'create', 'creó un nuevo cliente', 'complete').catch(err => console.error('Stats error:', err));
             res.status(200).json({ 
                 message: 'Cliente creado correctamente',
                 data: { id: result.insertId }
@@ -53,8 +53,7 @@ const adminController = {
             
             const { id, first_name, last_name, email, number, service } = req.body;
             const result = await User.editProfile(id, first_name, last_name, email, number, service);
-                        const stats = await Stats.addStat(req.session.user.id, 'admin', 'update', 'actualizó un cliente', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+            Stats.addStat(req.session.user.id, 'admin', 'update', 'actualizó un cliente', 'complete').catch(err => console.error('Stats error:', err));
             if (result === 1) {
                 res.status(200).json({ 
                     message: "Perfil actualizado correctamente", 
@@ -92,8 +91,7 @@ const adminController = {
 
             const result = await User.deleteClient(clientId);
             if (result === 0) return res.status(500).json({ message: "Error en el servidor" });
-                        const stats = await Stats.addStat(req.session.user.id, 'admin', 'delete', 'eliminó un cliente', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+            Stats.addStat(req.session.user.id, 'admin', 'delete', 'eliminó un cliente', 'complete').catch(err => console.error('Stats error:', err));
             res.status(200).json({ 
                 message: 'Cliente eliminado correctamente',
                 data: { deleted_client: clientName }
@@ -204,8 +202,7 @@ const adminController = {
                     console.error('Error insertando imagen:', img.storage_name);
                 }
             }
-            const stats = await Stats.addStat(req.session.user.id, 'admin', 'create', 'creó una nueva galería', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+            Stats.addStat(req.session.user.id, 'admin', 'create', 'creó una nueva galería', 'complete').catch(err => console.error('Stats error:', err));
             res.status(201).json({
                 message: 'Galería creada exitosamente',
                 data: {
@@ -279,8 +276,7 @@ const adminController = {
             if (!resultDeleteGallery || resultDeleteGallery === 0) {
                 return res.status(500).json({ message: 'Error al eliminar la galería' });
             }
-            const stats = await Stats.addStat(req.session.user.id, 'admin', 'delete', 'eliminó una galería', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+            Stats.addStat(req.session.user.id, 'admin', 'delete', 'eliminó una galería', 'complete').catch(err => console.error('Stats error:', err));
             res.status(200).json({ 
                 message: 'Galería eliminada correctamente',
                 data: { deleted_gallery: galleryName, deleted_files: allFilePath.length }
@@ -646,8 +642,7 @@ createVideo: async (req, res) => {
       console.log("VIDEO DATA EN EL CONTROLLER : ", videoData)
 
       const newVideo = await Video.create(videoData);
-            const stats = await Stats.addStat(req.session.user.id, 'admin', 'create', 'creó un nuevo video', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+            Stats.addStat(req.session.user.id, 'admin', 'create', 'creó un nuevo video', 'complete').catch(err => console.error('Stats error:', err));
       res.status(201).json({
         success: true,
         message: 'Video creado y subido correctamente',
@@ -705,8 +700,7 @@ createVideo: async (req, res) => {
       const { status } = req.body;
 
       const result = await Video.updateStatus(videoId, status);
-                  const stats = await Stats.addStat(req.session.user.id, 'admin', 'update', 'actualizó status de video', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+            Stats.addStat(req.session.user.id, 'admin', 'update', 'actualizó status de video', 'complete').catch(err => console.error('Stats error:', err));
       if (result) {
         res.json({
           success: true,
@@ -739,8 +733,7 @@ createVideo: async (req, res) => {
       const { progress } = req.body;
 
       const result = await Video.updateProgress(videoId, parseInt(progress));
-                  const stats = await Stats.addStat(req.session.user.id, 'admin', 'update', 'actualizó progreso de video', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+            Stats.addStat(req.session.user.id, 'admin', 'update', 'actualizó progreso de video', 'complete').catch(err => console.error('Stats error:', err));
       if (result > 0) {
         res.json({
           success: true,
@@ -783,12 +776,12 @@ createVideo: async (req, res) => {
       }
 
       const result = await Video.deleteVideo(videoId);
-                  const stats = await Stats.addStat(req.session.user.id, 'admin', 'delete', 'eliminó un video', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+            Stats.addStat(req.session.user.id, 'admin', 'delete', 'eliminó un video', 'complete').catch(err => console.error('Stats error:', err));
       if (result) {
         res.json({
           success: true,
-          message: 'Video eliminado correctamente'
+          message: 'Video eliminado correctamente',
+          data: { title: video.title }
         });
       } else {
         res.status(404).json({
@@ -964,10 +957,7 @@ createPublicGallery: async (req, res) => {
             }
         }
 
-        const stats = await Stats.addStat(user.id, 'admin', 'create', 'creó una nueva galería pública', 'complete');
-        if(!stats || stats < 1) {
-            console.warn("No se pudo registrar estadística");
-        }
+        Stats.addStat(user.id, 'admin', 'create', 'creó una nueva galería pública', 'complete').catch(err => console.error('Stats error:', err));
 
         console.log("Galería pública creada exitosamente");
         res.status(201).json({
@@ -984,7 +974,280 @@ createPublicGallery: async (req, res) => {
         console.error('Error en createPublicGallery:', err);
         res.status(500).json({ message: 'Error del servidor: ' + err.message });
     }
-}
+},
+
+
+getClientSelections: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+
+        const pool = require('../database/dbConnect');
+        const [rows] = await pool.execute(`
+            SELECT
+                g.id AS gallery_id,
+                g.title,
+                g.service_type,
+                g.client_id,
+                u.first_name,
+                u.last_name,
+                u.email,
+                COUNT(gi.id) AS selected_count,
+                MAX(gi.updated_at) AS confirmed_at
+            FROM galleries g
+            JOIN users u ON g.client_id = u.id
+            JOIN gallery_images gi ON g.id = gi.gallery_id AND gi.is_selected = 1
+            GROUP BY g.id, g.title, g.service_type, g.client_id, u.first_name, u.last_name, u.email
+            ORDER BY confirmed_at DESC
+        `);
+
+        return res.status(200).json({ data: rows });
+    } catch (err) {
+        console.error('Error en getClientSelections:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+getSelectionImages: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+
+        const { galleryId } = req.params;
+        const images = await Gallery_images.getSelectedByGallery(galleryId);
+        return res.status(200).json({ data: images });
+    } catch (err) {
+        console.error('Error en getSelectionImages:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+getAllComments: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+        const Comments = require('../moduls/Comments');
+        const comments = await Comments.getAllForAdmin();
+        return res.status(200).json({ success: true, data: comments });
+    } catch (err) {
+        console.error('Error en getAllComments:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+markCommentSeen: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+        const { id } = req.params;
+        const Comments = require('../moduls/Comments');
+        await Comments.markAsSeen(id);
+        const Stats = require('../moduls/Stats');
+        Stats.addStat(user.id, 'admin', 'update', `marcó comentario #${id} como visto`, 'complete').catch(err => console.error('Stats error:', err));
+        return res.status(200).json({ success: true, message: 'Comentario marcado como visto' });
+    } catch (err) {
+        console.error('Error en markCommentSeen:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+getAllRequests: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+        const General_requests = require('../moduls/General_requests');
+        const requests = await General_requests.getAllForAdmin();
+        return res.status(200).json({ success: true, data: requests });
+    } catch (err) {
+        console.error('Error en getAllRequests:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+updateRequest: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+        const { id } = req.params;
+        const { status, admin_response } = req.body;
+        const General_requests = require('../moduls/General_requests');
+        await General_requests.updateRequest(id, status, admin_response);
+        const Stats = require('../moduls/Stats');
+        Stats.addStat(user.id, 'admin', 'update', `actualizó solicitud #${id} a "${status}"`, 'complete').catch(err => console.error('Stats error:', err));
+        return res.status(200).json({ success: true, message: 'Solicitud actualizada' });
+    } catch (err) {
+        console.error('Error en updateRequest:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+cancelSelection: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+
+        const { galleryId } = req.params;
+        await Gallery_images.resetSelection(galleryId);
+
+        const Stats = require('../moduls/Stats');
+        Stats.addStat(user.id, 'admin', 'update', `canceló la selección de la galería ${galleryId}`, 'complete').catch(err => console.error('Stats error:', err));
+
+        return res.status(200).json({ message: 'Selección cancelada correctamente' });
+    } catch (err) {
+        console.error('Error en cancelSelection:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+updateVideo: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+        const { videoId } = req.params;
+        const { title, description, estimated_delivery } = req.body;
+        if (!title?.trim()) return res.status(400).json({ success: false, message: 'El título es obligatorio' });
+        const result = await Video.update(videoId, { title: title.trim(), description: description?.trim() || '', estimated_delivery: estimated_delivery || null });
+        if (!result) return res.status(404).json({ success: false, message: 'Video no encontrado' });
+        res.json({ success: true, message: 'Video actualizado correctamente' });
+    } catch (error) {
+        console.error('Error updating video:', error);
+        res.status(500).json({ success: false, message: 'Error al actualizar el video' });
+    }
+},
+
+updateGallery: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+        const { galleryId } = req.params;
+        const { title, description, status } = req.body;
+        if (!title?.trim()) return res.status(400).json({ success: false, message: 'El título es obligatorio' });
+        const result = await Gallery.update(galleryId, {
+            title: title.trim(),
+            description: description?.trim() || '',
+            status: status || 'active'
+        });
+        if (!result) return res.status(404).json({ success: false, message: 'Galería no encontrada' });
+        res.json({ success: true, message: 'Galería actualizada correctamente' });
+    } catch (error) {
+        console.error('Error en updateGallery:', error);
+        res.status(500).json({ success: false, message: 'Error al actualizar la galería' });
+    }
+},
+
+toggleGalleryStatus: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+        const { galleryId } = req.params;
+        const { status } = req.body;
+        if (!['active', 'inactive'].includes(status)) {
+            return res.status(400).json({ success: false, message: 'Estado inválido' });
+        }
+        const result = await Gallery.updateStatus(galleryId, status);
+        if (!result) return res.status(404).json({ success: false, message: 'Galería no encontrada' });
+        res.json({ success: true, message: status === 'active' ? 'Galería activada' : 'Galería desactivada' });
+    } catch (error) {
+        console.error('Error en toggleGalleryStatus:', error);
+        res.status(500).json({ success: false, message: 'Error al actualizar el estado de la galería' });
+    }
+},
+
+getGalleryImages: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+        const { galleryId } = req.params;
+        const images = await Gallery_images.getByGalleryId(galleryId);
+        res.json({ success: true, data: images });
+    } catch (error) {
+        console.error('Error en getGalleryImages:', error);
+        res.status(500).json({ success: false, message: 'Error al obtener las imágenes' });
+    }
+},
+
+deleteGalleryImage: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+        const { imageId } = req.params;
+        const result = await Gallery_images.deleteImage(imageId);
+        if (!result) return res.status(404).json({ success: false, message: 'Imagen no encontrada' });
+        res.json({ success: true, message: 'Imagen eliminada' });
+    } catch (error) {
+        console.error('Error en deleteGalleryImage:', error);
+        res.status(500).json({ success: false, message: 'Error al eliminar la imagen' });
+    }
+},
+
+addImagesToGallery: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+        if (!req.files || req.files.length === 0) return res.status(400).json({ success: false, message: 'No se enviaron imágenes' });
+        const { galleryId } = req.params;
+        const gallery = await Gallery.getGalleryById(galleryId);
+        if (!gallery) return res.status(404).json({ success: false, message: 'Galería no encontrada' });
+        const folderName = gallery.folder_path || `gallery-${galleryId}`;
+        const results = await Promise.all(
+            req.files.map(async (file) => {
+                try {
+                    const fileExtension = path.extname(file.originalname);
+                    const uniqueFileName = `${uuidv4()}${fileExtension}`;
+                    const uploadResult = await uploadFile(file.buffer, uniqueFileName, folderName, file.mimetype);
+                    if (uploadResult.success) {
+                        await Gallery_images.createImage(
+                            parseInt(galleryId),
+                            file.originalname,
+                            uniqueFileName,
+                            uploadResult.url,
+                            uploadResult.path,
+                            false,
+                            999
+                        );
+                        return true;
+                    }
+                    return false;
+                } catch (fileError) {
+                    console.error('Error procesando archivo:', fileError);
+                    return false;
+                }
+            })
+        );
+        const added = results.filter(Boolean).length;
+        if (added === 0) return res.status(500).json({ success: false, message: 'Error al subir las imágenes' });
+        const allImages = await Gallery_images.getByGalleryId(galleryId);
+        await Gallery.updatePhotosCount(galleryId, allImages.length);
+        res.json({ success: true, message: `${added} imagen(es) agregada(s)`, count: added });
+    } catch (error) {
+        console.error('Error en addImagesToGallery:', error);
+        res.status(500).json({ success: false, message: 'Error al agregar las imágenes' });
+    }
+},
+
+getAllReviews: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso denegado' });
+        const reviews = await Reviews.getAllReviews(user.id);
+        return res.status(200).json({ reviews });
+    } catch (err) {
+        console.error('Error en getAllReviews (admin):', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+deleteReview: async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await Reviews.deleteReview(id);
+        if (!result) return res.status(404).json({ message: 'Reseña no encontrada' });
+        return res.status(200).json({ message: 'Reseña eliminada correctamente' });
+    } catch (err) {
+        console.error('Error en deleteReview (admin):', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
 
 };
 

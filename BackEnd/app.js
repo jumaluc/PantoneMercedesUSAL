@@ -17,7 +17,16 @@ const adminPublicRoutes = require('./src/routes/adminPublicRoutes');
 //MIDDLEWARE
 app.use(helmet());
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: (origin, callback) => {
+    const allowed = [
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:5175',
+      'http://localhost:5199',
+    ];
+    if (!origin || allowed.includes(origin)) callback(null, true);
+    else callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(morgan('combined'));
@@ -25,16 +34,38 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use((req, res, next)=>{
-
+app.use((req, res, next) => {
     const token = req.cookies.access_token;
-    req.session = {user :  null};
-    try{
-        const data = jwt.verify(token, process.env.SECRET_WEB_TOKEN)
+    const refreshToken = req.cookies.refresh_token;
+    req.session = { user: null };
+
+    try {
+        // Access token válido → sesión normal
+        const data = jwt.verify(token, process.env.SECRET_WEB_TOKEN);
         req.session.user = data;
+    } catch (error) {
+        // Access token expirado/inválido → intentar con refresh token
+        if (refreshToken) {
+            try {
+                const refreshData = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+                // Emitir nuevo access token transparentemente
+                const newAccessToken = jwt.sign(
+                    { id: refreshData.id, role: refreshData.role },
+                    process.env.SECRET_WEB_TOKEN,
+                    { expiresIn: '1h' }
+                );
+                res.cookie('access_token', newAccessToken, {
+                    httpOnly: true,
+                    sameSite: 'strict',
+                    maxAge: 1000 * 60 * 60
+                });
+                req.session.user = { id: refreshData.id, role: refreshData.role };
+            } catch (refreshError) {
+                // Refresh token también expirado → sin sesión, el usuario deberá loguearse
+            }
+        }
     }
-    catch(error){}
-    next()
+    next();
 });
 
 

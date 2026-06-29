@@ -116,6 +116,45 @@ static async getGalleriesGrowth(days = 30) {
     catch(err){console.log(err)};
  }
 
+static async updateStatus(galleryId, status) {
+    try {
+        const [result] = await pool.execute(
+            'UPDATE galleries SET status = ? WHERE id = ?',
+            [status, galleryId]
+        );
+        return result.affectedRows > 0;
+    } catch (err) {
+        console.error('Error updating gallery status:', err);
+        throw err;
+    }
+}
+
+static async update(galleryId, { title, description, status }) {
+    try {
+        const [result] = await pool.execute(
+            'UPDATE galleries SET title = ?, description = ?, status = ? WHERE id = ?',
+            [title, description, status, galleryId]
+        );
+        return result.affectedRows > 0;
+    } catch (err) {
+        console.error('Error updating gallery:', err);
+        throw err;
+    }
+}
+
+static async updatePhotosCount(galleryId, count) {
+    try {
+        const [result] = await pool.execute(
+            'UPDATE galleries SET photos_count = ? WHERE id = ?',
+            [count, galleryId]
+        );
+        return result.affectedRows > 0;
+    } catch (err) {
+        console.error('Error updating photos count:', err);
+        throw err;
+    }
+}
+
 }
 
 module.exports = Gallery;

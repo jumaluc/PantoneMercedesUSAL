@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faEdit, faEraser,faSpinner, faImages, faCheckCircle, faSearchPlus, faArrowUp, faTimes, faEye, faComment, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { toast } from 'react-toastify';
+import { faDownload, faEdit, faEraser, faTrash, faSpinner, faImages, faCheckCircle, faSearchPlus, faArrowUp, faTimes, faEye, faComment, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import './Gallery.css';
 import CommentsSection from './CommentSection';
@@ -16,12 +16,13 @@ const Gallery = ({ user }) => {
     return savedIndex ? parseInt(savedIndex) : 0;
   });
   const [selectedImages, setSelectedImages] = useState(new Set());
+
+  const storageKey = (galleryId) => `pantone_selection_${galleryId}`;
   const [loading, setLoading] = useState(true);
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [overlayImage, setOverlayImage] = useState(null);
   const [overlayIndex, setOverlayIndex] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [showHeader, setShowHeader] = useState(true);
   const [processedImages, setProcessedImages] = useState([]);
   const [downloading, setDownloading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -31,6 +32,7 @@ const Gallery = ({ user }) => {
   // Obtener la galería actual
   const currentGallery = galleriesData[currentGalleryIndex] || null;
   const currentGalleryId = currentGallery?.gallery?.id;
+  const selectionLocked = currentGallery?.selection_locked || false;
 
   // Guardar el índice actual en localStorage cuando cambie
   useEffect(() => {
@@ -45,9 +47,33 @@ const Gallery = ({ user }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Cargar/restaurar la selección cada vez que cambia la galería activa o su estado locked
   useEffect(() => {
-    setShowHeader(selectedImages.size === 0);
-  }, [selectedImages.size]);
+    if (!currentGallery) return;
+
+    if (selectionLocked) {
+      // Selección confirmada: mostrar las imágenes marcadas en la DB
+      const confirmedIds = new Set(
+        currentGallery.images.filter(img => img.is_selected === 1).map(img => img.id)
+      );
+      setSelectedImages(confirmedIds);
+    } else {
+      // Selección en progreso: restaurar desde localStorage
+      const saved = localStorage.getItem(storageKey(currentGalleryId));
+      if (saved) {
+        try {
+          const ids = JSON.parse(saved);
+          // Solo conservar IDs que existan en esta galería
+          const validIds = ids.filter(id => currentGallery.images.some(img => img.id === id));
+          setSelectedImages(new Set(validIds));
+        } catch {
+          setSelectedImages(new Set());
+        }
+      } else {
+        setSelectedImages(new Set());
+      }
+    }
+  }, [currentGalleryId, selectionLocked]);
 
   useEffect(() => {
     if (currentGallery?.images) {
@@ -89,25 +115,31 @@ const Gallery = ({ user }) => {
       const response = await fetch('http://localhost:3000/user/getGallery', {
         credentials: 'include'
       });
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Datos recibidos:', data);
-        setGalleriesData(data.data || []);
-        
-        // Verificar si el índice guardado es válido para los nuevos datos
-        if (data.data && data.data.length > 0) {
-          const savedIndex = localStorage.getItem('currentGalleryIndex');
-          const indexToUse = savedIndex ? 
-            Math.min(parseInt(savedIndex), data.data.length - 1) : 0;
-          
-          setCurrentGalleryIndex(indexToUse);
-        }
-      } else {
+
+      // 404 = sin galerías todavía, no es un error
+      if (response.status === 404) {
+        setGalleriesData([]);
+        return;
+      }
+
+      if (!response.ok) {
         throw new Error('Error al cargar galerías');
+      }
+
+      const data = await response.json();
+      const galleries = data.data || [];
+      setGalleriesData(galleries);
+
+      if (galleries.length > 0) {
+        const savedIndex = localStorage.getItem('currentGalleryIndex');
+        const indexToUse = savedIndex
+          ? Math.min(parseInt(savedIndex), galleries.length - 1)
+          : 0;
+        setCurrentGalleryIndex(indexToUse);
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Error al cargar las galerías');
+      toast.error('Error al cargar las galerías', { id: 'gallery-fetch-error' });
     } finally {
       setLoading(false);
     }
@@ -121,7 +153,7 @@ const Gallery = ({ user }) => {
     if (newIndex >= galleriesData.length) newIndex = 0;
     
     setCurrentGalleryIndex(newIndex);
-    setSelectedImages(new Set()); // Limpiar selección al cambiar de galería
+    // La selección se restaura automáticamente desde localStorage/DB vía useEffect
   };
 
   const toggleImageSelection = (imageId, event) => {
@@ -133,6 +165,10 @@ const Gallery = ({ user }) => {
       newSelected.add(imageId);
     }
     setSelectedImages(newSelected);
+    // Persistir en localStorage inmediatamente (solo si no está bloqueada)
+    if (!selectionLocked && currentGalleryId) {
+      localStorage.setItem(storageKey(currentGalleryId), JSON.stringify(Array.from(newSelected)));
+    }
   };
 
   const handleImageClick = (image, index, event) => {
@@ -303,8 +339,8 @@ const Gallery = ({ user }) => {
         if (response.ok) {
           const result = await response.json();
           toast.success(result.message || 'Selección confirmada correctamente');
-          setSelectedImages(new Set());
-          fetchGalleries(); // Recargar para actualizar datos
+          localStorage.removeItem(storageKey(currentGalleryId));
+          fetchGalleries(); // Recargar para actualizar datos (el useEffect restaura desde DB)
         } else {
           const errorData = await response.json();
           throw new Error(errorData.error || 'Error al confirmar la selección');
@@ -330,6 +366,44 @@ const Gallery = ({ user }) => {
 
   const clearSelection = () => {
     setSelectedImages(new Set());
+    if (currentGalleryId) {
+      localStorage.removeItem(storageKey(currentGalleryId));
+    }
+  };
+
+  const cancelSelectionByClient = async () => {
+    const result = await Swal.fire({
+      title: '¿Borrar selección confirmada?',
+      html: `Tu selección actual será <strong>eliminada por completo</strong>.<br>Podrás volver a elegir tus fotos desde cero.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, borrar selección',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+      backdrop: true
+    });
+    if (!result.isConfirmed) return;
+    try {
+      const response = await fetch('http://localhost:3000/user/cancelSelection', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ galleryId: currentGalleryId })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        toast.success(data.message || 'Selección eliminada');
+        localStorage.removeItem(storageKey(currentGalleryId));
+        fetchGalleries();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al cancelar la selección');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Error al cancelar la selección');
+    }
   };
 
   const filteredImages = processedImages.filter(image => selectedImages.has(image.id));
@@ -354,92 +428,87 @@ const Gallery = ({ user }) => {
   }
 
   return (
-    <div className="galeria-container">
-      {showHeader && currentGallery && (
+    <div className={`galeria-container ${selectedImages.size > 0 ? 'with-selection' : ''}`}>
+
+      {currentGallery && (
         <header className="galeria-header">
           <div className="galeria-header-content">
             <div className="galeria-header-main">
               <div className="galeria-navigation">
                 {galleriesData.length > 1 && (
-                  <button 
-                    className="nav-arrow prev" 
-                    onClick={() => navigateGallery(-1)}
-                    title="Galería anterior"
-                  >
+                  <button className="nav-arrow prev" onClick={() => navigateGallery(-1)} title="Galería anterior">
                     <FontAwesomeIcon icon={faChevronLeft} />
                   </button>
                 )}
-                
                 <div className="galeria-title-section">
                   <h1>{currentGallery.gallery.title}</h1>
                   <p className="galeria-service">{currentGallery.gallery.service_type}</p>
                 </div>
-
                 {galleriesData.length > 1 && (
-                  <button 
-                    className="nav-arrow next" 
-                    onClick={() => navigateGallery(1)}
-                    title="Siguiente galería"
-                  >
+                  <button className="nav-arrow next" onClick={() => navigateGallery(1)} title="Siguiente galería">
                     <FontAwesomeIcon icon={faChevronRight} />
                   </button>
                 )}
               </div>
             </div>
-            
             <div className="galeria-header-meta">
               <div className="galeria-meta-left">
                 <span className="galeria-client">{user?.first_name} {user?.last_name}</span>
                 <span className="galeria-count">{currentGallery.images?.length || 0} fotos</span>
               </div>
-              
               <div className="galeria-counter">
-                <span className="gallery-counter-text">
-                  Galería {currentGalleryIndex + 1} de {galleriesData.length}
-                </span>
+                <span className="gallery-counter-text">Galería {currentGalleryIndex + 1} de {galleriesData.length}</span>
               </div>
             </div>
           </div>
         </header>
       )}
-      
-      {/* STICKY HEADER CORREGIDO - Se mantiene siempre que haya selección */}
-      {selectedImages.size > 0 && (
-        <div className="selection-counter-sticky" key={`sticky-${currentGalleryId}`}>
-          <div className="selection-counter-content">
-            <div className="selection-info">
-              <FontAwesomeIcon icon={faCheckCircle} className="selection-icon" />
-              <span className="selection-text">
+
+      {selectionLocked ? (
+        <div className="selection-bar selection-bar--locked">
+          <div className="selection-bar-content">
+            <div className="selection-bar-info">
+              <FontAwesomeIcon icon={faCheckCircle} className="selection-bar-icon" />
+              <span className="selection-bar-count">Selección confirmada</span>
+              <span className="selection-bar-gallery">— Tu fotógrafo ya recibió tu elección de fotos</span>
+            </div>
+            <div className="selection-bar-actions">
+              <button className="sel-btn sel-btn--danger" onClick={cancelSelectionByClient} title="Borrar tu selección actual y volver a elegir">
+                <FontAwesomeIcon icon={faTrash} /> Borrar selección
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : selectedImages.size > 0 && (
+        <div className="selection-bar">
+          <div className="selection-bar-content">
+            <div className="selection-bar-info">
+              <FontAwesomeIcon icon={faCheckCircle} className="selection-bar-icon" />
+              <span className="selection-bar-count">
                 {selectedImages.size} imagen{selectedImages.size !== 1 ? 'es' : ''} seleccionada{selectedImages.size !== 1 ? 's' : ''}
               </span>
-              <span className="gallery-indicator">
-                - {currentGallery?.gallery?.title}
-              </span>
+              <span className="selection-bar-gallery">— {currentGallery?.gallery?.title}</span>
             </div>
-            <div className="selection-actions">
-              <button className="confirm-selection-btn" onClick={confirmSelection}>
-                <FontAwesomeIcon icon={faCheckCircle} /> Confirmar Selección
+            <div className="selection-bar-actions">
+              <button className="sel-btn sel-btn--primary" onClick={confirmSelection}>
+                <FontAwesomeIcon icon={faCheckCircle} /> Confirmar
               </button>
-              <button onClick={clearSelection} className="confirm-selection-btn">
-                <FontAwesomeIcon icon={faEraser} /> Limpiar selección
-              </button>
-              <button className="confirm-selection-btn" onClick={downloadSelected} disabled={downloading}>
-                {downloading ? (
-                  <FontAwesomeIcon icon={faSpinner} spin />
-                ) : (
-                  <FontAwesomeIcon icon={faDownload} />
-                )}
+              <button className="sel-btn sel-btn--secondary" onClick={downloadSelected} disabled={downloading}>
+                {downloading ? <FontAwesomeIcon icon={faSpinner} spin /> : <FontAwesomeIcon icon={faDownload} />}
                 Descargar
               </button>
-              <button className="confirm-selection-btn" onClick={previewSelected}>
-                <FontAwesomeIcon icon={faEye} /> Previsualizar Seleccionadas
+              <button className="sel-btn sel-btn--ghost" onClick={previewSelected}>
+                <FontAwesomeIcon icon={faEye} /> Previsualizar
+              </button>
+              <button className="sel-btn sel-btn--danger" onClick={clearSelection}>
+                <FontAwesomeIcon icon={faTimes} /> Limpiar
               </button>
             </div>
           </div>
         </div>
       )}
-      
-      <main className={`galeria-main ${selectedImages.size > 0 ? 'with-selection' : ''}`}>
+
+      <main className="galeria-main">
         <div className="galeria-grid">
           {processedImages.length > 0 ? (
             processedImages.map((image, index) => (
@@ -449,9 +518,11 @@ const Gallery = ({ user }) => {
                     e.target.src = '/placeholder-image.jpg';
                   }} />
                   <div className="galeria-item-overlay">
-                    <button className={`check-btn ${selectedImages.has(image.id) ? 'checked' : ''}`} onClick={(e) => toggleImageSelection(image.id, e)}>
-                      <FontAwesomeIcon icon={faCheckCircle} />
-                    </button>
+                    {!selectionLocked && (
+                      <button className={`check-btn ${selectedImages.has(image.id) ? 'checked' : ''}`} onClick={(e) => toggleImageSelection(image.id, e)}>
+                        <FontAwesomeIcon icon={faCheckCircle} />
+                      </button>
+                    )}
                     <button className="zoom-btn" onClick={(e) => handleZoomClick(image, index, e)}>
                       <FontAwesomeIcon icon={faSearchPlus} />
                     </button>

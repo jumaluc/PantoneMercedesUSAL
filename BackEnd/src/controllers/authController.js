@@ -14,14 +14,26 @@ const authController = {
             if(!validPassword){
                 return res.status(401).json({message : 'Credenciales Incorrectas'});
             }
-            const token = jwt.sign({id: result.id, role: result.role }, process.env.SECRET_WEB_TOKEN, {
-                    expiresIn: '1h'
-                });
+            const accessToken = jwt.sign(
+                { id: result.id, role: result.role },
+                process.env.SECRET_WEB_TOKEN,
+                { expiresIn: '1h' }
+            );
+            const refreshToken = jwt.sign(
+                { id: result.id, role: result.role },
+                process.env.REFRESH_TOKEN_SECRET,
+                { expiresIn: '30d' }
+            );
                 return res
-                .cookie('access_token', token, {
+                .cookie('access_token', accessToken, {
                     httpOnly: true,
                     sameSite: 'strict',
-                    maxAge: 1000 * 60 * 60
+                    maxAge: 1000 * 60 * 60  // 1 hora
+                })
+                .cookie('refresh_token', refreshToken, {
+                    httpOnly: true,
+                    sameSite: 'strict',
+                    maxAge: 1000 * 60 * 60 * 24 * 30  // 30 días
                 })
                 .status(200).json({role: result.role})
             }
@@ -62,7 +74,7 @@ const authController = {
         try{
             const data = req.session.user;
             if(!data) return res.status(401).json({message : 'Acceso denegado'})
-            res.clearCookie('access_token').status(200).json({message : 'Logout Exitoso'});
+            res.clearCookie('access_token').clearCookie('refresh_token').status(200).json({message : 'Logout Exitoso'});
         }
         catch(error){
 

@@ -1,5 +1,6 @@
 // middleware/adminLogger.js
 const AdminLog = require('../moduls/AdminLog');
+const User = require('../moduls/Users');
 
 const logAdminAction = async (req, action_type, resource_type = null, resource_id = null, resource_name = null, additional_data = {}) => {
     try {
@@ -10,15 +11,29 @@ const logAdminAction = async (req, action_type, resource_type = null, resource_i
                 'CLIENT_UPDATE': `Actualizó el cliente: ${resource_name || resource_id}`,
                 'CLIENT_DELETE': `Eliminó el cliente: ${resource_name || resource_id}`,
                 'GALLERY_CREATE': `Creó galería: ${resource_name || 'Nueva galería'}`,
+                'GALLERY_UPDATE': `Actualizó galería: ${resource_name || resource_id}`,
                 'GALLERY_DELETE': `Eliminó galería: ${resource_name || resource_id}`,
-                'GALLERY_VIEW': `Vió lista de galerías`
+                'GALLERY_VIEW': `Vió lista de galerías`,
+                'VIDEO_CREATE': `Creó el video: ${resource_name || 'Nuevo video'}`,
+                'VIDEO_UPDATE': `Editó el video: ${resource_name || resource_id}`,
+                'VIDEO_UPDATE_STATUS': `Actualizó estado del video #${resource_id}${resource_name ? ` → ${resource_name}` : ''}`,
+                'VIDEO_UPDATE_PROGRESS': `Actualizó progreso del video #${resource_id}${resource_name ? ` al ${resource_name}%` : ''}`,
+                'VIDEO_DELETE': `Eliminó el video: ${resource_name || `#${resource_id}`}`,
+                'COMMENT_SEEN': `Marcó comentario #${resource_id} como visto`,
+                'REQUEST_UPDATE': `Actualizó solicitud #${resource_id}${resource_name ? ` → ${resource_name}` : ''}`,
+                'SELECTION_CANCEL': `Canceló la selección de la galería #${resource_id}`,
             };
 
             const action_description = actionDescriptions[action_type] || action_type;
 
+            const adminUser = await User.getUser(req.session.user.id);
+            const adminName = adminUser
+                ? `${adminUser.first_name} ${adminUser.last_name}`
+                : `Admin #${req.session.user.id}`;
+
             await AdminLog.createLog({
                 admin_id: req.session.user.id,
-                admin_name: `${req.session.user.first_name} ${req.session.user.last_name}`,
+                admin_name: adminName,
                 action_type: action_type,
                 action_description: action_description,
                 resource_type: resource_type,

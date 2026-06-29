@@ -2,7 +2,8 @@ import Navbar from './ClientNavbar';
 import ClientProfile from './ClientProfile';
 import Gallery from './ClientGallery';
 import ClientCommentsAndRequests from './ClientCommentsAndRequests';
-import ClientVideosSection from './ClientVideosSection'; // Nueva importación
+import ClientVideosSection from './ClientVideosSection';
+import ClientReviews from './ClientReviews';
 import './Dashboard.css';
 import React, { useState, useEffect } from 'react';
 import PublicContent from '../PublicWebsite/PublicLayout'
@@ -52,13 +53,15 @@ const Dashboard = () => {
   const renderSection = () => {
     switch (activeSection) {
       case 'home':
-        return <PublicContent/>
+        return <PublicContent hideLogin={true} />
       case 'profile':
-        return <ClientProfile user={user} />;
+        return <ClientProfile user={user} setUser={setUser} />;
       case 'comments':
         return <ClientCommentsAndRequests user={user} />;
       case 'videos':
-        return <ClientVideosSection user={user} />; // Nueva sección
+        return <ClientVideosSection user={user} />;
+      case 'reviews':
+        return <ClientReviews user={user} />;
       case 'gallery':
       default:
         return <Gallery user={user} />;

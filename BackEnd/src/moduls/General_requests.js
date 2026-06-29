@@ -12,8 +12,40 @@ class General_requests{
     }
     static async getMyRequests(idUser){
         try{
-            const [response] = await pool.execute('SELECT id, tipo as type, request as message, issue as subject, created_at, priority FROM general_requests WHERE user_id = ?',[idUser]);
+            const [response] = await pool.execute(
+                'SELECT id, tipo as type, request as message, issue as subject, created_at, priority, status, admin_response FROM general_requests WHERE user_id = ?',
+                [idUser]
+            );
             return response;
+        }
+        catch(err){console.log(err)}
+    }
+
+    static async getAllForAdmin(){
+        try{
+            const [response] = await pool.execute(
+                `SELECT gr.id, gr.tipo AS type, gr.issue AS subject, gr.request AS message,
+                        gr.priority, gr.status, gr.admin_response, gr.created_at, gr.updated_at,
+                        u.first_name, u.last_name, u.email
+                 FROM general_requests gr
+                 INNER JOIN users u ON gr.user_id = u.id
+                 ORDER BY
+                   FIELD(gr.status,'pending','in_progress','resolved','cancelled'),
+                   FIELD(gr.priority,'urgent','high','medium','low'),
+                   gr.created_at DESC`
+            );
+            return response;
+        }
+        catch(err){console.log(err)}
+    }
+
+    static async updateRequest(id, status, admin_response){
+        try{
+            const [response] = await pool.execute(
+                'UPDATE general_requests SET status = ?, admin_response = ? WHERE id = ?',
+                [status, admin_response || null, id]
+            );
+            return response.affectedRows;
         }
         catch(err){console.log(err)}
     }

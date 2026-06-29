@@ -8,6 +8,7 @@ const General_requests = require('../moduls/General_requests');
 const { getAllVideosById } = require('../moduls/Client_videos');
 const Video = require('../moduls/Video');
 const Stats = require('../moduls/Stats');
+const Reviews = require('../moduls/Reviews');
 const userController = {
 
     editProfile: async (req, res) => {
@@ -17,8 +18,7 @@ const userController = {
             
             const { id, first_name, last_name, email, number, service } = req.body;
             const result = await User.editProfile(id, first_name, last_name, email, number, service);
-            const stats = await Stats.addStat(req.session.user.id, 'client', 'edit', 'edicion del perfil', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+            Stats.addStat(req.session.user.id, 'client', 'edit', 'edicion del perfil', 'complete').catch(err => console.error('Stats error:', err));
             if (result === 1) {
 
                 return res.status(200).json({
@@ -71,10 +71,12 @@ getGallery: async (req, res) => {
         // Obtener imágenes para cada galería
         const galleriesWithImages = await Promise.all(
             galleries.map(async (gallery) => {
-                const images = await Gallery_images.getByGalleryId(gallery.id);
+                const images = await Gallery_images.getByGalleryIdWithSelection(gallery.id);
+                const selectionLocked = images.some(img => img.is_selected === 1);
                 return {
                     gallery: gallery,
-                    images: images || []
+                    images: images || [],
+                    selection_locked: selectionLocked
                 };
             })
         );
@@ -141,8 +143,7 @@ downloadSingleImage: async (req, res) => {
     });
 
     readStream.pipe(res);
-    const stats = await Stats.addStat(req.session.user.id, 'client', 'download', 'descargó 1 foto', 'complete');
-    if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+    Stats.addStat(req.session.user.id, 'client', 'download', 'descargó 1 foto', 'complete').catch(err => console.error('Stats error:', err));
   } catch (error) {
     console.error("Error en downloadSingleImage:", error);
     if (!res.headersSent) {
@@ -196,9 +197,7 @@ imageUrls.forEach((imageUrl, index) => {
 
     // Ahora sí cerrar el ZIP
     archive.finalize();
-    
-            const stats = await Stats.addStat(req.session.user.id, 'client', 'download', 'descargó '+imageUrls.length + ' fotos', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+    Stats.addStat(req.session.user.id, 'client', 'download', 'descargó ' + imageUrls.length + ' fotos', 'complete').catch(err => console.error('Stats error:', err));
   } catch (error) {
     console.error('Error en downloadImages:', error);
     if (!res.headersSent) {
@@ -221,8 +220,7 @@ confirmSelection: async (req, res) => {
         // Aquí va la lógica para actualizar la base de datos
         // Por ejemplo:
         const result = await Gallery_images.updateSelectionStatus(imageIds, true);
-                    const stats = await Stats.addStat(req.session.user.id, 'client', 'confirm selection', 'confirmó selección de '+imageIds.length + ' fotos', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+        Stats.addStat(req.session.user.id, 'client', 'confirm selection', 'confirmó selección de ' + imageIds.length + ' fotos', 'complete').catch(err => console.error('Stats error:', err));
         if (result) {
             res.status(200).json({ 
                 message: `Se confirmaron ${imageIds.length} imágenes correctamente`,
@@ -250,8 +248,7 @@ addComment : async (req,res) => {
     const commentId = await Comments.addComment(userId, gallery_id, comment, image_id);
 
     if(!commentId) return res.status(500).json({message : "Error en el servidor"});
-            const stats = await Stats.addStat(req.session.user.id, 'client', 'comment', 'comentó una foto', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+    Stats.addStat(req.session.user.id, 'client', 'comment', 'comentó una foto', 'complete').catch(err => console.error('Stats error:', err));
     return res.status(200).json({
       message: "Comentario agregado correctamente", 
       commentId: commentId // Cambia esto para que coincida con el frontend
@@ -294,8 +291,7 @@ deleteImageComment: async (req, res) => {
     const result = await Comments.deleteImageComment(commentId);
 
     if (!result || result === 0) return res.status(500).json({ message: "Error en el servidor o comentario no encontrado" });
-                const stats = await Stats.addStat(req.session.user.id, 'client', 'comment', 'eliminó un comentario', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+    Stats.addStat(req.session.user.id, 'client', 'comment', 'eliminó un comentario', 'complete').catch(err => console.error('Stats error:', err));
     return res.status(200).json({ message: "Comentario eliminado correctamente" }); // Cambiado a status 200 y json()
 
   } catch (err) {
@@ -318,8 +314,7 @@ updateImageComment: async (req, res) => {
     const result = await Comments.updateImageComment(comment_id, comment);
     console.log(result)
     if (!result || result === 0) return res.status(500).json({ message: "Error en el servidor o comentario no encontrado" });
-                const stats = await Stats.addStat(req.session.user.id, 'client', 'comment', 'editó un comentario', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+    Stats.addStat(req.session.user.id, 'client', 'comment', 'editó un comentario', 'complete').catch(err => console.error('Stats error:', err));
     return res.status(200).json({ 
       message: "Comentario actualizado correctamente",
       affectedRows: result 
@@ -357,9 +352,8 @@ createRequest: async (req, res) =>{
 
     const idUser = req.session.user.id;
     const response = await General_requests.createRequest(idUser, type, subject, message, priority);
-    if(!response || response < 0)return req.status(500).json({message : "Error en el servidor"});
-            const stats = await Stats.addStat(req.session.user.id, 'client', 'request', 'escrició una solicitud', 'complete');
-            if(!stats || stats < 1)return res.status(500).json({message: 'Error en el servidor'})
+    if(!response || response < 0) return res.status(500).json({message : "Error en el servidor"});
+    Stats.addStat(req.session.user.id, 'client', 'request', 'escribió una solicitud', 'complete').catch(err => console.error('Stats error:', err));
     return res.status(200).json({message : "Solicitud creada correctamente"});
 
   }
@@ -397,7 +391,131 @@ createRequest: async (req, res) =>{
 
   }
        catch(err){console.log(err)}
- }
+ },
+
+downloadVideo: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso denegado' });
+
+        const { videoId } = req.params;
+        const videos = await Video.getById(videoId);
+        const video = videos?.[0];
+
+        if (!video || video.user_id !== user.id)
+            return res.status(403).json({ message: 'Sin acceso a este video' });
+
+        if (video.status !== 'completed')
+            return res.status(400).json({ message: 'El video aún no está disponible' });
+
+        const videoUrl = video.video_url;
+        const cleanUrl = videoUrl.split('?')[0];
+        const safeFilename = encodeURIComponent(video.original_filename || `video_${videoId}.mp4`);
+        res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
+
+        if (cleanUrl.includes(bucket.name)) {
+            const fileName = cleanUrl.substring(cleanUrl.indexOf(bucket.name) + bucket.name.length + 1);
+            const file = bucket.file(fileName);
+            const [exists] = await file.exists();
+            if (!exists) return res.status(404).json({ error: 'Video no encontrado en el servidor' });
+            const [metadata] = await file.getMetadata();
+            res.setHeader('Content-Type', metadata.contentType || 'video/mp4');
+            file.createReadStream().on('error', () => {
+                if (!res.headersSent) res.status(500).json({ error: 'Error al transmitir el video' });
+            }).pipe(res);
+        } else {
+            const https = require('https');
+            const http = require('http');
+            const protocol = videoUrl.startsWith('https') ? https : http;
+            res.setHeader('Content-Type', 'video/mp4');
+            protocol.get(videoUrl, (videoRes) => {
+                videoRes.pipe(res);
+            }).on('error', () => {
+                if (!res.headersSent) res.status(500).json({ error: 'Error al descargar el video' });
+            });
+        }
+    } catch (err) {
+        console.error('Error en downloadVideo:', err);
+        if (!res.headersSent) res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+submitReview: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso denegado' });
+
+        const { rating, message } = req.body;
+        if (!rating || rating < 1 || rating > 5) return res.status(400).json({ message: 'El puntaje debe ser entre 1 y 5' });
+        if (!message || !message.trim()) return res.status(400).json({ message: 'El mensaje es requerido' });
+
+        await Reviews.submitReview(user.id, rating, message.trim());
+        Stats.addStat(user.id, 'client', 'review', 'dejó una reseña', 'complete').catch(err => console.error('Stats error:', err));
+        return res.status(200).json({ message: 'Reseña guardada correctamente' });
+    } catch (err) {
+        console.error('Error en submitReview:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+getMyReview: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso denegado' });
+        const review = await Reviews.getMyReview(user.id);
+        return res.status(200).json({ review });
+    } catch (err) {
+        console.error('Error en getMyReview:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+getAllReviews: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso denegado' });
+        const reviews = await Reviews.getAllReviews(user.id);
+        return res.status(200).json({ reviews });
+    } catch (err) {
+        console.error('Error en getAllReviews:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+toggleLike: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso denegado' });
+        const { id } = req.params;
+        const action = await Reviews.toggleLike(user.id, id);
+        return res.status(200).json({ action });
+    } catch (err) {
+        console.error('Error en toggleLike:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+cancelSelection: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso denegado' });
+
+        const { galleryId } = req.body;
+        if (!galleryId) return res.status(400).json({ message: 'galleryId es requerido' });
+
+        const galleries = await Gallery.getByClientId(user.id);
+        const isOwner = galleries && galleries.some(g => g.id === parseInt(galleryId));
+        if (!isOwner) return res.status(403).json({ message: 'No tienes permiso para cancelar esta selección' });
+
+        await Gallery_images.resetSelection(galleryId);
+        Stats.addStat(user.id, 'client', 'update', `canceló su selección de la galería ${galleryId}`, 'complete').catch(err => console.error('Stats error:', err));
+
+        return res.status(200).json({ message: 'Selección cancelada. Ya podés volver a seleccionar tus fotos.' });
+    } catch (err) {
+        console.error('Error en cancelSelection:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+}
 
 
 

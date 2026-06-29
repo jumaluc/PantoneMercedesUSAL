@@ -130,11 +130,6 @@ const deleteFileFromGCS = async (fileName) => {
 
 async function uploadFile(fileBuffer, fileName, folderName, mimetype) {
   try {
-    const hasCredentials = await checkCredentials();
-    if (!hasCredentials) {
-      throw new Error('Credenciales de Google Cloud no configuradas');
-    }
-
     const destination = `${folderName}/${fileName}`;
     const file = bucket.file(destination);
 

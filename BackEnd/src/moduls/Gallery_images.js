@@ -8,7 +8,10 @@ class Gallery_images{
     }
     static async getAllImagesPathGallery(id){
         try{
-            const [result] = await pool.execute('SELECT file_path from gallery_images WHERE gallery_id = ?',[id]);
+            const [result] = await pool.execute(
+                'SELECT id, image_url, file_path, original_filename, is_primary, upload_order FROM gallery_images WHERE gallery_id = ? ORDER BY upload_order ASC',
+                [id]
+            );
             return result;
         }
         catch(err){console.log(err)}
@@ -37,6 +40,56 @@ class Gallery_images{
         throw error;
     }
 }
+static async getByGalleryIdWithSelection(galleryId) {
+    try {
+        const [result] = await pool.execute(
+            'SELECT id, image_url, original_filename, is_selected, upload_order FROM gallery_images WHERE gallery_id = ? ORDER BY upload_order',
+            [galleryId]
+        );
+        return result;
+    } catch(err) { console.log(err); throw err; }
+}
+
+static async hasConfirmedSelection(galleryId) {
+    try {
+        const [rows] = await pool.execute(
+            'SELECT COUNT(*) as count FROM gallery_images WHERE gallery_id = ? AND is_selected = 1',
+            [galleryId]
+        );
+        return rows[0].count > 0;
+    } catch(err) { console.log(err); throw err; }
+}
+
+static async getSelectedByGallery(galleryId) {
+    try {
+        const [rows] = await pool.execute(
+            'SELECT id, image_url, original_filename, upload_order FROM gallery_images WHERE gallery_id = ? AND is_selected = 1 ORDER BY upload_order',
+            [galleryId]
+        );
+        return rows;
+    } catch(err) { console.log(err); throw err; }
+}
+
+static async resetSelection(galleryId) {
+    try {
+        const [result] = await pool.execute(
+            'UPDATE gallery_images SET is_selected = 0 WHERE gallery_id = ?',
+            [galleryId]
+        );
+        return result.affectedRows;
+    } catch(err) { console.log(err); throw err; }
+}
+
+static async deleteImage(imageId) {
+    try {
+        const [result] = await pool.execute('DELETE FROM gallery_images WHERE id = ?', [imageId]);
+        return result.affectedRows > 0;
+    } catch (err) {
+        console.error('Error deleting gallery image:', err);
+        throw err;
+    }
+}
+
 static async getTotalImages() {
     try {
         const [rows] = await pool.execute('SELECT COUNT(*) as total FROM gallery_images');

@@ -45,7 +45,20 @@ class User {
         return result[0];
     }
     static async getAllClients(){
-        const [result] = await pool.execute('SELECT id, first_name, last_name, email, number, service, created_at FROM users WHERE role = "client"');
+        const [result] = await pool.execute(`
+            SELECT
+                u.id, u.first_name, u.last_name, u.email, u.number, u.service, u.created_at,
+                g.id AS gallery_id,
+                g.status AS gallery_status,
+                CASE WHEN g.id IS NOT NULL THEN 1 ELSE 0 END AS has_gallery,
+                COALESCE(vc.videos_count, 0) AS videos_count,
+                COALESCE(cc.comments_count, 0) AS comments_count
+            FROM users u
+            LEFT JOIN galleries g ON g.client_id = u.id
+            LEFT JOIN (SELECT user_id, COUNT(*) AS videos_count FROM client_videos GROUP BY user_id) vc ON vc.user_id = u.id
+            LEFT JOIN (SELECT user_id, COUNT(*) AS comments_count FROM image_comments GROUP BY user_id) cc ON cc.user_id = u.id
+            WHERE u.role = 'client'
+        `);
         return result;
     }
     static async deleteClient(id){

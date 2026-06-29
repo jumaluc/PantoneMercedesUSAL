@@ -3,9 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV, faEdit, faTrash, faEye, faImage } from '@fortawesome/free-solid-svg-icons';
 import './GalleriesSection.css';
 import Swal from 'sweetalert2';
+import EditGalleryModal from './EditGalleryModal';
 
 const GalleryCard = ({ gallery, onUpdate }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const handleDelete = async () => {
 
@@ -84,6 +86,7 @@ const GalleryCard = ({ gallery, onUpdate }) => {
   };
 
   return (
+    <>
     <div className="gallery-card">
       <div className="gallery-image">
         {gallery.cover_image_url ? (
@@ -153,7 +156,7 @@ const GalleryCard = ({ gallery, onUpdate }) => {
               <FontAwesomeIcon icon={faEye} />
               Ver Galería
             </button>
-            <button className="action-btn edit-btn">
+            <button className="action-btn edit-btn" onClick={() => { setShowEditModal(true); setShowMenu(false); }}>
               <FontAwesomeIcon icon={faEdit} />
               Editar
             </button>
@@ -168,6 +171,16 @@ const GalleryCard = ({ gallery, onUpdate }) => {
         )}
       </div>
     </div>
+
+      {showEditModal && (
+        <EditGalleryModal
+          gallery={gallery}
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onUpdated={() => { setShowEditModal(false); onUpdate(); }}
+        />
+      )}
+    </>
   );
 };
 

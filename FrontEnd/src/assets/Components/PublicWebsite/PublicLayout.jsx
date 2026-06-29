@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-    faStar, 
-    faArrowRight, 
-    faCamera, 
-    faUsers, 
+import {
+    faStar,
+    faArrowRight,
+    faCamera,
+    faUsers,
     faTrophy,
     faEnvelope,
     faPhone,
@@ -14,12 +14,14 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faInstagram, faFacebook } from '@fortawesome/free-brands-svg-icons';
 import './PublicHome.css';
+import PoliciesModal from './PoliciesModal';
 
-const PublicHome = () => {
+const PublicHome = ({ hideLogin = false }) => {
     const [companyInfo, setCompanyInfo] = useState(null);
     const [featuredTestimonials, setFeaturedTestimonials] = useState([]);
     const [loading, setLoading] = useState(true);
     const [userLoggedIn, setUserLoggedIn] = useState(false);
+    const [showPolicies, setShowPolicies] = useState(false);
     const navigate = useNavigate();
     
     // Referencia para la sección de especialidades
@@ -196,17 +198,24 @@ const PublicHome = () => {
     return (
         <div className="public-home">
             {/* Botón fijo de login */}
-            <button 
-                onClick={handleLoginClick}
-                className="public-home__floating-login-btn"
-            >
-                <FontAwesomeIcon icon={faSignInAlt} />
-                <span>Acceder</span>
-            </button>
+            {!hideLogin && (
+                <button
+                    onClick={handleLoginClick}
+                    className="public-home__floating-login-btn"
+                >
+                    <FontAwesomeIcon icon={faSignInAlt} />
+                    <span>Acceder</span>
+                </button>
+            )}
 
             {/* Hero Section */}
             <section className="public-home__hero">
                 <div className="public-home__hero-content">
+                    <img
+                        src="/logoPantone.jpg"
+                        alt="Pantone Mercedes"
+                        className="public-home__hero-logo"
+                    />
                     <h1 className="public-home__hero-title">
                         {companyInfo?.company_name || 'Pantone Mercedes'}
                     </h1>
@@ -366,6 +375,25 @@ const PublicHome = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Footer */}
+            <footer className="public-home__footer">
+                <div className="public-home__container">
+                    <div className="public-home__footer-content">
+                        <span className="public-home__footer-copy">
+                            © {new Date().getFullYear()} Pantone Mercedes. Todos los derechos reservados.
+                        </span>
+                        <button
+                            className="public-home__footer-policies-btn"
+                            onClick={() => setShowPolicies(true)}
+                        >
+                            Términos y Políticas
+                        </button>
+                    </div>
+                </div>
+            </footer>
+
+            {showPolicies && <PoliciesModal onClose={() => setShowPolicies(false)} />}
         </div>
     );
 };

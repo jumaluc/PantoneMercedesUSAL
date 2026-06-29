@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import './Login.css';
-import { toast } from "react-toastify";
+import toast from 'react-hot-toast';
 import ForgotPassword from "../ForgotPassword/ForgotPassword";
+import PoliciesModal from '../../PublicWebsite/PoliciesModal';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -11,6 +12,7 @@ const Login = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [errors, setErrors] = useState({});
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showPolicies, setShowPolicies] = useState(false);
   const [modalType, setModalType] = useState('success');
   
   const [loginData, setLoginData] = useState({
@@ -128,17 +130,13 @@ const Login = () => {
 
 const login = () => {
   if (!validateLogin()) {
-    setModalType('error');
-    setModalMessage('Por favor, corrige los errores en el formulario');
-    setShowModal(true);
+    toast.error('Por favor, corregí los errores en el formulario');
     return;
   }
 
   fetch('http://localhost:3000/auth/login', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(loginData),
     credentials: 'include'
   })
@@ -158,28 +156,20 @@ const login = () => {
         throw new Error('Rol no reconocido');
       }
     })
-  .catch((error) => {
-    const errorMessage = error.message || 'Error de conexión con el servidor';
-    toast.error(`❌ ${errorMessage}`);
-    setModalType('error');
-    setModalMessage(`Error: ${errorMessage}`);
-    setShowModal(true);
-  });
+    .catch((error) => {
+      toast.error(error.message || 'Error de conexión con el servidor');
+    });
 };
 
   const register = () => {
     if (!validateRegister()) {
-      setModalType('error');
-      setModalMessage('Por favor, corriges los errores en el formulario');
-      setShowModal(true);
+      toast.error('Por favor, corregí los errores en el formulario');
       return;
     }
 
     fetch('http://localhost:3000/auth/register', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(registerData),
     })
     .then(response => {
@@ -190,32 +180,20 @@ const login = () => {
       }
       return response.json();
     })
-    .then(data => {
+    .then(() => {
       setModalType('success');
       setModalMessage('¡Cuenta creada exitosamente! Se ha enviado un email de confirmación.');
       setShowModal(true);
       setRegisterData({
-        first_name: '',
-        last_name: '',
-        number: '',
-        email: '',
-        password: '',
-        password2: '',
-        service: '',
-        acceptTerm: false
-      }
-      
-    );
-    setErrors({})
+        first_name: '', last_name: '', number: '',
+        email: '', password: '', password2: '', service: '', acceptTerm: false
+      });
+      setErrors({});
     })
     .catch(error => {
-      setModalType('error');
-      setModalMessage(error.message);
-      const newErrors = {};
-      newErrors.email = 'Email en uso';
+      const newErrors = { email: 'Email en uso' };
       setErrors(newErrors);
-      setShowModal(true);
-      return Object.keys(newErrors).length === 0;
+      toast.error(error.message || 'Error al crear la cuenta');
     });
   };
 
@@ -280,6 +258,7 @@ const login = () => {
               </button>
             </div>
 
+            <div className="lg-tab-panels">
             <div className={`lg-form-content ${activeTab === 'login' ? '' : 'lg-form-hidden'}`}>
               <h2 className="lg-form-title">Bienvenido de vuelta</h2>
               
@@ -451,7 +430,7 @@ const login = () => {
                     checked={registerData.acceptTerm}
                   />
                   <span className="lg-checkbox-text">
-                    Acepto los <a href="#" className="lg-terms-link">términos y condiciones</a>
+                    Acepto los <a href="#" className="lg-terms-link" onClick={(e) => { e.preventDefault(); setShowPolicies(true); }}>términos y condiciones</a>
                   </span>
                   {errors.acceptTerm && <span className="lg-error-message">{errors.acceptTerm}</span>}
                 </div>
@@ -464,6 +443,7 @@ const login = () => {
                 </button>
               </form>
             </div>
+            </div>{/* lg-tab-panels */}
           </div>
         </div>
       </div>
@@ -503,6 +483,9 @@ const login = () => {
       )}
       {showForgotPassword && (
         <ForgotPassword onClose={() => setShowForgotPassword(false)} />
+      )}
+      {showPolicies && (
+        <PoliciesModal onClose={() => setShowPolicies(false)} />
       )}
     </div>
   );

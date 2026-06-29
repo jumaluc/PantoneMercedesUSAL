@@ -14,21 +14,18 @@ body {
 .lg-login-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
-  padding: 20px;
 }
 
 .lg-background-pattern {
   position: absolute;
   inset: 0;
   opacity: 0.05;
-  background-image: 
-    radial-gradient(circle at 25% 25%, #FF8C00 2px, transparent 2px), 
+  background-image:
+    radial-gradient(circle at 25% 25%, #FF8C00 2px, transparent 2px),
     radial-gradient(circle at 75% 75%, #FFB347 1px, transparent 1px);
   background-size: 100px 100px;
+  pointer-events: none;
 }
 
 .lg-main-container {
@@ -37,16 +34,21 @@ body {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 40px;
+  min-height: 100vh;
 }
 
-/* Branding Section */
+/* Branding Section — centrada en pantalla independiente del form */
 .lg-branding-section {
-  flex: 1;
-  padding-right: 40px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 20px;
 }
 
 .lg-branding-content {
@@ -113,10 +115,14 @@ body {
   background-color: #FFB347;
 }
 
-/* Form Section */
+/* Form Section — centrada verticalmente, tamaño natural por tab */
 .lg-form-section {
-  flex: 1;
-  max-width: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  box-sizing: border-box;
 }
 
 .lg-form-container {
@@ -126,6 +132,34 @@ body {
   border-radius: 20px;
   padding: 32px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Tab panels: el oculto usa position absolute — no ocupa alto
+   pero permite transición de opacidad suave */
+.lg-tab-panels {
+  position: relative;
+}
+
+.lg-tab-panels .lg-form-content {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lg-tab-panels .lg-form-hidden {
+  display: block;
+  opacity: 0;
+  transform: translateY(10px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .lg-tab-buttons {
@@ -409,19 +443,27 @@ body {
 /* Responsive Design */
 @media (max-width: 968px) {
   .lg-main-container {
-    flex-direction: column;
-    gap: 60px;
+    grid-template-columns: 1fr;
+    min-height: unset;
   }
-  
+
   .lg-branding-section {
-    padding-right: 0;
+    position: static;
+    height: auto;
+    min-height: unset;
+    padding: 60px 20px 20px;
     text-align: center;
   }
-  
+
+  .lg-form-section {
+    min-height: unset;
+    padding: 20px 20px 60px;
+  }
+
   .lg-features-list {
     text-align: center;
   }
-  
+
   .lg-feature-item {
     justify-content: center;
   }

@@ -83,7 +83,20 @@ class Video {
         }
         catch(err){console.log(err)}
     }
-  
+
+    static async update(videoId, { title, description, estimated_delivery }) {
+        try {
+            const [result] = await pool.execute(
+                'UPDATE client_videos SET title = ?, description = ?, estimated_delivery = ? WHERE id = ?',
+                [title, description, estimated_delivery, videoId]
+            );
+            return result.affectedRows > 0;
+        } catch (err) {
+            console.error('Error in Video.update:', err);
+            throw err;
+        }
+    }
+
 }
 
 module.exports = Video;

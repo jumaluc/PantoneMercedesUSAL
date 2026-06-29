@@ -1,3 +1,5 @@
+@import 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css';
+
 .comment-comments-requests-container {
     padding: 20px;
     max-width: 1200px;
@@ -321,6 +323,12 @@
     background: rgba(245, 158, 11, 0.1);
     color: #fbbf24;
     border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.comment-comment-status.comment-seen {
+    background: rgba(16, 185, 129, 0.08);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
 /* Solicitudes */
@@ -688,6 +696,118 @@
     background: #6c757d;
 }
 
+/* ── Miniatura clickeable ─────────────────────────────── */
+.comment-image-clickable {
+    cursor: zoom-in;
+    position: relative;
+}
+
+.comment-image-expand-hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0);
+    color: transparent;
+    font-size: 1.4rem;
+    transition: background 0.2s ease, color 0.2s ease;
+    border-radius: 6px;
+}
+
+.comment-image-clickable:hover .comment-image-expand-hint {
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+}
+
+.comment-image-clickable:hover {
+    border-color: #FF8C00;
+    transform: scale(1.03);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+/* ── Lightbox ─────────────────────────────────────────── */
+.comment-lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    animation: comment-lb-fade-in 0.18s ease;
+}
+
+@keyframes comment-lb-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.comment-lightbox-content {
+    position: relative;
+    max-width: min(90vw, 1100px);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.comment-lightbox-image {
+    max-width: 100%;
+    max-height: calc(90vh - 60px);
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
+    animation: comment-lb-zoom-in 0.2s ease;
+}
+
+@keyframes comment-lb-zoom-in {
+    from { transform: scale(0.92); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+
+.comment-lightbox-close {
+    position: absolute;
+    top: -44px;
+    right: 0;
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.comment-lightbox-close:hover {
+    background: rgba(255, 140, 0, 0.7);
+}
+
+.comment-lightbox-caption {
+    color: #d1d5db;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+@media (max-width: 480px) {
+    .comment-lightbox-overlay {
+        padding: 0.75rem;
+    }
+    .comment-lightbox-close {
+        top: -40px;
+        right: -4px;
+    }
+}
+
 /* Ajustes en el header del comentario para incluir el botón de eliminar */
 .comment-comment-header {
     display: flex;
@@ -754,8 +874,6 @@
     transform: translateY(-1px);
 }
 
-/* Animaciones para los alerts */
-@import 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css';
 
 /* Botón de eliminar comentario */
 .comment-delete-btn {

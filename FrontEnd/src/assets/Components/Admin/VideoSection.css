@@ -835,3 +835,84 @@
     .video-meta-info, .video-progress-section { padding: 10px; }
     .video-status-controls { flex-direction: column; }
 }
+
+/* Edit panel */
+.video-edit-panel {
+    margin-top: 12px;
+    padding: 14px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid #374151;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.video-edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.video-edit-field label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.video-edit-field input,
+.video-edit-field textarea {
+    padding: 8px 10px;
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    color: #d1d5db;
+    font-size: 0.875rem;
+    transition: border-color 0.2s;
+    font-family: inherit;
+}
+
+.video-edit-field input:focus,
+.video-edit-field textarea:focus {
+    outline: none;
+    border-color: #FF8C00;
+}
+
+.video-edit-field textarea { resize: vertical; }
+
+.video-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.btn-cancel-edit {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    color: #9ca3af;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel-edit:hover { border-color: #6b7280; color: #d1d5db; }
+
+.btn-save-edit {
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #FF8C00, #FFB347);
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-save-edit:hover:not(:disabled) { opacity: 0.88; }
+.btn-save-edit:disabled { opacity: 0.5; cursor: not-allowed; }

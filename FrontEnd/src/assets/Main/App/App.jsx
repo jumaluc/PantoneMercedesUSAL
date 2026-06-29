@@ -3,6 +3,7 @@ import './App.css'
 import Login from '../../Components/Auth/Login/Login.jsx'
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Toaster } from 'react-hot-toast';
 import ClientDashboard from '../../Components/Client/ClientDashboard.jsx';
 import AdminDashboard from '../../Components/Admin/AdminDashboard.jsx';
 import { PrivateRoute } from '../../hooks/PrivateRoute.jsx';
@@ -60,21 +61,38 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
-        style={{
-          top: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-        }}
+        theme="dark"
+        style={{ top: '20px', left: '50%', transform: 'translateX(-50%)' }}
         toastStyle={{
-          background: '#ffffff',
-          color: '#333333',
-          border: '1px solid #e0e0e0',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          background: '#1f2937',
+          color: '#d1d5db',
+          border: '1px solid #374151',
+          borderRadius: '10px',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+          fontSize: '0.9rem',
         }}
         progressStyle={{
-          background: 'linear-gradient(to right, #4CAF50, #45a049)',
+          background: 'linear-gradient(to right, #FF8C00, #FFB347)',
+        }}
+      />
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: '#1f2937',
+            color: '#d1d5db',
+            border: '1px solid #374151',
+            borderRadius: '10px',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+            fontSize: '0.9rem',
+          },
+          success: {
+            iconTheme: { primary: '#FF8C00', secondary: '#000' },
+          },
+          error: {
+            iconTheme: { primary: '#dc3545', secondary: '#fff' },
+          },
+          duration: 3000,
         }}
       />
     </>

@@ -18,6 +18,8 @@ import Swal from 'sweetalert2';
 const VideoCard = ({ video, onUpdate, onDelete }) => {
     const [loading, setLoading] = useState(false);
     const [showVideoModal, setShowVideoModal] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editData, setEditData] = useState({ title: '', description: '', estimated_delivery: '' });
 
     const getStatusInfo = (status) => {
         const statusInfo = {
@@ -151,6 +153,30 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
             } finally {
                 setLoading(false);
             }
+        }
+    };
+
+    const handleEditSave = async () => {
+        if (!editData.title.trim()) {
+            toast.error('El título es obligatorio');
+            return;
+        }
+        setLoading(true);
+        try {
+            const res = await fetch(`http://localhost:3000/admin/updateVideo/${video.id}`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(editData)
+            });
+            if (!res.ok) throw new Error();
+            toast.success('Video actualizado');
+            setIsEditing(false);
+            onUpdate();
+        } catch {
+            toast.error('Error al actualizar el video');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -288,9 +314,16 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
                             <FontAwesomeIcon icon={faPlay} />
                         </button>
                     )}
-                    <button 
+                    <button
                         className="btn-edit"
-                        onClick={() => {/* Abrir modal de edición */}}
+                        onClick={() => {
+                            setEditData({
+                                title: video.title || '',
+                                description: video.description || '',
+                                estimated_delivery: video.estimated_delivery ? video.estimated_delivery.split('T')[0] : ''
+                            });
+                            setIsEditing(prev => !prev);
+                        }}
                         title="Editar video"
                     >
                         <FontAwesomeIcon icon={faEdit} />
@@ -305,6 +338,45 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
                     </button>
                 </div>
             </div>
+
+            {isEditing && (
+                <div className="video-edit-panel">
+                    <div className="video-edit-field">
+                        <label>Título</label>
+                        <input
+                            type="text"
+                            value={editData.title}
+                            onChange={e => setEditData(prev => ({ ...prev, title: e.target.value }))}
+                            placeholder="Título del video"
+                        />
+                    </div>
+                    <div className="video-edit-field">
+                        <label>Descripción</label>
+                        <textarea
+                            value={editData.description}
+                            onChange={e => setEditData(prev => ({ ...prev, description: e.target.value }))}
+                            placeholder="Descripción..."
+                            rows={2}
+                        />
+                    </div>
+                    <div className="video-edit-field">
+                        <label>Entrega estimada</label>
+                        <input
+                            type="date"
+                            value={editData.estimated_delivery}
+                            onChange={e => setEditData(prev => ({ ...prev, estimated_delivery: e.target.value }))}
+                        />
+                    </div>
+                    <div className="video-edit-actions">
+                        <button className="btn-cancel-edit" onClick={() => setIsEditing(false)} disabled={loading}>
+                            Cancelar
+                        </button>
+                        <button className="btn-save-edit" onClick={handleEditSave} disabled={loading}>
+                            {loading ? 'Guardando...' : 'Guardar'}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Modal de preview del video */}
             {showVideoModal && video.video_url && (

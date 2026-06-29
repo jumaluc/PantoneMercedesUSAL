@@ -2,9 +2,14 @@ import React, { useState, useEffect } from 'react';
 import AdminNavbar from './AdminNavbar';
 import ClientsSection from './ClientsSection';
 import GalleriesSection from './Galery/GalleriesSection';
-import VideosSection from './VideosSection'; // Nueva importación
+import VideosSection from './VideosSection';
 import StatsSection from './StatsSection';
 import PublicContent from './PublicContentManagement';
+import AuditSection from './AuditSection';
+import ProfileSection from './ProfileSection';
+import SelectionsSection from './SelectionsSection';
+import CommentsSection from './CommentsSection';
+import RequestsSection from './RequestsSection';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import './AdminDashboard.css';
@@ -54,9 +59,12 @@ const AdminDashboard = () => {
 
     switch (activeSection) {
       case 'stats': return <StatsSection />;
-      case 'clients': return <ClientsSection />;
+      case 'clients': return <ClientsSection setActiveSection={setActiveSection} />;
       case 'galleries': return <GalleriesSection />;
       case 'videos': return <VideosSection />; //
+      case 'selections': return <SelectionsSection />;
+      case 'comments': return <CommentsSection />;
+      case 'requests': return <RequestsSection />;
       case 'audit': return <AuditSection />;
       case 'publicContent': return <PublicContent/> 
       case 'profile': return <ProfileSection adminData={adminData} />;

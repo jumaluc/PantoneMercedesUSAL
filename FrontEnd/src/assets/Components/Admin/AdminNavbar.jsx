@@ -1,25 +1,30 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faPeopleGroup, 
-  faImages, 
-  faVideo, 
+import {
+  faPeopleGroup,
+  faImages,
+  faVideo,
   faComments,
   faHistory,
   faChartBar,
   faUserGear,
-  faSignOutAlt
+  faCheckCircle,
+  faEnvelope,
+  faGlobe
 } from '@fortawesome/free-solid-svg-icons';
 
 const AdminNavbar = ({ activeSection, setActiveSection, adminData }) => {
   const navItems = [
-    { id: 'stats', label: 'Estadísticas', icon: faChartBar },
-    { id: 'clients', label: 'Clientes', icon: faPeopleGroup },
-    { id: 'galleries', label: 'Galerías', icon: faImages },
-    { id: 'videos', label: 'Videos', icon: faVideo },
-    { id: 'audit', label: 'Historial', icon: faHistory },
-    { id: 'publicContent', label: 'Public', icon: faUserGear },
-    { id: 'profile', label: 'Perfil', icon: faUserGear }
+    { id: 'stats',         label: 'Estadísticas', icon: faChartBar },
+    { id: 'clients',       label: 'Clientes',     icon: faPeopleGroup },
+    { id: 'galleries',     label: 'Galerías',     icon: faImages },
+    { id: 'videos',        label: 'Videos',       icon: faVideo },
+    { id: 'selections',    label: 'Selecciones',  icon: faCheckCircle },
+    { id: 'comments',      label: 'Comentarios',  icon: faComments },
+    { id: 'requests',      label: 'Solicitudes',  icon: faEnvelope },
+    { id: 'audit',         label: 'Historial',    icon: faHistory },
+    { id: 'publicContent', label: 'Public',       icon: faGlobe },
+    { id: 'profile',       label: 'Perfil',       icon: faUserGear },
   ];
 
   return (
