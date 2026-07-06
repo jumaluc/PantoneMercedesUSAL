@@ -1,10 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+// ── Lazy image: renderiza el <img> solo cuando entra al viewport ──
+const LazyImage = ({ src, alt, imageId, onOrientationDetected }) => {
+  const [inView, setInView] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
+      { rootMargin: '600px 0px' }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const handleLoad = (e) => {
+    setLoaded(true);
+    onOrientationDetected?.(imageId, e.target.naturalHeight > e.target.naturalWidth);
+  };
+
+  return (
+    <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
+      {!loaded && <div className="img-skeleton" />}
+      {inView && (
+        <img
+          src={src}
+          alt={alt}
+          onLoad={handleLoad}
+          onError={(e) => { e.target.src = '/placeholder-image.jpg'; setLoaded(true); }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: loaded ? 1 : 0, transition: 'opacity 0.35s ease', display: 'block' }}
+        />
+      )}
+    </div>
+  );
+};
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faEdit, faEraser, faTrash, faSpinner, faImages, faCheckCircle, faSearchPlus, faArrowUp, faTimes, faEye, faComment, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import './Gallery.css';
-import CommentsSection from './CommentSection';
 import ImageCommentsOverlay from './ImageCommentsOverlay';
 import SongSelectionModal from './SongSelectionModal';
 
@@ -24,7 +61,8 @@ const Gallery = ({ user }) => {
   const [overlayImage, setOverlayImage] = useState(null);
   const [overlayIndex, setOverlayIndex] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [processedImages, setProcessedImages] = useState([]);
+  const imageOrientations = useRef(new Map());
+  const [orientationTick, setOrientationTick] = useState(0);
   const [downloading, setDownloading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showCommentsOverlay, setShowCommentsOverlay] = useState(false);
@@ -32,6 +70,9 @@ const Gallery = ({ user }) => {
   const [showSongModal, setShowSongModal] = useState(false);
   const [confirmingSelection, setConfirmingSelection] = useState(false);
   const [songSelection, setSongSelection] = useState(null);
+  const [filterOrientation, setFilterOrientation] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [sortBy, setSortBy] = useState('default');
 
   // Obtener la galería actual
   const currentGallery = galleriesData[currentGalleryIndex] || null;
@@ -93,31 +134,19 @@ const Gallery = ({ user }) => {
     }
   }, [currentGalleryId, selectionLocked]);
 
+  // Limpiar orientaciones al cambiar de galería
   useEffect(() => {
-    if (currentGallery?.images) {
-      const processImages = async () => {
-        const processed = await Promise.all(
-          currentGallery.images.map(async (image) => {
-            return new Promise((resolve) => {
-              const img = new Image();
-              img.onload = () => {
-                const isVertical = img.naturalHeight > img.naturalWidth;
-                resolve({ ...image, isVertical });
-              };
-              img.onerror = () => {
-                resolve({ ...image, isVertical: false });
-              };
-              img.src = image.image_url;
-            });
-          })
-        );
-        setProcessedImages(processed);
-      };
-      processImages();
-    } else {
-      setProcessedImages([]);
-    }
-  }, [currentGallery]);
+    imageOrientations.current = new Map();
+    setOrientationTick(0);
+  }, [currentGalleryId]);
+
+  const handleOrientationDetected = useCallback((imageId, isVertical) => {
+    imageOrientations.current.set(imageId, isVertical);
+    setOrientationTick(t => t + 1);
+  }, []);
+
+  // Las imágenes de la galería actual (sin pre-carga masiva)
+  const processedImages = currentGallery?.images || [];
 
   const handleScroll = () => {
     setShowScrollTop(window.scrollY > 300);
@@ -229,12 +258,12 @@ const Gallery = ({ user }) => {
   };
 
   const navigateOverlay = (direction) => {
-    if (!processedImages || processedImages.length === 0) return;
+    if (!displayedImages || displayedImages.length === 0) return;
     let newIndex = overlayIndex + direction;
-    if (newIndex < 0) newIndex = processedImages.length - 1;
-    if (newIndex >= processedImages.length) newIndex = 0;
+    if (newIndex < 0) newIndex = displayedImages.length - 1;
+    if (newIndex >= displayedImages.length) newIndex = 0;
     setOverlayIndex(newIndex);
-    setOverlayImage(processedImages[newIndex]);
+    setOverlayImage(displayedImages[newIndex]);
   };
 
   const downloadSelected = async () => {
@@ -423,6 +452,21 @@ const Gallery = ({ user }) => {
 
   const filteredImages = processedImages.filter(image => selectedImages.has(image.id));
 
+  const displayedImages = (() => {
+    let imgs = [...processedImages];
+
+    // Ordenamiento
+    if (sortBy === 'date-new') imgs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    else if (sortBy === 'date-old') imgs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+    // Filtrar por orientación (usa mapa lazy; horizontal incluye imágenes aún no cargadas)
+    if (filterOrientation === 'vertical') imgs = imgs.filter(img => imageOrientations.current.get(img.id) === true);
+    else if (filterOrientation === 'horizontal') imgs = imgs.filter(img => imageOrientations.current.get(img.id) !== true);
+    if (filterStatus === 'selected') imgs = imgs.filter(img => selectedImages.has(img.id));
+    else if (filterStatus === 'unselected') imgs = imgs.filter(img => !selectedImages.has(img.id));
+    return imgs;
+  })();
+
   if (loading) {
     return (
       <div className="gallery-loading">
@@ -450,20 +494,22 @@ const Gallery = ({ user }) => {
           <div className="galeria-header-content">
             <div className="galeria-header-main">
               <div className="galeria-navigation">
-                {galleriesData.length > 1 && (
-                  <button className="nav-arrow prev" onClick={() => navigateGallery(-1)} title="Galería anterior">
-                    <FontAwesomeIcon icon={faChevronLeft} />
-                  </button>
-                )}
                 <div className="galeria-title-section">
                   <h1>{currentGallery.gallery.title}</h1>
                   <p className="galeria-service">{currentGallery.gallery.service_type}</p>
+                  {galleriesData.length > 1 && galleriesData.length <= 12 && (
+                    <div className="galeria-nav-dots">
+                      {galleriesData.map((g, idx) => (
+                        <button
+                          key={idx}
+                          className={`galeria-nav-dot${idx === currentGalleryIndex ? ' active' : ''}`}
+                          onClick={() => setCurrentGalleryIndex(idx)}
+                          title={g.gallery?.title}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
-                {galleriesData.length > 1 && (
-                  <button className="nav-arrow next" onClick={() => navigateGallery(1)} title="Siguiente galería">
-                    <FontAwesomeIcon icon={faChevronRight} />
-                  </button>
-                )}
               </div>
             </div>
             <div className="galeria-header-meta">
@@ -472,7 +518,17 @@ const Gallery = ({ user }) => {
                 <span className="galeria-count">{currentGallery.images?.length || 0} fotos</span>
               </div>
               <div className="galeria-counter">
+                {galleriesData.length > 1 && (
+                  <button className="nav-arrow-ghost" onClick={() => navigateGallery(-1)} title="Galería anterior">
+                    <FontAwesomeIcon icon={faChevronLeft} />
+                  </button>
+                )}
                 <span className="gallery-counter-text">Galería {currentGalleryIndex + 1} de {galleriesData.length}</span>
+                {galleriesData.length > 1 && (
+                  <button className="nav-arrow-ghost" onClick={() => navigateGallery(1)} title="Siguiente galería">
+                    <FontAwesomeIcon icon={faChevronRight} />
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -534,15 +590,57 @@ const Gallery = ({ user }) => {
         </header>
       )}
 
+      {processedImages.length > 0 && (
+        <div className="gal-filters">
+          <div className="gal-filter-group">
+            <span className="gal-filter-label">Orientación</span>
+            <div className="gal-filter-pills">
+              {[['all','Todas'],['vertical','Vertical'],['horizontal','Horizontal']].map(([val, label]) => (
+                <button key={val} className={`gal-pill${filterOrientation === val ? ' active' : ''}`} onClick={() => setFilterOrientation(val)}>{label}</button>
+              ))}
+            </div>
+          </div>
+          <div className="gal-filter-group">
+            <span className="gal-filter-label">Estado</span>
+            <div className="gal-filter-pills">
+              {[['all','Todas'],['selected','Seleccionadas'],['unselected','Sin seleccionar']].map(([val, label]) => (
+                <button key={val} className={`gal-pill${filterStatus === val ? ' active' : ''}`} onClick={() => setFilterStatus(val)}>{label}</button>
+              ))}
+            </div>
+          </div>
+          <div className="gal-filter-group">
+            <span className="gal-filter-label">Orden</span>
+            <div className="gal-filter-pills">
+              {[['default','Por defecto'],['date-new','Más nuevas'],['date-old','Más antiguas']].map(([val, label]) => (
+                <button key={val} className={`gal-pill${sortBy === val ? ' active' : ''}`} onClick={() => setSortBy(val)}>{label}</button>
+              ))}
+            </div>
+          </div>
+          {(filterOrientation !== 'all' || filterStatus !== 'all') && (
+            <span className="gal-filter-count">
+              {displayedImages.filter(img => !img._dimmed).length} de {processedImages.length} fotos destacadas
+            </span>
+          )}
+          {(filterOrientation !== 'all' || filterStatus !== 'all' || sortBy !== 'default') && (
+            <button className="gal-filter-reset" onClick={() => { setFilterOrientation('all'); setFilterStatus('all'); setSortBy('default'); }}>
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+      )}
+
       <main className="galeria-main">
         <div className="galeria-grid">
-          {processedImages.length > 0 ? (
-            processedImages.map((image, index) => (
-              <div key={image.id} className={`galeriaFotos-container-imagen ${image.isVertical ? 'vertical' : 'horizontal'}`}>
+          {displayedImages.length > 0 ? (
+            displayedImages.map((image, index) => (
+              <div key={image.id} className={`galeriaFotos-container-imagen ${imageOrientations.current.get(image.id) === true ? 'vertical' : 'horizontal'}${selectedImages.has(image.id) ? ' selected-container' : ''}`}>
                 <div className={`galeria-item ${selectedImages.has(image.id) ? 'selected' : ''}`} onClick={(e) => handleImageClick(image, index, e)}>
-                  <img src={image.image_url} alt={image.original_filename} onError={(e) => {
-                    e.target.src = '/placeholder-image.jpg';
-                  }} />
+                  <LazyImage
+                    imageId={image.id}
+                    src={image.image_url}
+                    alt={image.original_filename}
+                    onOrientationDetected={handleOrientationDetected}
+                  />
                   <div className="galeria-item-overlay">
                     {!selectionLocked && (
                       <button className={`check-btn ${selectedImages.has(image.id) ? 'checked' : ''}`} onClick={(e) => toggleImageSelection(image.id, e)}>
@@ -573,7 +671,7 @@ const Gallery = ({ user }) => {
           ) : (
             <div className="no-images-message">
               <FontAwesomeIcon icon={faImages} size="3x" />
-              <p>No hay imágenes en esta galería</p>
+              <p>{currentGallery?.images?.length === 0 ? 'No hay imágenes en esta galería' : 'Ninguna imagen coincide con los filtros'}</p>
             </div>
           )}
         </div>
@@ -603,7 +701,7 @@ const Gallery = ({ user }) => {
                   <div className="preview-image-container">
                     <img src={image.image_url} alt={image.original_filename} className="preview-img" onClick={() => {
                       setOverlayImage(image);
-                      setOverlayIndex(processedImages.findIndex(img => img.id === image.id));
+                      setOverlayIndex(displayedImages.findIndex(img => img.id === image.id));
                       setOverlayVisible(true);
                       setShowPreview(false);
                     }} />
@@ -675,7 +773,7 @@ const Gallery = ({ user }) => {
               </div>
             </div>
             <div className="overlay-info">
-              <span className="overlay-counter">{overlayIndex + 1} / {processedImages.length}</span>
+              <span className="overlay-counter">{overlayIndex + 1} / {displayedImages.length}</span>
               <span className="overlay-gallery">{currentGallery?.gallery?.title}</span>
             </div>
           </div>
@@ -689,8 +787,6 @@ const Gallery = ({ user }) => {
         galleryId={currentGalleryId}
       />
       
-      <CommentsSection user={user} galleryId={currentGalleryId} />
-
       <SongSelectionModal
         isOpen={showSongModal}
         onClose={() => setShowSongModal(false)}

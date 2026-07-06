@@ -48,7 +48,13 @@
   text-align: left;
   font-size: 0.95rem;
   border-bottom: 1px solid #374151;
+  border-right: 1px solid #2a3142;
   position: static;
+}
+
+.clients-table th:last-child,
+.clients-table td:last-child {
+  border-right: none;
 }
 
 .clients-table th {
@@ -270,6 +276,33 @@
 .clear-filters-btn:hover {
   opacity: 0.9;
   transform: translateY(-1px);
+}
+
+/* Count badges */
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #2a3142;
+  color: #6b7280;
+  border: 1px solid #374151;
+}
+
+.count-badge--active {
+  background: rgba(255, 140, 0, 0.12);
+  color: #FF8C00;
+  border-color: rgba(255, 140, 0, 0.3);
+}
+
+.count-badge--comments {
+  background: rgba(99, 179, 237, 0.12);
+  color: #63b3ed;
+  border-color: rgba(99, 179, 237, 0.3);
 }
 
 /* Responsive */

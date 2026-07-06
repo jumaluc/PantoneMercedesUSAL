@@ -1,0 +1,235 @@
+.upm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.upm-card {
+  background: #1a1f2e;
+  border: 1px solid #2a2f3e;
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.upm-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.upm-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+  margin-bottom: 0.75rem;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 6px;
+}
+
+.upm-title {
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+}
+
+.upm-gallery-name {
+  color: #FF8C00;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Progress bar */
+.upm-progress-section {
+  margin-bottom: 1.5rem;
+}
+
+.upm-bar-track {
+  background: #2a2f3e;
+  border-radius: 999px;
+  height: 14px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.upm-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #b86000 0%, #FF8C00 60%, #FFB347 100%);
+  transition: width 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.upm-bar-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+  animation: upm-shimmer 1.5s infinite;
+}
+
+@keyframes upm-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.upm-bar-fill.upm-done::after { display: none; }
+
+.upm-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.upm-percentage {
+  color: #FF8C00;
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.upm-count {
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+/* Phase label */
+.upm-phase {
+  text-align: center;
+  color: #d1d5db;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  min-height: 1.2em;
+}
+
+/* Stats row */
+.upm-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.upm-stat {
+  flex: 1;
+  background: #0f1219;
+  border: 1px solid #2a2f3e;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+
+.upm-stat-label {
+  display: block;
+  color: #6b7280;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.3rem;
+}
+
+.upm-stat-value {
+  display: block;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Batch list */
+.upm-batch-info {
+  background: #0f1219;
+  border: 1px solid #2a2f3e;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+/* Done state */
+.upm-done-state {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.upm-done-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.upm-done-text {
+  color: #4ade80;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Footer note */
+.upm-footer-note {
+  text-align: center;
+  color: #4b5563;
+  font-size: 0.78rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Cancel button */
+.upm-cancel-btn {
+  display: block;
+  width: 100%;
+  padding: 0.6rem;
+  background: transparent;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upm-cancel-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.upm-cancel-btn--close {
+  background: rgba(255, 140, 0, 0.1);
+  border-color: rgba(255, 140, 0, 0.4);
+  color: #FF8C00;
+}
+
+.upm-cancel-btn--close:hover {
+  background: rgba(255, 140, 0, 0.2);
+  border-color: #FF8C00;
+  color: #FFB347;
+}
+
+/* Cancelling state bar */
+.upm-bar-fill.upm-cancelling {
+  background: #374151;
+}
+
+/* Error state */
+.upm-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  color: #f87171;
+  font-size: 0.88rem;
+  text-align: center;
+  margin-top: 1rem;
+}

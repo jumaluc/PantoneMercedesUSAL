@@ -34,7 +34,7 @@ class Gallery {
 static async getByClientId(clientId) {
     try {
         const [result] = await pool.execute(
-            'SELECT id, title, service_type, description, photos_count, created_at FROM galleries WHERE client_id = ? ORDER BY created_at DESC', 
+            'SELECT id, title, service_type, description, photos_count, created_at FROM galleries WHERE client_id = ? AND status = "active" ORDER BY created_at DESC',
             [clientId]
         );
         return result;
@@ -151,6 +151,19 @@ static async updatePhotosCount(galleryId, count) {
         return result.affectedRows > 0;
     } catch (err) {
         console.error('Error updating photos count:', err);
+        throw err;
+    }
+}
+
+static async updateCoverImage(galleryId, imageUrl) {
+    try {
+        const [result] = await pool.execute(
+            'UPDATE galleries SET cover_image_url = ? WHERE id = ?',
+            [imageUrl, galleryId]
+        );
+        return result.affectedRows > 0;
+    } catch (err) {
+        console.error('Error updating cover image:', err);
         throw err;
     }
 }

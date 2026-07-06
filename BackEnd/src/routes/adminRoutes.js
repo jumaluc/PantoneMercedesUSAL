@@ -117,6 +117,8 @@ router.put('/updateGallery/:galleryId',
 router.get('/getGalleryImages/:galleryId', adminController.getGalleryImages);
 router.delete('/deleteGalleryImage/:imageId', adminController.deleteGalleryImage);
 router.post('/addImagesToGallery/:galleryId', uploadGaleria, adminController.addImagesToGallery);
+router.post('/createGalleryMeta', adminController.createGalleryMeta);
+router.post('/finalizeGallery/:galleryId', adminController.finalizeGallery);
 
 router.get('/getStats', adminController.getStats);
 
@@ -158,5 +160,9 @@ router.delete('/reviews/:id', withAdminLog('REVIEW_DELETE', (req) => ({
 })), adminController.deleteReview);
 
 router.get('/song-selections', adminController.getAllSongSelections);
+
+router.get('/notifications', adminController.getNotifications);
+router.post('/notifications/:id/read', adminController.markNotificationRead);
+router.post('/notifications/read-all', adminController.markAllNotificationsRead);
 
 module.exports = router;

@@ -11,6 +11,7 @@ const Video = require('../moduls/Video')
 const Stats = require('../moduls/Stats')
 const Reviews = require('../moduls/Reviews')
 const SongSelection = require('../moduls/SongSelection')
+const Notification = require('../moduls/Notification')
 const adminController = {
 
     getAllClients: async (req, res) => {
@@ -56,8 +57,9 @@ const adminController = {
             const result = await User.editProfile(id, first_name, last_name, email, number, service);
             Stats.addStat(req.session.user.id, 'admin', 'update', 'actualizó un cliente', 'complete').catch(err => console.error('Stats error:', err));
             if (result === 1) {
-                res.status(200).json({ 
-                    message: "Perfil actualizado correctamente", 
+                Notification.create(parseInt(id), 'profile_updated', 'Tu perfil fue actualizado', 'Un administrador realizó cambios en los datos de tu perfil.').catch(err => console.error('Notif error:', err));
+                res.status(200).json({
+                    message: "Perfil actualizado correctamente",
                     data: {
                         id: id,
                         first_name: first_name,
@@ -204,6 +206,7 @@ const adminController = {
                 }
             }
             Stats.addStat(req.session.user.id, 'admin', 'create', 'creó una nueva galería', 'complete').catch(err => console.error('Stats error:', err));
+            Notification.create(parseInt(id), 'gallery_created', '¡Nueva galería disponible!', `Se creó tu galería "${title}" con ${uploadedImages.length} foto${uploadedImages.length !== 1 ? 's' : ''}.`).catch(err => console.error('Notif error:', err));
             res.status(201).json({
                 message: 'Galería creada exitosamente',
                 data: {
@@ -644,6 +647,7 @@ createVideo: async (req, res) => {
 
       const newVideo = await Video.create(videoData);
             Stats.addStat(req.session.user.id, 'admin', 'create', 'creó un nuevo video', 'complete').catch(err => console.error('Stats error:', err));
+            Notification.create(parseInt(client_id), 'new_video', '¡Nuevo video disponible!', `Se subió un nuevo video: "${title.trim()}". Podés verlo en tu sección de videos.`).catch(err => console.error('Notif error:', err));
       res.status(201).json({
         success: true,
         message: 'Video creado y subido correctamente',
@@ -1049,9 +1053,11 @@ markCommentSeen: async (req, res) => {
         if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
         const { id } = req.params;
         const Comments = require('../moduls/Comments');
+        const commentUserId = await Comments.getCommentUserId(id);
         await Comments.markAsSeen(id);
         const Stats = require('../moduls/Stats');
         Stats.addStat(user.id, 'admin', 'update', `marcó comentario #${id} como visto`, 'complete').catch(err => console.error('Stats error:', err));
+        if (commentUserId) Notification.create(commentUserId, 'comment_seen', 'Tu comentario fue visto', 'El equipo de Pantone vio tu comentario en una foto de tu galería.').catch(err => console.error('Notif error:', err));
         return res.status(200).json({ success: true, message: 'Comentario marcado como visto' });
     } catch (err) {
         console.error('Error en markCommentSeen:', err);
@@ -1079,9 +1085,11 @@ updateRequest: async (req, res) => {
         const { id } = req.params;
         const { status, admin_response } = req.body;
         const General_requests = require('../moduls/General_requests');
+        const reqUserId = await General_requests.getRequestUserId(id);
         await General_requests.updateRequest(id, status, admin_response);
         const Stats = require('../moduls/Stats');
         Stats.addStat(user.id, 'admin', 'update', `actualizó solicitud #${id} a "${status}"`, 'complete').catch(err => console.error('Stats error:', err));
+        if (reqUserId && admin_response) Notification.create(reqUserId, 'request_response', 'Respuesta a tu solicitud', admin_response).catch(err => console.error('Notif error:', err));
         return res.status(200).json({ success: true, message: 'Solicitud actualizada' });
     } catch (err) {
         console.error('Error en updateRequest:', err);
@@ -1195,14 +1203,17 @@ addImagesToGallery: async (req, res) => {
         if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
         if (!req.files || req.files.length === 0) return res.status(400).json({ success: false, message: 'No se enviaron imágenes' });
         const { galleryId } = req.params;
+        const setFirstAsPrimary = req.body.isPrimary === 'true' || req.body.isPrimary === true;
         const gallery = await Gallery.getGalleryById(galleryId);
         if (!gallery) return res.status(404).json({ success: false, message: 'Galería no encontrada' });
         const folderName = gallery.folder_path || `gallery-${galleryId}`;
+        let coverImageUrl = null;
         const results = await Promise.all(
-            req.files.map(async (file) => {
+            req.files.map(async (file, index) => {
                 try {
                     const fileExtension = path.extname(file.originalname);
                     const uniqueFileName = `${uuidv4()}${fileExtension}`;
+                    const isPrimary = setFirstAsPrimary && index === 0;
                     const uploadResult = await uploadFile(file.buffer, uniqueFileName, folderName, file.mimetype);
                     if (uploadResult.success) {
                         await Gallery_images.createImage(
@@ -1211,9 +1222,10 @@ addImagesToGallery: async (req, res) => {
                             uniqueFileName,
                             uploadResult.url,
                             uploadResult.path,
-                            false,
-                            999
+                            isPrimary,
+                            isPrimary ? 0 : 999
                         );
+                        if (isPrimary) coverImageUrl = uploadResult.url;
                         return true;
                     }
                     return false;
@@ -1227,7 +1239,8 @@ addImagesToGallery: async (req, res) => {
         if (added === 0) return res.status(500).json({ success: false, message: 'Error al subir las imágenes' });
         const allImages = await Gallery_images.getByGalleryId(galleryId);
         await Gallery.updatePhotosCount(galleryId, allImages.length);
-        res.json({ success: true, message: `${added} imagen(es) agregada(s)`, count: added });
+        if (coverImageUrl) await Gallery.updateCoverImage(galleryId, coverImageUrl);
+        res.json({ success: true, message: `${added} imagen(es) agregada(s)`, count: added, coverImageUrl });
     } catch (error) {
         console.error('Error en addImagesToGallery:', error);
         res.status(500).json({ success: false, message: 'Error al agregar las imágenes' });
@@ -1267,6 +1280,106 @@ getAllSongSelections: async (req, res) => {
     } catch (err) {
         console.error('Error en getAllSongSelections:', err);
         return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+getNotifications: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso no autorizado' });
+        const notifications = await Notification.getByUser(user.id);
+        const unread = await Notification.getUnreadCount(user.id);
+        return res.status(200).json({ notifications, unread });
+    } catch (err) {
+        console.error('Error en getNotifications (admin):', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+markNotificationRead: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso no autorizado' });
+        const { id } = req.params;
+        await Notification.markRead(id, user.id);
+        return res.status(200).json({ success: true });
+    } catch (err) {
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+markAllNotificationsRead: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso no autorizado' });
+        await Notification.markAllRead(user.id);
+        return res.status(200).json({ success: true });
+    } catch (err) {
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+createGalleryMeta: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+
+        const { id, title, service, description, status = 'active' } = req.body;
+        if (!id || !title || !service) {
+            return res.status(400).json({ message: 'client_id, title y service_type son obligatorios' });
+        }
+
+        const client = await User.findOne(id);
+        if (!client) return res.status(404).json({ message: 'Cliente no encontrado' });
+
+        const safeClientName = `${client.first_name}${client.last_name}`
+            .replace(/[^a-zA-Z0-9]/g, '-')
+            .toLowerCase();
+        const folderName = `${id}-${safeClientName}`;
+
+        const newGallery = await Gallery.newGallery(
+            id, title, service, description, status,
+            0, '', folderName, user.id
+        );
+
+        if (!newGallery || !newGallery.insertId) {
+            return res.status(500).json({ message: 'Error al crear la galería' });
+        }
+
+        res.status(201).json({
+            message: 'Galería creada',
+            data: { galleryId: newGallery.insertId, folderName }
+        });
+    } catch (err) {
+        console.error('Error en createGalleryMeta:', err);
+        res.status(500).json({ message: 'Error del servidor' });
+    }
+},
+
+finalizeGallery: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+
+        const { galleryId } = req.params;
+        const gallery = await Gallery.getGalleryById(galleryId);
+        if (!gallery) return res.status(404).json({ message: 'Galería no encontrada' });
+
+        const allImages = await Gallery_images.getByGalleryId(galleryId);
+        await Gallery.updatePhotosCount(galleryId, allImages.length);
+
+        Stats.addStat(user.id, 'admin', 'create', 'creó una nueva galería', 'complete').catch(err => console.error('Stats error:', err));
+        Notification.create(
+            parseInt(gallery.client_id),
+            'gallery_created',
+            '¡Nueva galería disponible!',
+            `Se creó tu galería "${gallery.title}" con ${allImages.length} foto${allImages.length !== 1 ? 's' : ''}.`
+        ).catch(err => console.error('Notif error:', err));
+
+        res.json({ success: true, total_images: allImages.length });
+    } catch (err) {
+        console.error('Error en finalizeGallery:', err);
+        res.status(500).json({ message: 'Error del servidor' });
     }
 },
 

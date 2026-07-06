@@ -267,7 +267,11 @@ const handleDeleteClick = async (clientId, e) => {
               <td>{client.email}</td>
               <td>+{client.number || 'Sin teléfono'}</td>
               <td>{client.service || 'No especificado'}</td>
-              <td>{client.has_gallery ? '✅' : '❌'}</td>
+              <td>
+                <span className={`count-badge${client.galleries_count > 0 ? ' count-badge--active' : ''}`}>
+                  {client.galleries_count || 0}
+                </span>
+              </td>
               <td>{client.videos_count || 0}</td>
               <td>
                 {client.created_at ? 
@@ -275,7 +279,11 @@ const handleDeleteClick = async (clientId, e) => {
                   'Sin fecha'
                 }
               </td>
-              <td>0</td>
+              <td>
+                <span className={`count-badge${client.comments_count > 0 ? ' count-badge--comments' : ''}`}>
+                  {client.comments_count || 0}
+                </span>
+              </td>
               <td>
                 <div className="actions-container">
                   <button 
