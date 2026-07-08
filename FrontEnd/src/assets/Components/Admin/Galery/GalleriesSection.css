@@ -296,6 +296,28 @@
   background: rgba(239, 68, 68, 1);
 }
 
+.load-more-images {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: rgba(255, 140, 0, 0.1);
+  border: 1px solid rgba(255, 140, 0, 0.35);
+  color: #FF8C00;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.load-more-images:hover {
+  background: rgba(255, 140, 0, 0.2);
+}
+
 @media (max-width: 768px) {
   .galleries-grid { grid-template-columns: 1fr; }
 

@@ -4,16 +4,13 @@ class Video {
     
     static async create(videoData) {
         try {
-            console.log('-----ENTRO AL LA BASE DE DATOS')
-            console.log(videoData)
-
             const {
-                user_id, title, description, estimated_delivery, status, video_url, file_name, original_filename, file_size, format, progress,created_by} = videoData;
+                user_id, title, description, estimated_delivery, status, video_url, file_name, original_filename, file_size, format, thumbnail_url, created_by} = videoData;
 
             const query = `
-                INSERT INTO client_videos 
+                INSERT INTO client_videos
                 (user_id, description, title, estimated_delivery, status, video_url,
-                 file_name, original_filename, file_size, format, progress, created_by)
+                 file_name, original_filename, file_size, format, thumbnail_url, created_by)
                 VALUES (?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
 
@@ -28,7 +25,7 @@ class Video {
                 original_filename,
                 file_size,
                 format,
-                progress,
+                thumbnail_url,
                 created_by
             ]);
 
@@ -44,13 +41,6 @@ class Video {
 
             const [result] = await pool.execute('SELECT client_videos.*, users.first_name, users.last_name, users.email FROM client_videos INNER JOIN users ON client_videos.user_id = users.id');
             return result
-        }
-        catch(err){console.log(err)}
-    }
-    static async updateProgress(videId, progress){
-        try{
-            const [result] = await pool.execute('UPDATE client_videos SET progress = ? WHERE id = ?', [progress, videId])
-            return result.affectedRows;
         }
         catch(err){console.log(err)}
     }

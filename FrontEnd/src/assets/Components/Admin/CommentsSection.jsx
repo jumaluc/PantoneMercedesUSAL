@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faComment, faCheckCircle, faClock, faSpinner,
-    faSearch, faImages, faThumbsUp
+    faSearch, faImages, faThumbsUp, faTimes, faExpand
 } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import './CommentsSection.css';
@@ -13,8 +13,16 @@ const CommentsSection = () => {
     const [filter, setFilter] = useState('all');
     const [search, setSearch] = useState('');
     const [marking, setMarking] = useState(null);
+    const [lightboxImage, setLightboxImage] = useState(null);
 
     useEffect(() => { fetchComments(); }, []);
+
+    useEffect(() => {
+        if (!lightboxImage) return;
+        const handleKeyDown = (e) => { if (e.key === 'Escape') setLightboxImage(null); };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [lightboxImage]);
 
     const fetchComments = async () => {
         try {
@@ -129,8 +137,14 @@ const CommentsSection = () => {
                 <div className="cs-list">
                     {filtered.map(c => (
                         <div key={c.id} className={`cs-card ${c.admin_seen ? 'cs-card--seen' : ''}`}>
-                            <div className="cs-card-image">
+                            <div
+                                className="cs-card-image"
+                                onClick={() => setLightboxImage({ url: c.image_url, title: c.original_filename || 'foto' })}
+                            >
                                 <img src={c.image_url} alt={c.original_filename || 'foto'} />
+                                <div className="cs-card-image-overlay">
+                                    <FontAwesomeIcon icon={faExpand} />
+                                </div>
                             </div>
 
                             <div className="cs-card-body">
@@ -183,6 +197,20 @@ const CommentsSection = () => {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {lightboxImage && (
+                <div className="cs-lightbox" onClick={() => setLightboxImage(null)}>
+                    <button className="cs-lightbox-close" onClick={() => setLightboxImage(null)} aria-label="Cerrar">
+                        <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                    <img
+                        src={lightboxImage.url}
+                        alt={lightboxImage.title}
+                        className="cs-lightbox-image"
+                        onClick={e => e.stopPropagation()}
+                    />
                 </div>
             )}
         </div>

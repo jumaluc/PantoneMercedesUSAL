@@ -10,6 +10,7 @@ const Video = require('../moduls/Video');
 const Stats = require('../moduls/Stats');
 const SongSelection = require('../moduls/SongSelection');
 const Reviews = require('../moduls/Reviews');
+const Notification = require('../moduls/Notification');
 const userController = {
 
     editProfile: async (req, res) => {
@@ -21,6 +22,7 @@ const userController = {
             const result = await User.editProfile(id, first_name, last_name, email, number, service);
             Stats.addStat(req.session.user.id, 'client', 'edit', 'edicion del perfil', 'complete').catch(err => console.error('Stats error:', err));
             if (result === 1) {
+                Notification.create(user.id, 'profile_updated', 'Perfil actualizado', 'Tus datos de perfil se guardaron correctamente.').catch(err => console.error('Notif error:', err));
 
                 return res.status(200).json({
                     message: "Perfil actualizado correctamente",
@@ -223,7 +225,10 @@ confirmSelection: async (req, res) => {
         const result = await Gallery_images.updateSelectionStatus(imageIds, true);
         Stats.addStat(req.session.user.id, 'client', 'confirm selection', 'confirmó selección de ' + imageIds.length + ' fotos', 'complete').catch(err => console.error('Stats error:', err));
         if (result) {
-            res.status(200).json({ 
+            const userData = await User.getUser(user.id);
+            const clientName = userData ? `${userData.first_name} ${userData.last_name}` : 'Un cliente';
+            Notification.createForAllAdmins('selection_confirmed', 'Selección de fotos confirmada', `${clientName} confirmó su selección de ${imageIds.length} foto${imageIds.length !== 1 ? 's' : ''}.`).catch(err => console.error('Notif error:', err));
+            res.status(200).json({
                 message: `Se confirmaron ${imageIds.length} imágenes correctamente`,
                 confirmedCount: imageIds.length
             });
@@ -250,6 +255,9 @@ addComment : async (req,res) => {
 
     if(!commentId) return res.status(500).json({message : "Error en el servidor"});
     Stats.addStat(req.session.user.id, 'client', 'comment', 'comentó una foto', 'complete').catch(err => console.error('Stats error:', err));
+    const commenter = await User.getUser(user.id);
+    const commenterName = commenter ? `${commenter.first_name} ${commenter.last_name}` : 'Un cliente';
+    Notification.createForAllAdmins('new_comment', 'Nuevo comentario en una foto', `${commenterName} dejó un comentario en una imagen de su galería.`).catch(err => console.error('Notif error:', err));
     return res.status(200).json({
       message: "Comentario agregado correctamente", 
       commentId: commentId // Cambia esto para que coincida con el frontend
@@ -355,6 +363,9 @@ createRequest: async (req, res) =>{
     const response = await General_requests.createRequest(idUser, type, subject, message, priority);
     if(!response || response < 0) return res.status(500).json({message : "Error en el servidor"});
     Stats.addStat(req.session.user.id, 'client', 'request', 'escribió una solicitud', 'complete').catch(err => console.error('Stats error:', err));
+    const requester = await User.getUser(user.id);
+    const requesterName = requester ? `${requester.first_name} ${requester.last_name}` : 'Un cliente';
+    Notification.createForAllAdmins('new_request', 'Nueva solicitud recibida', `${requesterName} envió una nueva solicitud: "${subject}".`).catch(err => console.error('Notif error:', err));
     return res.status(200).json({message : "Solicitud creada correctamente"});
 
   }
@@ -452,6 +463,9 @@ submitReview: async (req, res) => {
 
         await Reviews.submitReview(user.id, rating, message.trim());
         Stats.addStat(user.id, 'client', 'review', 'dejó una reseña', 'complete').catch(err => console.error('Stats error:', err));
+        const reviewer = await User.getUser(user.id);
+        const reviewerName = reviewer ? `${reviewer.first_name} ${reviewer.last_name}` : 'Un cliente';
+        Notification.createForAllAdmins('new_review', 'Nueva reseña recibida', `${reviewerName} dejó una reseña con ${rating} estrella${rating !== 1 ? 's' : ''}.`).catch(err => console.error('Notif error:', err));
         return res.status(200).json({ message: 'Reseña guardada correctamente' });
     } catch (err) {
         console.error('Error en submitReview:', err);
@@ -555,9 +569,42 @@ getSongSelection: async (req, res) => {
         console.error('Error en getSongSelection:', err);
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
+},
+
+getNotifications: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso denegado' });
+        const notifications = await Notification.getByUser(user.id);
+        const unread = await Notification.getUnreadCount(user.id);
+        return res.status(200).json({ notifications, unread });
+    } catch (err) {
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+markNotificationRead: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso denegado' });
+        const { id } = req.params;
+        await Notification.markRead(id, user.id);
+        return res.status(200).json({ success: true });
+    } catch (err) {
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+markAllNotificationsRead: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user) return res.status(401).json({ message: 'Acceso denegado' });
+        await Notification.markAllRead(user.id);
+        return res.status(200).json({ success: true });
+    } catch (err) {
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
 }
-
-
 
 }
 

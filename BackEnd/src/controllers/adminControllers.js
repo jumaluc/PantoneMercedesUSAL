@@ -2,7 +2,8 @@
 const User = require('../moduls/Users');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
-const { uploadFile, getFileUrls, deleteFile, checkCredentials, uploadVideoToGCS} = require('../utils/googleStorageService');
+const { uploadFile, getFileUrls, deleteFile, checkCredentials, uploadVideoToGCS, uploadThumbnailToGCS, bucket} = require('../utils/googleStorageService');
+const archiver = require('archiver');
 const Gallery = require('../moduls/Galleries');
 const Gallery_images = require('../moduls/Gallery_images');
 const path = require('path');
@@ -611,15 +612,8 @@ createVideo: async (req, res) => {
       if (!user || user.role !== 'admin') {
         return res.status(401).json({ message: 'Acceso no autorizado' });
       }
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message: 'No se recibió ningún archivo de video'
-        });
-      }
-      console.log("++++++++++++++++++++++++ ENTRO AL CREATE VIDEO")
-      const { client_id, title, description, service_type, estimated_delivery, status, progress } = req.body;
-      console.log(req.body);
+
+      const { client_id, title, description, estimated_delivery, status } = req.body;
       if (!client_id || !title) {
         return res.status(400).json({
           success: false,
@@ -627,43 +621,48 @@ createVideo: async (req, res) => {
         });
       }
 
-      const videoUploadResult = await uploadVideoToGCS(req.file, 'videos', client_id);
+      const videoFile = req.files?.video?.[0];
+      const thumbnailFile = req.files?.thumbnail?.[0];
+
+      let videoUploadResult = null;
+      if (videoFile) {
+        videoUploadResult = await uploadVideoToGCS(videoFile, 'videos', client_id);
+      }
+
+      let thumbnailUploadResult = null;
+      if (thumbnailFile) {
+        thumbnailUploadResult = await uploadThumbnailToGCS(thumbnailFile, 'thumbnails', client_id);
+      }
 
       const videoData = {
         user_id: parseInt(client_id),
         title: title.trim(),
-        description : description.trim(),
+        description: description?.trim() || '',
         estimated_delivery: estimated_delivery || null,
         status: status || 'waiting_selection',
-        video_url: videoUploadResult.url,
-        file_name: videoUploadResult.fileName,
-        original_filename: req.file.originalname,
-        file_size: req.file.size,
-        format: req.file.mimetype,
+        video_url: videoUploadResult?.url || null,
+        file_name: videoUploadResult?.fileName || null,
+        original_filename: videoFile?.originalname || null,
+        file_size: videoFile?.size || null,
+        format: videoFile?.mimetype || null,
+        thumbnail_url: thumbnailUploadResult?.url || null,
         created_by: user.id,
-        progress : progress,
       };
-      console.log("VIDEO DATA EN EL CONTROLLER : ", videoData)
 
       const newVideo = await Video.create(videoData);
             Stats.addStat(req.session.user.id, 'admin', 'create', 'creó un nuevo video', 'complete').catch(err => console.error('Stats error:', err));
             Notification.create(parseInt(client_id), 'new_video', '¡Nuevo video disponible!', `Se subió un nuevo video: "${title.trim()}". Podés verlo en tu sección de videos.`).catch(err => console.error('Notif error:', err));
       res.status(201).json({
         success: true,
-        message: 'Video creado y subido correctamente',
+        message: 'Video creado correctamente',
         data: {
-          video: newVideo,
-          uploadInfo: {
-            url: videoUploadResult.url,
-            size: videoUploadResult.size,
-            originalName: videoUploadResult.originalName
-          }
+          video: newVideo
         }
       });
 
     } catch (error) {
       console.error('Error creating video:', error);
-      
+
       res.status(500).json({
         success: false,
         message: error.message || 'Error al crear el video'
@@ -723,39 +722,6 @@ createVideo: async (req, res) => {
       res.status(500).json({
         success: false,
         message: 'Error al actualizar el estado'
-      });
-    }
-  },
-
-  updateVideoProgress: async (req, res) => {
-    try {
-      const user = req.session.user;
-      if (!user || user.role !== 'admin') {
-        return res.status(401).json({ message: 'Acceso no autorizado' });
-      }
-      console.log("ENTRO AL UPDATE ------------", req.params, req.body)
-      const { videoId } = req.params;
-      const { progress } = req.body;
-
-      const result = await Video.updateProgress(videoId, parseInt(progress));
-            Stats.addStat(req.session.user.id, 'admin', 'update', 'actualizó progreso de video', 'complete').catch(err => console.error('Stats error:', err));
-      if (result > 0) {
-        res.json({
-          success: true,
-          message: 'Progreso del video actualizado'
-        });
-      } else {
-        res.status(404).json({
-          success: false,
-          message: 'Video no encontrado'
-        });
-      }
-
-    } catch (error) {
-      console.error('Error updating video progress:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error al actualizar el progreso'
       });
     }
   },
@@ -1031,6 +997,53 @@ getSelectionImages: async (req, res) => {
     } catch (err) {
         console.error('Error en getSelectionImages:', err);
         return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+downloadSelectionZip: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+
+        const { galleryId } = req.params;
+        const images = await Gallery_images.getSelectedByGallery(galleryId);
+        if (!images || images.length === 0) {
+            return res.status(400).json({ success: false, message: 'No hay imágenes seleccionadas para descargar' });
+        }
+
+        const gallery = await Gallery.getGalleryById(galleryId);
+        const safeTitle = (gallery?.title || 'seleccion').replace(/[^a-zA-Z0-9\-_ ]/g, '_');
+
+        const archive = archiver('zip', { zlib: { level: 9 } });
+        res.setHeader('Content-Disposition', `attachment; filename="${safeTitle}.zip"`);
+        res.setHeader('Content-Type', 'application/zip');
+
+        archive.on('error', (error) => {
+            console.error('Error creando ZIP:', error);
+            if (!res.headersSent) res.status(500).json({ success: false, message: 'Error al crear el archivo ZIP' });
+        });
+
+        archive.pipe(res);
+
+        images.forEach((img, index) => {
+            try {
+                const cleanUrl = img.image_url.split('?')[0];
+                const bucketName = bucket.name;
+                const fileName = cleanUrl.substring(cleanUrl.indexOf(bucketName) + bucketName.length + 1);
+                const file = bucket.file(fileName);
+                const ext = fileName.split('.').pop() || 'jpg';
+                const safeName = img.original_filename || `imagen_${index + 1}.${ext}`;
+                archive.append(file.createReadStream(), { name: safeName });
+            } catch (err) {
+                console.error(`Error procesando imagen ${img.id}:`, err);
+            }
+        });
+
+        archive.finalize();
+        Stats.addStat(user.id, 'admin', 'download', `descargó ${images.length} fotos de la selección`, 'complete').catch(err => console.error('Stats error:', err));
+    } catch (err) {
+        console.error('Error en downloadSelectionZip:', err);
+        if (!res.headersSent) res.status(500).json({ success: false, message: 'Error interno del servidor' });
     }
 },
 

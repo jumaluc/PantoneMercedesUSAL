@@ -4,7 +4,7 @@ import {
     faVideo, faDownload, faPlay, faPause, faClock,
     faSpinner, faCheckCircle, faEdit, faHourglassHalf,
     faSearch, faFileVideo, faHistory, faCalendarCheck,
-    faTimesCircle, faExpand, faTimes
+    faExpand, faTimes
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import './ClientVideosSection.css';
@@ -27,12 +27,6 @@ const STATUS_MAP = {
         color: '#10b981',
         icon: faCheckCircle,
         description: 'Tu video está listo.'
-    },
-    cancelled: {
-        text: 'Cancelado',
-        color: '#ef4444',
-        icon: faTimesCircle,
-        description: 'Este video fue cancelado.'
     }
 };
 
@@ -106,20 +100,6 @@ const ClientVideosSection = ({ user }) => {
         const sizes = ['B', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(1024));
         return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
-    };
-
-    const getProgressLabel = (p) => {
-        if (p <= 25) return 'Iniciando';
-        if (p <= 50) return 'En progreso';
-        if (p <= 75) return 'Avanzado';
-        return 'Casi listo';
-    };
-
-    const getProgressColor = (p) => {
-        if (p <= 25) return '#ef4444';
-        if (p <= 50) return '#f59e0b';
-        if (p <= 75) return '#3b82f6';
-        return '#10b981';
     };
 
     const filtered = videos.filter(v => {
@@ -235,24 +215,6 @@ const ClientVideosSection = ({ user }) => {
 
                                     {video.description && (
                                         <p className="cvs-description">{video.description}</p>
-                                    )}
-
-                                    {/* Progreso solo si NO está completado */}
-                                    {!isAvailable && typeof video.progress === 'number' && (
-                                        <div className="cvs-progress">
-                                            <div className="cvs-progress-labels">
-                                                <span>{video.progress}% completado</span>
-                                            </div>
-                                            <div className="cvs-progress-bar">
-                                                <div
-                                                    className="cvs-progress-fill"
-                                                    style={{
-                                                        width: `${video.progress}%`,
-                                                        background: getProgressColor(video.progress)
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
                                     )}
 
                                     <div className="cvs-meta">

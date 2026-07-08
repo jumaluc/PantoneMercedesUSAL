@@ -79,6 +79,14 @@ static async getAllForAdmin(){
     catch(err){console.log(err)}
 }
 
+static async getCommentUserId(commentId){
+    try{
+        const [rows] = await pool.execute('SELECT user_id FROM image_comments WHERE id = ?', [commentId]);
+        return rows[0]?.user_id || null;
+    }
+    catch(err){console.log(err); return null;}
+}
+
 static async markAsSeen(commentId){
     try{
         const [result] = await pool.execute(

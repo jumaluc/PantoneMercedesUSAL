@@ -15,7 +15,7 @@ class Stats  {
     static async getAllStats(){
 
         try{
-            const [result] = await pool.execute('SELECT stats.*, users.first_name, users.last_name FROM stats INNER JOIN users ON users.id = stats.user_id');
+            const [result] = await pool.execute('SELECT stats.*, users.first_name, users.last_name FROM stats INNER JOIN users ON users.id = stats.user_id ORDER BY stats.created_at DESC, stats.id DESC');
             return result;
         }
         catch(err){console.log(err)}

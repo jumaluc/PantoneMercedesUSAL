@@ -43,7 +43,7 @@ class Gallery_images{
 static async getByGalleryIdWithSelection(galleryId) {
     try {
         const [result] = await pool.execute(
-            'SELECT id, image_url, original_filename, is_selected, upload_order FROM gallery_images WHERE gallery_id = ? ORDER BY upload_order',
+            'SELECT id, image_url, original_filename, is_selected, upload_order, created_at FROM gallery_images WHERE gallery_id = ? ORDER BY upload_order',
             [galleryId]
         );
         return result;

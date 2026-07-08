@@ -40,22 +40,9 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
                 color: '#10b981',
                 icon: faPlay,
                 class: 'status-completed'
-            },
-            cancelled: {
-                text: 'Cancelado',
-                color: '#ef4444',
-                icon: faClock,
-                class: 'status-cancelled'
             }
         };
         return statusInfo[status] || statusInfo.waiting_selection;
-    };
-
-    const getProgressInfo = (progress) => {
-        if (progress <= 25) return { color: '#ef4444', label: 'Iniciando' };
-        if (progress <= 50) return { color: '#f59e0b', label: 'En progreso' };
-        if (progress <= 75) return { color: '#3b82f6', label: 'Avanzado' };
-        return { color: '#10b981', label: 'Casi listo' };
     };
 
     const handleStatusChange = async (newStatus) => {
@@ -79,32 +66,6 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
         } catch (error) {
             console.error('Error updating video status:', error);
             toast.error('Error al actualizar el estado');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleProgressUpdate = async (newProgress) => {
-        setLoading(true);
-        try {
-            const response = await fetch(`http://localhost:3000/admin/updateVideoProgress/${video.id}`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ progress: newProgress })
-            });
-
-            if (response.ok) {
-                toast.success('Progreso actualizado');
-                onUpdate();
-            } else {
-                throw new Error('Error al actualizar el progreso');
-            }
-        } catch (error) {
-            console.error('Error updating video progress:', error);
-            toast.error('Error al actualizar el progreso');
         } finally {
             setLoading(false);
         }
@@ -196,7 +157,6 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
     };
 
     const statusInfo = getStatusInfo(video.status);
-    const progressInfo = getProgressInfo(video.progress);
 
     return (
         <div className="video-card">
@@ -224,25 +184,6 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
                     {video.first_name} {video.last_name}
                     {video.email && ` (${video.email})`}
                 </span>
-            </div>
-
-            {/* Barra de progreso */}
-            <div className="video-progress-section">
-                <div className="video-progress-header">
-                    <span>Progreso: {video.progress}%</span>
-                    <span style={{ color: progressInfo.color }}>
-                        {progressInfo.label}
-                    </span>
-                </div>
-                <div className="video-progress-bar">
-                    <div 
-                        className="video-progress-fill"
-                        style={{ 
-                            width: `${video.progress}%`,
-                            backgroundColor: progressInfo.color
-                        }}
-                    ></div>
-                </div>
             </div>
 
             {/* Meta información */}
@@ -278,7 +219,7 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
             {/* Acciones */}
             <div className="video-actions">
                 <div className="video-status-controls">
-                    <select 
+                    <select
                         value={video.status}
                         onChange={(e) => handleStatusChange(e.target.value)}
                         disabled={loading}
@@ -287,20 +228,6 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
                         <option value="waiting_selection">Esperando selección</option>
                         <option value="in_editing">En edición</option>
                         <option value="completed">Finalizado</option>
-                        <option value="cancelled">Cancelado</option>
-                    </select>
-
-                    <select 
-                        value={video.progress}
-                        onChange={(e) => handleProgressUpdate(parseInt(e.target.value))}
-                        disabled={loading}
-                        className="progress-select"
-                    >
-                        <option value="0">0%</option>
-                        <option value="25">25%</option>
-                        <option value="50">50%</option>
-                        <option value="75">75%</option>
-                        <option value="100">100%</option>
                     </select>
                 </div>
 

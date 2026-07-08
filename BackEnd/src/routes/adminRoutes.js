@@ -4,7 +4,7 @@ const router = express.Router();
 const adminController = require('../controllers/adminControllers');
 const uploadGaleria = require('../middleware/upload');
 const { withAdminLog } = require('../middleware/adminLoger');
-const {uploadVideo} = require('../middleware/uploadVideo');
+const {uploadVideo, handleUploadErrors: handleVideoUploadErrors} = require('../middleware/uploadVideo');
 const { requireAdmin } = require('../middleware/auth');
 router.use(requireAdmin);
 router.get('/getAllClients', withAdminLog('CLIENT_VIEW'), adminController.getAllClients);
@@ -28,7 +28,7 @@ router.delete('/deleteClient/:clientId', withAdminLog('CLIENT_DELETE', (req, dat
     resource_id: req.params.clientId
 })), adminController.deleteClient);
 
-router.post('/createGallery', uploadGaleria, withAdminLog('GALLERY_CREATE', (req, data) => ({
+router.post('/createGallery', uploadGaleria, uploadGaleria.handleUploadErrors, withAdminLog('GALLERY_CREATE', (req, data) => ({
     resource_type: 'GALLERY',
     resource_id: data.data?.gallery?.insertId,
     resource_name: req.body.title,
@@ -52,6 +52,7 @@ router.get('/stats/galleries-growth', adminController.getGalleriesGrowth);
 router.get('/stats/activity-timeline', adminController.getActivityTimeline);
 router.post('/createVideo',
   uploadVideo,
+  handleVideoUploadErrors,
   withAdminLog('VIDEO_CREATE', (req, data) => ({
     resource_type: 'VIDEO',
     resource_id: data.data?.video?.id,
@@ -69,15 +70,6 @@ router.put('/updateVideoStatus/:videoId',
     resource_name: req.body.status
   })),
   adminController.updateVideoStatus
-);
-
-router.put('/updateVideoProgress/:videoId',
-  withAdminLog('VIDEO_UPDATE_PROGRESS', (req) => ({
-    resource_type: 'VIDEO',
-    resource_id: req.params.videoId,
-    resource_name: String(req.body.progress)
-  })),
-  adminController.updateVideoProgress
 );
 
 router.delete('/deleteVideo/:videoId',
@@ -116,7 +108,7 @@ router.put('/updateGallery/:galleryId',
 );
 router.get('/getGalleryImages/:galleryId', adminController.getGalleryImages);
 router.delete('/deleteGalleryImage/:imageId', adminController.deleteGalleryImage);
-router.post('/addImagesToGallery/:galleryId', uploadGaleria, adminController.addImagesToGallery);
+router.post('/addImagesToGallery/:galleryId', uploadGaleria, uploadGaleria.handleUploadErrors, adminController.addImagesToGallery);
 router.post('/createGalleryMeta', adminController.createGalleryMeta);
 router.post('/finalizeGallery/:galleryId', adminController.finalizeGallery);
 
@@ -127,6 +119,7 @@ router.post('/public-content/createPublicGallery', uploadGaleria, adminControlle
 
 router.get('/client-selections', adminController.getClientSelections);
 router.get('/client-selections/:galleryId/images', adminController.getSelectionImages);
+router.get('/client-selections/:galleryId/download-zip', adminController.downloadSelectionZip);
 router.post('/client-selections/:galleryId/cancel',
   withAdminLog('SELECTION_CANCEL', (req) => ({
     resource_type: 'SELECTION',

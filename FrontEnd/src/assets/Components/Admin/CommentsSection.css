@@ -144,9 +144,11 @@
 
 /* Thumbnail */
 .cs-card-image {
+    position: relative;
     width: 110px;
     flex-shrink: 0;
     background: #0a0d12;
+    cursor: pointer;
 }
 
 .cs-card-image img {
@@ -154,6 +156,63 @@
     height: 100%;
     object-fit: cover;
     display: block;
+}
+
+.cs-card-image-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+    font-size: 1.1rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.cs-card-image:hover .cs-card-image-overlay {
+    opacity: 1;
+}
+
+/* Lightbox */
+.cs-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.cs-lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.cs-lightbox-close:hover { background: rgba(255, 140, 0, 0.2); color: #FF8C00; }
+
+.cs-lightbox-image {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
 /* Body */

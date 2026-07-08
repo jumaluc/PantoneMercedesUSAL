@@ -3,21 +3,32 @@ const multer = require('multer');
 // Configurar multer para usar memoria (no guardar en disco)
 const memoryStorage = multer.memoryStorage();
 
-// Filtro para validar tipos de video
-const fileFilter = (req, file, cb) => {
-  const allowedMimeTypes = [
-    'video/mp4',
-    'video/avi', 
-    'video/mov',
-    'video/wmv',
-    'video/mkv',
-    'video/flv',
-    'video/webm',
-    'video/quicktime',
-    'video/x-msvideo'
-  ];
+// Filtro para validar tipos de video y miniatura
+const allowedVideoMimeTypes = [
+  'video/mp4',
+  'video/avi',
+  'video/mov',
+  'video/wmv',
+  'video/mkv',
+  'video/flv',
+  'video/webm',
+  'video/quicktime',
+  'video/x-msvideo'
+];
 
-  if (allowedMimeTypes.includes(file.mimetype)) {
+const allowedThumbnailMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+
+const fileFilter = (req, file, cb) => {
+  if (file.fieldname === 'thumbnail') {
+    if (allowedThumbnailMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Tipo de imagen no permitido para la miniatura. Formatos aceptados: JPEG, PNG'), false);
+    }
+    return;
+  }
+
+  if (allowedVideoMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
     cb(new Error(`Tipo de archivo no permitido. Formatos aceptados: MP4, AVI, MOV, WMV, MKV, FLV, WEBM`), false);
@@ -30,7 +41,7 @@ const uploadVideo = multer({
   fileFilter: fileFilter,
   limits: {
     fileSize: 500 * 1024 * 1024, // 500MB máximo
-    files: 1
+    files: 2
   }
 });
 
@@ -59,6 +70,9 @@ const handleUploadErrors = (error, req, res, next) => {
 };
 
 module.exports = {
-  uploadVideo: uploadVideo.single('video'),
+  uploadVideo: uploadVideo.fields([
+    { name: 'video', maxCount: 1 },
+    { name: 'thumbnail', maxCount: 1 }
+  ]),
   handleUploadErrors
 };

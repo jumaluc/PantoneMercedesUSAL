@@ -12,6 +12,7 @@ import {
     faVideo,
     faStar
 } from '@fortawesome/free-solid-svg-icons';
+import NotificationBell from '../Shared/NotificationBell';
 
 const Navbar = ({ user, activeSection, setActiveSection }) => {
   const navigate = useNavigate();
@@ -99,6 +100,7 @@ const Navbar = ({ user, activeSection, setActiveSection }) => {
           <span className="user-name">{nombreCompleto}</span>
           <span className="user-email">{user.email}</span>
         </div>
+        <NotificationBell role="client" />
         <button className="logout-btn" onClick={handleLogout}>
           <FontAwesomeIcon icon={faSignOutAlt} />
           Cerrar Sesión

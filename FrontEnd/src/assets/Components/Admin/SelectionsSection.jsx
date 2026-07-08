@@ -17,6 +17,7 @@ const SelectionsSection = () => {
   const [loadingImages, setLoadingImages] = useState({});
   const [lightboxImage, setLightboxImage] = useState(null);
   const [cancelling, setCancelling] = useState(null);
+  const [downloadingZip, setDownloadingZip] = useState(null);
 
   useEffect(() => {
     fetchSelections();
@@ -93,23 +94,30 @@ const SelectionsSection = () => {
     const images = galleryImages[galleryId];
     if (!images || images.length === 0) return;
 
-    toast.loading('Preparando descarga...', { id: 'dl-all' });
+    setDownloadingZip(galleryId);
+    toast.loading('Comprimiendo imágenes...', { id: 'dl-all' });
     try {
-      for (const img of images) {
-        const res = await fetch(img.image_url);
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = img.original_filename || `imagen_${img.id}.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+      const res = await fetch(`http://localhost:3000/admin/client-selections/${galleryId}/download-zip`, {
+        credentials: 'include'
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Error al descargar');
       }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${galleryTitle || 'seleccion'}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
       toast.success(`${images.length} imágenes descargadas`, { id: 'dl-all' });
-    } catch {
-      toast.error('Error al descargar', { id: 'dl-all' });
+    } catch (err) {
+      toast.error(err.message || 'Error al descargar', { id: 'dl-all' });
+    } finally {
+      setDownloadingZip(null);
     }
   };
 
@@ -241,8 +249,12 @@ const SelectionsSection = () => {
                         <button
                           className="sel-btn-download-all"
                           onClick={() => downloadAll(sel.gallery_id, sel.title)}
+                          disabled={downloadingZip === sel.gallery_id}
                         >
-                          <FontAwesomeIcon icon={faDownload} /> Descargar todas
+                          {downloadingZip === sel.gallery_id
+                            ? <FontAwesomeIcon icon={faSpinner} spin />
+                            : <FontAwesomeIcon icon={faDownload} />}
+                          {downloadingZip === sel.gallery_id ? 'Comprimiendo...' : 'Descargar todas'}
                         </button>
                       </div>
                       <div className="sel-images-grid">

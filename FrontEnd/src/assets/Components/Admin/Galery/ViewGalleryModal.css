@@ -1,0 +1,207 @@
+.vgm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.vgm-modal {
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 860px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.vgm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #374151;
+    flex-shrink: 0;
+}
+
+.vgm-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #f3f4f6;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.vgm-title svg { color: #FF8C00; }
+
+.vgm-title h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.vgm-count {
+    font-size: 0.82rem;
+    font-weight: 400;
+    color: #9ca3af;
+}
+
+.vgm-close {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.vgm-close:hover { color: #d1d5db; background: rgba(255, 255, 255, 0.05); }
+
+.vgm-body {
+    padding: 24px;
+}
+
+.vgm-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #9ca3af;
+    padding: 20px 0;
+    font-size: 0.875rem;
+}
+
+.vgm-loading svg { color: #FF8C00; }
+
+.vgm-no-images {
+    color: #6b7280;
+    font-size: 0.875rem;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.vgm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.vgm-thumb {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #374151;
+    background: #1f2937;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.vgm-thumb:hover {
+    border-color: #FF8C00;
+    transform: scale(1.02);
+}
+
+.vgm-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Lightbox */
+.vgm-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vgm-lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 1;
+}
+
+.vgm-lightbox-close:hover { background: rgba(255, 140, 0, 0.2); color: #FF8C00; }
+
+.vgm-lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px;
+    height: 52px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 1;
+}
+
+.vgm-lightbox-nav:hover { background: rgba(255, 140, 0, 0.2); color: #FF8C00; }
+
+.vgm-lightbox-prev { left: 20px; }
+.vgm-lightbox-next { right: 20px; }
+
+.vgm-lightbox-image-container {
+    max-width: 90vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.vgm-lightbox-image {
+    max-width: 90vw;
+    max-height: 78vh;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.vgm-lightbox-counter {
+    color: #d1d5db;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 5px 14px;
+    border-radius: 999px;
+}
+
+@media (max-width: 600px) {
+    .vgm-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+    .vgm-modal { max-height: 95vh; }
+    .vgm-lightbox-nav { width: 42px; height: 42px; font-size: 1.1rem; }
+    .vgm-lightbox-prev { left: 8px; }
+    .vgm-lightbox-next { right: 8px; }
+}

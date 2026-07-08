@@ -1,13 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV, faEdit, faTrash, faEye, faImage } from '@fortawesome/free-solid-svg-icons';
 import './GalleriesSection.css';
 import Swal from 'sweetalert2';
 import EditGalleryModal from './EditGalleryModal';
+import ViewGalleryModal from './ViewGalleryModal';
 
 const GalleryCard = ({ gallery, onUpdate }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!showMenu) return;
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMenu]);
 
   const handleDelete = async () => {
 
@@ -142,8 +156,8 @@ const GalleryCard = ({ gallery, onUpdate }) => {
         </div>
       </div>
 
-      <div className="gallery-actions">
-        <button 
+      <div className="gallery-actions" ref={menuRef}>
+        <button
           className="action-toggle"
           onClick={() => setShowMenu(!showMenu)}
         >
@@ -152,7 +166,7 @@ const GalleryCard = ({ gallery, onUpdate }) => {
 
         {showMenu && (
           <div className="action-menu">
-            <button className="action-btn view-btn">
+            <button className="action-btn view-btn" onClick={() => { setShowViewModal(true); setShowMenu(false); }}>
               <FontAwesomeIcon icon={faEye} />
               Ver Galería
             </button>
@@ -178,6 +192,14 @@ const GalleryCard = ({ gallery, onUpdate }) => {
           isOpen={showEditModal}
           onClose={() => setShowEditModal(false)}
           onUpdated={() => { setShowEditModal(false); onUpdate(); }}
+        />
+      )}
+
+      {showViewModal && (
+        <ViewGalleryModal
+          gallery={gallery}
+          isOpen={showViewModal}
+          onClose={() => setShowViewModal(false)}
         />
       )}
     </>

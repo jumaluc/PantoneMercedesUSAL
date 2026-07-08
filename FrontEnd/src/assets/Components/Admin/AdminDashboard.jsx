@@ -12,6 +12,7 @@ import CommentsSection from './CommentsSection';
 import RequestsSection from './RequestsSection';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import NotificationBell from '../Shared/NotificationBell';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -92,18 +93,20 @@ const AdminDashboard = () => {
           <img src="logoPantone.jpg" className="navBarLogo" alt="Logo" />
           <h1 className='top-navbar-title'>Panel Administrativo</h1>
         </div>
-        <div className='container-logo-titulo'>
-          {adminData &&         
+        <div className='navbar-user-actions'>
+          {adminData &&
             <div className="user-info">
               <span className="user-name">{adminData.first_name} {adminData.last_name}</span>
               <span className="user-email">{adminData.email}</span>
             </div>
           }
 
-          <FontAwesomeIcon 
-            className='logoutFontIcon'       
-            onClick={handleLogout} 
-            icon={faArrowRightFromBracket} 
+          <NotificationBell role="admin" />
+
+          <FontAwesomeIcon
+            className='logoutFontIcon'
+            onClick={handleLogout}
+            icon={faArrowRightFromBracket}
           />
         </div>
       </header>

@@ -39,6 +39,14 @@ class General_requests{
         catch(err){console.log(err)}
     }
 
+    static async getRequestUserId(id){
+        try{
+            const [rows] = await pool.execute('SELECT user_id FROM general_requests WHERE id = ?', [id]);
+            return rows[0]?.user_id || null;
+        }
+        catch(err){console.log(err); return null;}
+    }
+
     static async updateRequest(id, status, admin_response){
         try{
             const [response] = await pool.execute(

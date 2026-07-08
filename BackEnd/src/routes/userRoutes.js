@@ -26,4 +26,7 @@ router.get('/getAllReviews', userController.getAllReviews);
 router.post('/toggleLike/:id', userController.toggleLike);
 router.post('/saveSongSelection', userController.saveSongSelection);
 router.get('/getSongSelection', userController.getSongSelection);
+router.get('/notifications', userController.getNotifications);
+router.post('/notifications/:id/read', userController.markNotificationRead);
+router.post('/notifications/read-all', userController.markAllNotificationsRead);
 module.exports = router;

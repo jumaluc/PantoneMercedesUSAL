@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faUpload, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faUpload, faTrash, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import UploadProgressModal from './UploadProgressModal';
 
 const BATCH_SIZE = 5;
+const INITIAL_PREVIEW_COUNT = 20;
+const PREVIEW_LOAD_MORE_COUNT = 30;
 
 const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
   const [formData, setFormData] = useState({
@@ -17,6 +19,7 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
   const [errors, setErrors] = useState({});
   const [images, setImages] = useState([]);
   const [mainImage, setMainImage] = useState(null);
+  const [visiblePreviewCount, setVisiblePreviewCount] = useState(INITIAL_PREVIEW_COUNT);
 
   // Progress state
   const [showProgress, setShowProgress] = useState(false);
@@ -48,6 +51,7 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
 
   const handleFileChange = (e) => {
     setImages(Array.from(e.target.files));
+    setVisiblePreviewCount(INITIAL_PREVIEW_COUNT);
   };
 
   const handleMainFileChange = (e) => {
@@ -135,7 +139,10 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
     if (speedHistory.length > 4) speedHistory.shift();
     const avgSpeed = speedHistory.reduce((a, b) => a + b, 0) / speedHistory.length;
 
-    if (!res.ok) throw new Error('Error al subir lote de imágenes');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Error al subir lote de imágenes');
+    }
     return { avgSpeed, batchBytes };
   };
 
@@ -246,6 +253,7 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
     setFormData({ id: '', title: '', service: '', description: '', status: 'active' });
     setImages([]);
     setMainImage(null);
+    setVisiblePreviewCount(INITIAL_PREVIEW_COUNT);
     setErrors({});
     setShowProgress(false);
     resetProgress();
@@ -359,7 +367,7 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
               )}
               {errors.images && <span className="error-text">{errors.images}</span>}
               <div className="image-preview">
-                {images.map((img, index) => (
+                {images.slice(0, visiblePreviewCount).map((img, index) => (
                   <div key={index} className="image-item">
                     <img src={URL.createObjectURL(img)} alt="preview" />
                     <button type="button" className="remove-btn" onClick={() => removeImage(index)}>
@@ -368,6 +376,16 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
                   </div>
                 ))}
               </div>
+              {images.length > visiblePreviewCount && (
+                <button
+                  type="button"
+                  className="load-more-images"
+                  onClick={() => setVisiblePreviewCount(prev => prev + PREVIEW_LOAD_MORE_COUNT)}
+                >
+                  <FontAwesomeIcon icon={faChevronDown} />
+                  Cargar más ({images.length - visiblePreviewCount} restantes)
+                </button>
+              )}
             </div>
 
             {/* Estado */}

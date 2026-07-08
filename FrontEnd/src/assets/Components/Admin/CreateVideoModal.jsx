@@ -10,8 +10,7 @@ const CreateVideoModal = ({ isOpen, onClose, onVideoCreated, clients }) => {
         description: '',
         service_type: '',
         estimated_delivery: '',
-        status: 'waiting_selection',
-        progress: 0
+        status: 'waiting_selection'
     });
     const [videoFile, setVideoFile] = useState(null);
     const [thumbnailFile, setThumbnailFile] = useState(null);
@@ -65,23 +64,20 @@ const CreateVideoModal = ({ isOpen, onClose, onVideoCreated, clients }) => {
             return;
         }
 
-        if (!videoFile) {
-            toast.error('Debes seleccionar un archivo de video');
-            return;
-        }
-
         setUploading(true);
 
         try {
             const submitData = new FormData();
-            
+
             // Agregar datos del formulario
             Object.keys(formData).forEach(key => {
                 submitData.append(key, formData[key]);
             });
-            
-            // Agregar archivos
-            submitData.append('video', videoFile);
+
+            // Agregar archivos (opcionales)
+            if (videoFile) {
+                submitData.append('video', videoFile);
+            }
             if (thumbnailFile) {
                 submitData.append('thumbnail', thumbnailFile);
             }
@@ -116,8 +112,7 @@ const CreateVideoModal = ({ isOpen, onClose, onVideoCreated, clients }) => {
             description: '',
             service_type: '',
             estimated_delivery: '',
-            status: 'waiting_selection',
-            progress: 0
+            status: 'waiting_selection'
         });
         setVideoFile(null);
         setThumbnailFile(null);
@@ -212,33 +207,17 @@ const CreateVideoModal = ({ isOpen, onClose, onVideoCreated, clients }) => {
                                 <option value="completed">Finalizado</option>
                             </select>
                         </div>
-
-                        <div className="form-group">
-                            <label>Progreso Inicial (%)</label>
-                            <select
-                                name="progress"
-                                value={formData.progress}
-                                onChange={handleInputChange}
-                            >
-                                <option value="0">0%</option>
-                                <option value="25">25%</option>
-                                <option value="50">50%</option>
-                                <option value="75">75%</option>
-                                <option value="100">100%</option>
-                            </select>
-                        </div>
                     </div>
 
                     {/* Upload de archivos */}
                     <div className="file-upload-section">
                         <div className="file-upload-group">
-                            <label>Archivo de Video *</label>
+                            <label>Archivo de Video (opcional)</label>
                             <div className="file-upload">
                                 <input
                                     type="file"
                                     accept="video/*"
                                     onChange={handleVideoFileChange}
-                                    required
                                 />
                                 <div className="upload-placeholder">
                                     <FontAwesomeIcon icon={faUpload} />
@@ -247,7 +226,7 @@ const CreateVideoModal = ({ isOpen, onClose, onVideoCreated, clients }) => {
                                     </span>
                                 </div>
                             </div>
-                            <small>Formatos: MP4, AVI, MOV, WMV. Máximo 500MB</small>
+                            <small>Formatos: MP4, AVI, MOV, WMV. Máximo 500MB. Podés agregarlo más adelante</small>
                         </div>
 
                         <div className="file-upload-group">
