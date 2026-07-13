@@ -10,15 +10,19 @@ import {
     faEnvelope,
     faPhone,
     faUser,
-    faSignInAlt
+    faSignInAlt,
+    faChevronDown,
+    faQuestionCircle
 } from '@fortawesome/free-solid-svg-icons';
-import { faInstagram, faFacebook } from '@fortawesome/free-brands-svg-icons';
+import { faInstagram, faFacebook, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import './PublicHome.css';
 import PoliciesModal from './PoliciesModal';
 
 const PublicHome = ({ hideLogin = false }) => {
     const [companyInfo, setCompanyInfo] = useState(null);
-    const [featuredTestimonials, setFeaturedTestimonials] = useState([]);
+    const [reviews, setReviews] = useState([]);
+    const [faqs, setFaqs] = useState([]);
+    const [openFaq, setOpenFaq] = useState(null);
     const [loading, setLoading] = useState(true);
     const [userLoggedIn, setUserLoggedIn] = useState(false);
     const [showPolicies, setShowPolicies] = useState(false);
@@ -89,9 +93,10 @@ const PublicHome = ({ hideLogin = false }) => {
     const fetchPublicData = async () => {
         try {
             setLoading(true);
-            const [companyRes, testimonialsRes] = await Promise.all([
+            const [companyRes, reviewsRes, faqsRes] = await Promise.all([
                 fetch('http://localhost:3000/api/public/company-info'),
-                fetch('http://localhost:3000/api/public/testimonials?featured=true')
+                fetch('http://localhost:3000/api/public/reviews'),
+                fetch('http://localhost:3000/api/public/faqs')
             ]);
 
             if (companyRes.ok) {
@@ -99,9 +104,14 @@ const PublicHome = ({ hideLogin = false }) => {
                 setCompanyInfo(companyData.data);
             }
 
-            if (testimonialsRes.ok) {
-                const testimonialsData = await testimonialsRes.json();
-                setFeaturedTestimonials(testimonialsData.data || []);
+            if (reviewsRes.ok) {
+                const reviewsData = await reviewsRes.json();
+                setReviews(reviewsData.data || []);
+            }
+
+            if (faqsRes.ok) {
+                const faqsData = await faqsRes.json();
+                setFaqs(faqsData.data || []);
             }
         } catch (error) {
             console.error('Error fetching public data:', error);
@@ -139,31 +149,53 @@ const PublicHome = ({ hideLogin = false }) => {
         ));
     };
 
+    const getInstagramHandle = (url) => {
+        const match = url.match(/instagram\.com\/([^/?]+)/i);
+        return match ? `@${match[1]}` : url;
+    };
+
+    const getWhatsappNumber = (url) => {
+        const match = url.match(/wa\.me\/(\d+)/i);
+        return match ? `+${match[1]}` : url;
+    };
+
     const renderSocialLinks = () => {
         if (!companyInfo?.social_media) return null;
 
         const socialMedia = companyInfo.social_media;
-        
+
         return (
             <div className="public-home__social-links">
                 {socialMedia.instagram && (
-                    <a 
-                        href={socialMedia.instagram} 
-                        target="_blank" 
+                    <a
+                        href={socialMedia.instagram}
+                        target="_blank"
                         rel="noopener noreferrer"
-                        className="public-home__social-link public-home__social-link--instagram"
+                        className="public-home__social-link public-home__social-link--instagram public-home__social-link--labeled"
                     >
                         <FontAwesomeIcon icon={faInstagram} />
+                        <span>{getInstagramHandle(socialMedia.instagram)}</span>
                     </a>
                 )}
                 {socialMedia.facebook && (
-                    <a 
-                        href={socialMedia.facebook} 
-                        target="_blank" 
+                    <a
+                        href={socialMedia.facebook}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="public-home__social-link public-home__social-link--facebook"
                     >
                         <FontAwesomeIcon icon={faFacebook} />
+                    </a>
+                )}
+                {socialMedia.whatsapp && (
+                    <a
+                        href={socialMedia.whatsapp}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="public-home__social-link public-home__social-link--whatsapp public-home__social-link--labeled"
+                    >
+                        <FontAwesomeIcon icon={faWhatsapp} />
+                        <span>{getWhatsappNumber(socialMedia.whatsapp)}</span>
                     </a>
                 )}
                 {companyInfo.email && (
@@ -310,30 +342,71 @@ const PublicHome = ({ hideLogin = false }) => {
             <section className="public-home__section public-home__section--testimonials">
                 <div className="public-home__container">
                     <h2 className="public-home__section-title">Lo Que Dicen Nuestros Clientes</h2>
-                    <div className="public-home__testimonials-grid">
-                        {featuredTestimonials.map(testimonial => (
-                            <div key={testimonial.id} className="public-home__testimonial-card">
-                                <div className="public-home__testimonial-content">
-                                    <div className="public-home__testimonial-stars">
-                                        {renderStars(testimonial.rating)}
-                                    </div>
-                                    <p className="public-home__testimonial-text">"{testimonial.content}"</p>
-                                </div>
-                                <div className="public-home__testimonial-author">
-                                    <div className="public-home__testimonial-info">
-                                        <div className="public-home__testimonial-name">
-                                            {testimonial.client_name}
+                    {reviews.length > 0 ? (
+                        <div className="public-home__testimonials-grid">
+                            {reviews.map(review => (
+                                <div key={review.id} className="public-home__testimonial-card">
+                                    <div className="public-home__testimonial-author">
+                                        <div className="public-home__testimonial-avatar">
+                                            {`${review.first_name?.[0] || ''}${review.last_name?.[0] || ''}`.toUpperCase()}
                                         </div>
-                                        <div className="public-home__testimonial-project">
-                                            {testimonial.project_type}
+                                        <div className="public-home__testimonial-info">
+                                            <div className="public-home__testimonial-name">
+                                                {review.first_name} {review.last_name}
+                                            </div>
+                                            {review.service && (
+                                                <div className="public-home__testimonial-project">
+                                                    {review.service}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
+                                    <div className="public-home__testimonial-content">
+                                        <div className="public-home__testimonial-stars">
+                                            {renderStars(review.rating)}
+                                        </div>
+                                        <p className="public-home__testimonial-text">"{review.message}"</p>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="public-home__testimonials-empty">
+                            Todavía no hay reseñas de clientes.
+                        </p>
+                    )}
                 </div>
             </section>
+
+            {/* FAQ */}
+            {faqs.length > 0 && (
+                <section className="public-home__section public-home__section--faq">
+                    <div className="public-home__container">
+                        <h2 className="public-home__section-title">Preguntas Frecuentes</h2>
+                        <div className="public-home__faq-list">
+                            {faqs.map(faq => (
+                                <div
+                                    key={faq.id}
+                                    className={`public-home__faq-item ${openFaq === faq.id ? 'public-home__faq-item--open' : ''}`}
+                                >
+                                    <button
+                                        className="public-home__faq-question"
+                                        onClick={() => setOpenFaq(prev => prev === faq.id ? null : faq.id)}
+                                        aria-expanded={openFaq === faq.id}
+                                    >
+                                        <FontAwesomeIcon icon={faQuestionCircle} className="public-home__faq-icon" />
+                                        <span>{faq.question}</span>
+                                        <FontAwesomeIcon icon={faChevronDown} className="public-home__faq-chevron" />
+                                    </button>
+                                    {openFaq === faq.id && (
+                                        <p className="public-home__faq-answer">{faq.answer}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* CTA Section con Redes Sociales */}
             <section className="public-home__cta">

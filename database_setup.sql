@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS users (
   password      VARCHAR(255)  NOT NULL,
   role          ENUM('admin','client') NOT NULL DEFAULT 'client',
   resetToken    VARCHAR(255)  DEFAULT NULL,
+  resetTokenExpires DATETIME  DEFAULT NULL,
   created_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -39,6 +40,7 @@ CREATE TABLE IF NOT EXISTS galleries (
   status          ENUM('active','inactive') NOT NULL DEFAULT 'active',
   photos_count    INT UNSIGNED  NOT NULL DEFAULT 0,
   cover_image_url VARCHAR(500)  DEFAULT NULL,
+  video_ready_at  DATETIME      DEFAULT NULL,
   folder_path     VARCHAR(500)  DEFAULT NULL,
   created_by      VARCHAR(150)  DEFAULT NULL,
   created_at      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -104,10 +106,12 @@ CREATE TABLE IF NOT EXISTS general_requests (
 CREATE TABLE IF NOT EXISTS client_videos (
   id                  INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id             INT UNSIGNED  NOT NULL,
+  gallery_id          INT UNSIGNED  DEFAULT NULL,
   title               VARCHAR(255)  NOT NULL,
   description         TEXT          DEFAULT NULL,
   video_url           VARCHAR(500)  DEFAULT NULL,
   thumbnail_url       VARCHAR(500)  DEFAULT NULL,
+  thumbnail_is_gallery_cover TINYINT(1) NOT NULL DEFAULT 0,
   storage_path        VARCHAR(500)  DEFAULT NULL,
   file_name           VARCHAR(255)  DEFAULT NULL,
   original_filename   VARCHAR(255)  DEFAULT NULL,
@@ -121,7 +125,8 @@ CREATE TABLE IF NOT EXISTS client_videos (
   created_by          VARCHAR(150)  DEFAULT NULL,
   created_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT fk_video_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  CONSTRAINT fk_video_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_video_gallery FOREIGN KEY (gallery_id) REFERENCES galleries(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================

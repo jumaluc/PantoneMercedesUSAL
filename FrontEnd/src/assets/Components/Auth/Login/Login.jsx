@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Login.css';
 import toast from 'react-hot-toast';
 import ForgotPassword from "../ForgotPassword/ForgotPassword";
 import PoliciesModal from '../../PublicWebsite/PoliciesModal';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,6 +14,25 @@ const Login = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPolicies, setShowPolicies] = useState(false);
   const [modalType, setModalType] = useState('success');
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:3000/auth/me', { credentials: 'include' })
+      .then(res => {
+        if (!res.ok) throw new Error('No autenticado');
+        return res.json();
+      })
+      .then(data => {
+        if (data.role === 'admin') {
+          navigate('/adminDashboard');
+        } else if (data.role === 'client') {
+          navigate('/clientDashboard');
+        } else {
+          setCheckingSession(false);
+        }
+      })
+      .catch(() => setCheckingSession(false));
+  }, [navigate]);
   
   const [loginData, setLoginData] = useState({
     email: '',
@@ -201,9 +220,24 @@ const login = () => {
     setShowModal(false);
   };
 
+  if (checkingSession) {
+    return (
+      <div className="lg-session-check">
+        <div className="lg-session-check-spinner"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="lg-login-container">
+    <div className={`lg-login-container ${activeTab === 'register' ? 'lg-login-register-mode' : ''}`}>
       <div className="lg-background-pattern"></div>
+
+      <Link to="/" className="lg-home-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+          <path d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z" />
+        </svg>
+        <span>Volver al Inicio</span>
+      </Link>
 
       <div className="lg-main-container">
         
@@ -411,12 +445,12 @@ const login = () => {
                     required
                   >
                     <option value="">Selecciona un servicio</option>
-                    <option value="fotografia">XV</option>
-                    <option value="video">Casamiento</option>
-                    <option value="retrato">Book</option>
-                    <option value="eventos">Bautismo</option>
-                    <option value="producto">Evento Coorporativo</option>
-                    <option value="dron">Otros</option>
+                    <option value="XV">XV</option>
+                    <option value="Casamiento">Casamiento</option>
+                    <option value="Book">Book</option>
+                    <option value="Bautismo">Bautismo</option>
+                    <option value="Evento Coorporativo">Evento Coorporativo</option>
+                    <option value="Otros">Otros</option>
                   </select>
                   {errors.service && <span className="lg-error-message">{errors.service}</span>}
                 </div>

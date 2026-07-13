@@ -1,6 +1,7 @@
 const PublicContent = require('../moduls/PublicContent');
 const Gallery = require('../moduls/Galleries')
 const Gallery_images = require('../moduls/Gallery_images')
+const Reviews = require('../moduls/Reviews')
 
 const publicController = {
 
@@ -37,6 +38,23 @@ const publicController = {
             res.status(500).json({
                 success: false,
                 message: 'Error al obtener proyectos públicos'
+            });
+        }
+    },
+
+    // Reseñas reales de clientes
+    getPublicReviews: async (req, res) => {
+        try {
+            const reviews = await Reviews.getAllReviews();
+            res.status(200).json({
+                success: true,
+                data: reviews
+            });
+        } catch (error) {
+            console.error('Error getting public reviews:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error al obtener las reseñas'
             });
         }
     },

@@ -64,7 +64,7 @@ const Dashboard = () => {
         return <ClientReviews user={user} />;
       case 'gallery':
       default:
-        return <Gallery user={user} />;
+        return <Gallery user={user} setActiveSection={setActiveSection} />;
     }
   };
 

@@ -15,7 +15,7 @@ const ForgotPassword = ({ onClose }) => {
   const [idResetPassword, setIdResetPassword] = useState(0);
   const startTimer = () => {
     if (timer) clearInterval(timer);
-    
+
     const newTimer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -25,7 +25,7 @@ const ForgotPassword = ({ onClose }) => {
         return prev - 1;
       });
     }, 1000);
-    
+
     setTimer(newTimer);
   };
 
@@ -38,7 +38,7 @@ const ForgotPassword = ({ onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       const response = await fetch('http://localhost:3000/recover/forgot-password', {
         method: 'POST',
@@ -49,7 +49,7 @@ const ForgotPassword = ({ onClose }) => {
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
         setMessage('');
         setStep('code');
@@ -68,7 +68,7 @@ const ForgotPassword = ({ onClose }) => {
   const handleResendCode = async () => {
     setResendCooldown(true);
     setMessage('');
-    
+
     try {
       const response = await fetch('http://localhost:3000/recover/forgot-password', {
         method: 'POST',
@@ -92,7 +92,7 @@ const ForgotPassword = ({ onClose }) => {
   const handleVerifyCode = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       const response = await fetch('http://localhost:3000/recover/verify-reset-code', {
         method: 'POST',
@@ -104,9 +104,7 @@ const ForgotPassword = ({ onClose }) => {
 
       const data = await response.json();
       setIdResetPassword(data.id);
-      console.log("SET ID PASSWORD 1 : ", idResetPassword)
       if (response.ok && data.valid) {
-        console.log("ENTRO AL SET STEP")
         setStep('newPassword');
         setMessage('');
       } else {
@@ -121,36 +119,35 @@ const ForgotPassword = ({ onClose }) => {
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    
+
     // Validaciones
     if (newPassword.length < 6) {
       setMessage('La contraseña debe tener al menos 6 caracteres');
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
       setMessage('Las contraseñas no coinciden');
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
-      console.log("id reser password", idResetPassword)
-      const response = await fetch('http://localhost:3000/recover/reset-password', {    
+      const response = await fetch('http://localhost:3000/recover/reset-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          email, 
+        body: JSON.stringify({
+          email,
           idResetPassword,
-          newPassword 
+          newPassword
         }),
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
         setStep('success');
         setMessage('Contraseña actualizada correctamente');
@@ -165,26 +162,26 @@ const ForgotPassword = ({ onClose }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close-btn" onClick={onClose}>×</button>
+    <div className="lg-modal-overlay" onClick={onClose}>
+      <div className="lg-modal-content" onClick={(e) => e.stopPropagation()}>
+        <button className="lg-modal-close-btn" onClick={onClose}>×</button>
 
         {step === 'email' && (
           <>
-            <div className="modal-icon">
-              <svg className="modal-check" fill="currentColor" viewBox="0 0 24 24">
+            <div className="lg-modal-icon">
+              <svg className="lg-modal-check" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 5.5V7H9V5.5L3 7V9L9 10.5V12L3 13.5V15.5L9 14V16H15V14L21 15.5V13.5L15 12V10.5L21 9Z"/>
               </svg>
             </div>
 
-            <h3 className="modal-title">Recuperar Contraseña</h3>
-            
-            <form onSubmit={handleSubmit} className="form">
-              <div className="form-group">
-                <label className="form-label">Email</label>
-                <input 
-                  type="email" 
-                  className="form-input"
+            <h3 className="lg-modal-title">Recuperar Contraseña</h3>
+
+            <form onSubmit={handleSubmit} className="lg-form">
+              <div className="lg-form-group">
+                <label className="lg-form-label">Email</label>
+                <input
+                  type="email"
+                  className="lg-form-input"
                   placeholder="Ingresa tu email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -193,9 +190,9 @@ const ForgotPassword = ({ onClose }) => {
                 />
               </div>
 
-              {message && <p className="modal-message error">{message}</p>}
+              {message && <p className="lg-modal-message error">{message}</p>}
 
-              <button type="submit" className="submit-button" disabled={isLoading}>
+              <button type="submit" className="lg-submit-button" disabled={isLoading}>
                 {isLoading ? 'Enviando...' : 'Enviar código'}
               </button>
             </form>
@@ -204,32 +201,32 @@ const ForgotPassword = ({ onClose }) => {
 
         {step === 'code' && (
           <>
-            <div className="modal-icon">
-              <svg className="modal-check" fill="currentColor" viewBox="0 0 24 24">
+            <div className="lg-modal-icon">
+              <svg className="lg-modal-check" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 5.5V7H9V5.5L3 7V9L9 10.5V12L3 13.5V15.5L9 14V16H15V14L21 15.5V13.5L15 12V10.5L21 9Z"/>
               </svg>
             </div>
 
-            <h3 className="modal-title">Verificar Código</h3>
-            <p className="modal-message">Se envió un código de 6 dígitos a: {email}</p>
-            
+            <h3 className="lg-modal-title">Verificar Código</h3>
+            <p className="lg-modal-message">Se envió un código de 6 dígitos a: {email}</p>
+
             {timeLeft > 0 && (
-              <p className="modal-message">
+              <p className="lg-timer">
                 ⏰ El código expira en: {Math.floor(timeLeft / 60)}:
                 {(timeLeft % 60).toString().padStart(2, '0')}
               </p>
             )}
-            
+
             {timeLeft === 0 && (
-              <p className="modal-message error">❌ El código ha expirado</p>
+              <p className="lg-timer expired">❌ El código ha expirado</p>
             )}
 
-            <form onSubmit={handleVerifyCode} className="form">
-              <div className="form-group">
-                <label className="form-label">Código de 6 dígitos</label>
-                <input 
-                  type="text" 
-                  className="form-input code-input"
+            <form onSubmit={handleVerifyCode} className="lg-form">
+              <div className="lg-form-group">
+                <label className="lg-form-label">Código de 6 dígitos</label>
+                <input
+                  type="text"
+                  className="lg-form-input lg-code-input"
                   placeholder="123456"
                   value={code}
                   onChange={(e) => {
@@ -243,36 +240,36 @@ const ForgotPassword = ({ onClose }) => {
                 />
               </div>
 
-              {message && <p className="modal-message error">{message}</p>}
+              {message && <p className="lg-modal-message error">{message}</p>}
 
               <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
-                <button 
-                  type="submit" 
-                  className="submit-button" 
+                <button
+                  type="submit"
+                  className="lg-submit-button"
                   disabled={isLoading || timeLeft === 0}
                 >
                   {isLoading ? 'Verificando...' : 'Verificar código'}
                 </button>
 
-                <button 
+                <button
                   type="button"
                   onClick={handleResendCode}
                   disabled={resendCooldown || isLoading}
-                  className="resend-button"
+                  className="lg-resend-button"
                 >
                   {resendCooldown ? 'Reenviar en 30s' : 'Reenviar código'}
                 </button>
               </div>
             </form>
 
-            <button 
+            <button
               onClick={() => {
                 setStep('email');
                 setMessage('');
                 setCode('');
                 if (timer) clearInterval(timer);
               }}
-              className="modal-button"
+              className="lg-modal-button"
               style={{ marginTop: '15px' }}
             >
               ↶ Cambiar email
@@ -282,21 +279,21 @@ const ForgotPassword = ({ onClose }) => {
 
         {step === 'newPassword' && (
           <>
-            <div className="modal-icon">
-              <svg className="modal-check" fill="currentColor" viewBox="0 0 24 24">
+            <div className="lg-modal-icon">
+              <svg className="lg-modal-check" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 5.5V7H9V5.5L3 7V9L9 10.5V12L3 13.5V15.5L9 14V16H15V14L21 15.5V13.5L15 12V10.5L21 9Z"/>
               </svg>
             </div>
 
-            <h3 className="modal-title">Nueva Contraseña</h3>
-            <p className="modal-message">Crea una nueva contraseña para tu cuenta</p>
+            <h3 className="lg-modal-title">Nueva Contraseña</h3>
+            <p className="lg-modal-message">Crea una nueva contraseña para tu cuenta</p>
 
-            <form onSubmit={handleResetPassword} className="form">
-              <div className="form-group">
-                <label className="form-label">Nueva Contraseña</label>
-                <input 
-                  type="password" 
-                  className="form-input"
+            <form onSubmit={handleResetPassword} className="lg-form">
+              <div className="lg-form-group">
+                <label className="lg-form-label">Nueva Contraseña</label>
+                <input
+                  type="password"
+                  className="lg-form-input"
                   placeholder="Mínimo 6 caracteres"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
@@ -306,11 +303,11 @@ const ForgotPassword = ({ onClose }) => {
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Confirmar Contraseña</label>
-                <input 
-                  type="password" 
-                  className="form-input"
+              <div className="lg-form-group">
+                <label className="lg-form-label">Confirmar Contraseña</label>
+                <input
+                  type="password"
+                  className="lg-form-input"
                   placeholder="Repite tu contraseña"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -319,21 +316,21 @@ const ForgotPassword = ({ onClose }) => {
                 />
               </div>
 
-              {message && <p className="modal-message error">{message}</p>}
+              {message && <p className="lg-modal-message error">{message}</p>}
 
               <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
-                <button 
-                  type="submit" 
-                  className="submit-button" 
+                <button
+                  type="submit"
+                  className="lg-submit-button"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Actualizando...' : 'Actualizar Contraseña'}
                 </button>
 
-                <button 
+                <button
                   type="button"
                   onClick={() => setStep('code')}
-                  className="modal-button"
+                  className="lg-modal-button"
                 >
                   ↶ Volver al código
                 </button>
@@ -344,18 +341,18 @@ const ForgotPassword = ({ onClose }) => {
 
         {step === 'success' && (
           <>
-            <div className="modal-icon success">
-              <svg className="modal-check" fill="currentColor" viewBox="0 0 24 24">
+            <div className="lg-modal-icon success">
+              <svg className="lg-modal-check" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
               </svg>
             </div>
 
-            <h3 className="modal-title">¡Contraseña Actualizada!</h3>
-            <p className="modal-message">Tu contraseña ha sido cambiada exitosamente</p>
+            <h3 className="lg-modal-title">¡Contraseña Actualizada!</h3>
+            <p className="lg-modal-message">Tu contraseña ha sido cambiada exitosamente</p>
 
-            <button 
+            <button
               onClick={onClose}
-              className="submit-button"
+              className="lg-submit-button"
             >
               Iniciar Sesión
             </button>

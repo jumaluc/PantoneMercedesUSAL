@@ -429,10 +429,6 @@ const ClientCommentsAndRequests = ({ user }) => {
                                                     </div>
                                                 )}
                                                 <div className="comment-image-details">
-                                                    <span className="comment-image-name">
-                                                        <FontAwesomeIcon icon={faImage} />
-                                                        {comment.image_name || 'Imagen'}
-                                                    </span>
                                                     <span className="comment-date">
                                                         <FontAwesomeIcon icon={faClock} />
                                                         {formatDate(comment.created_at)}

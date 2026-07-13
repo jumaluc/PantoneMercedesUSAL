@@ -7,6 +7,7 @@ const logAdminAction = async (req, action_type, resource_type = null, resource_i
         if (req.session.user && req.session.user.role === 'admin') {
             // Crear descripción automática basada en el tipo de acción
             const actionDescriptions = {
+                'CLIENT_VIEW': `Vió la lista de clientes`,
                 'CLIENT_CREATE': `Creó el cliente: ${resource_name || 'Nuevo cliente'}`,
                 'CLIENT_UPDATE': `Actualizó el cliente: ${resource_name || resource_id}`,
                 'CLIENT_DELETE': `Eliminó el cliente: ${resource_name || resource_id}`,
@@ -22,6 +23,8 @@ const logAdminAction = async (req, action_type, resource_type = null, resource_i
                 'COMMENT_SEEN': `Marcó comentario #${resource_id} como visto`,
                 'REQUEST_UPDATE': `Actualizó solicitud #${resource_id}${resource_name ? ` → ${resource_name}` : ''}`,
                 'SELECTION_CANCEL': `Canceló la selección de la galería #${resource_id}`,
+                'SELECTION_VIDEO_READY': `${resource_name || 'Actualizó el estado de entrega'} (galería #${resource_id})`,
+                'REVIEW_DELETE': `Eliminó la reseña #${resource_id}`,
             };
 
             const action_description = actionDescriptions[action_type] || action_type;

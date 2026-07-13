@@ -10,11 +10,84 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
+/* Session check loading screen */
+.lg-session-check {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+}
+
+.lg-session-check-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #374151;
+  border-top: 4px solid #FF8C00;
+  border-radius: 50%;
+  animation: lg-session-check-spin 1s linear infinite;
+}
+
+@keyframes lg-session-check-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Container Styles */
 .lg-login-container {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
   position: relative;
+}
+
+.lg-home-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+  color: #000;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(255, 140, 0, 0.35);
+}
+
+.lg-home-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 140, 0, 0.5);
+  opacity: 0.92;
+}
+
+@media (max-width: 968px) {
+  .lg-home-btn {
+    top: 15px;
+    left: 15px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .lg-home-btn {
+    top: 10px;
+    left: 10px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .lg-home-btn span {
+    display: none;
+  }
 }
 
 .lg-background-pattern {
@@ -37,7 +110,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 /* Branding Section — centrada en pantalla independiente del form */
@@ -120,9 +193,28 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   padding: 40px 20px;
   box-sizing: border-box;
+}
+
+/* Modo registro: el formulario es más alto que la pantalla, se permite scroll */
+.lg-login-register-mode {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
+}
+
+.lg-login-register-mode .lg-main-container {
+  height: auto;
+  min-height: 100vh;
+}
+
+.lg-login-register-mode .lg-form-section {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
 }
 
 .lg-form-container {
@@ -377,6 +469,7 @@ body {
 }
 
 .lg-modal-content {
+  position: relative;
   background: #111827;
   border: 1px solid #374151;
   border-radius: 20px;
@@ -442,21 +535,26 @@ body {
 
 /* Responsive Design */
 @media (max-width: 968px) {
+  .lg-login-container {
+    height: auto;
+    overflow: visible;
+  }
+
   .lg-main-container {
     grid-template-columns: 1fr;
-    min-height: unset;
+    height: auto;
   }
 
   .lg-branding-section {
     position: static;
     height: auto;
-    min-height: unset;
     padding: 60px 20px 20px;
     text-align: center;
   }
 
   .lg-form-section {
-    min-height: unset;
+    height: auto;
+    overflow: visible;
     padding: 20px 20px 60px;
   }
 

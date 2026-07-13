@@ -36,75 +36,17 @@
   padding-top: 24px;
 }
 
-/* Gallery navigation arrows */
+/* Gallery navigation (título y dots viven dentro de .galeria-navigation;
+   el resto del estilo del header lo define Gallery.css) */
 .galeria-navigation {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
   min-height: 60px;
-  position: relative;
-}
-
-.nav-arrow {
-  background: rgba(255, 140, 0, 0.15);
-  border: 2px solid rgba(255, 140, 0, 0.4);
-  color: #FF8C00;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-  font-size: 1.2rem;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.nav-arrow.prev { left: 0; }
-.nav-arrow.next { right: 0; }
-
-.nav-arrow:hover {
-  background: rgba(255, 140, 0, 0.3);
-  border-color: #FF8C00;
-  transform: translateY(-50%) scale(1.1);
-}
-
-.nav-arrow:active {
-  transform: translateY(-50%) scale(0.95);
 }
 
 .galeria-title-section {
   flex: 1;
-  text-align: center;
   min-width: 0;
-  padding: 0 80px;
-}
-
-.galeria-title-section h1 {
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2;
-  color: white;
-}
-
-.galeria-service {
-  font-size: 1.1rem;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  color: var(--accent-light);
-  opacity: 0.9;
 }
 
 /* Client navbar */
@@ -116,11 +58,27 @@
   background: var(--bg-navbar);
   padding: 11px 32px;
   display: flex;
+  flex-wrap: wrap;
+  row-gap: 8px;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   z-index: 1000;
   border-bottom: 1px solid var(--accent);
+}
+
+.navbar-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.navbar-collapse {
+  display: contents;
 }
 
 .navbar svg { margin-right: 4px; }
@@ -564,48 +522,74 @@
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
-  .navbar-menu {
-    gap: 2px;
-  }
-
-  .nav-btn-client {
-    padding: 8px 11px;
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .navbar {
     padding: 10px 15px;
-    flex-direction: column;
-    gap: 10px;
-    height: auto;
+    height: 62px;
+    flex-wrap: nowrap;
+  }
+
+  .navbar-hamburger {
+    display: flex;
+    align-items: center;
+  }
+
+  .navbar-collapse {
+    display: block;
+    position: fixed;
+    top: 62px;
+    left: 0;
+    right: 0;
+    max-height: 0;
+    overflow: hidden;
+    background: var(--bg-navbar);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    transition: max-height 0.3s ease;
+    z-index: 999;
+  }
+
+  .navbar-collapse.open {
+    max-height: calc(100vh - 62px);
+    overflow-y: auto;
   }
 
   .navbar-menu {
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    padding: 8px;
     gap: 4px;
   }
 
+  .nav-btn-client {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .navbar-user {
+    align-self: center;
+    gap: 12px;
+    padding-bottom: 0;
+  }
+
+  .user-info {
+    display: none;
+  }
+
+  .logout-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
   .dashboard-main {
-    margin-top: 150px;
+    margin-top: 62px;
   }
 
   .gallery-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 15px;
-  }
-
-  .galeria-title-section {
-    padding: 0 60px;
-  }
-
-  .nav-arrow {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
   }
 
   .profile-container {
@@ -615,10 +599,6 @@
 }
 
 @media (max-width: 480px) {
-  .galeria-title-section {
-    padding: 0 50px;
-  }
-
   .navbar-brand h2 {
     font-size: 15px;
   }

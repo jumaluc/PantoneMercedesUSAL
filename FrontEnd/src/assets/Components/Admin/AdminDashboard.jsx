@@ -11,7 +11,7 @@ import SelectionsSection from './SelectionsSection';
 import CommentsSection from './CommentsSection';
 import RequestsSection from './RequestsSection';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRightFromBracket, faBars } from '@fortawesome/free-solid-svg-icons';
 import NotificationBell from '../Shared/NotificationBell';
 import './AdminDashboard.css';
 
@@ -20,6 +20,7 @@ const AdminDashboard = () => {
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dashboardStats, setDashboardStats] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -90,6 +91,13 @@ const AdminDashboard = () => {
       {/* Barra superior */}
       <header className="top-navbar">
         <div className='container-logo-titulo'>
+          <button
+            className="hamburger-btn"
+            onClick={() => setSidebarOpen(prev => !prev)}
+            aria-label="Abrir menú"
+          >
+            <FontAwesomeIcon icon={faBars} />
+          </button>
           <img src="logoPantone.jpg" className="navBarLogo" alt="Logo" />
           <h1 className='top-navbar-title'>Panel Administrativo</h1>
         </div>
@@ -113,12 +121,18 @@ const AdminDashboard = () => {
 
       <div className="dashboard-body">
         {/* Barra lateral */}
-        <AdminNavbar 
+        <AdminNavbar
           activeSection={activeSection}
           setActiveSection={setActiveSection}
           adminData={adminData}
           dashboardStats={dashboardStats}
+          isOpen={sidebarOpen}
+          onNavigate={() => setSidebarOpen(false)}
         />
+
+        {sidebarOpen && (
+          <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>
+        )}
 
         {/* Contenido principal */}
         <main className="admin-main">

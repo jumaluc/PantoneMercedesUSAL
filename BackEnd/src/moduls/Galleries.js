@@ -34,7 +34,7 @@ class Gallery {
 static async getByClientId(clientId) {
     try {
         const [result] = await pool.execute(
-            'SELECT id, title, service_type, description, photos_count, created_at FROM galleries WHERE client_id = ? AND status = "active" ORDER BY created_at DESC',
+            'SELECT id, title, service_type, description, photos_count, video_ready_at, created_at FROM galleries WHERE client_id = ? AND status = "active" ORDER BY created_at DESC',
             [clientId]
         );
         return result;
@@ -164,6 +164,19 @@ static async updateCoverImage(galleryId, imageUrl) {
         return result.affectedRows > 0;
     } catch (err) {
         console.error('Error updating cover image:', err);
+        throw err;
+    }
+}
+
+static async setVideoReady(galleryId, ready) {
+    try {
+        const [result] = await pool.execute(
+            'UPDATE galleries SET video_ready_at = ? WHERE id = ?',
+            [ready ? new Date() : null, galleryId]
+        );
+        return result.affectedRows > 0;
+    } catch (err) {
+        console.error('Error updating video ready status:', err);
         throw err;
     }
 }

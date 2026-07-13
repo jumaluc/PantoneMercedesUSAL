@@ -407,6 +407,11 @@
 }
 
 /* Action column */
+.stats-section__table-col--action {
+    color: #d1d5db;
+    font-size: 14px;
+}
+
 .stats-section__action-type {
     display: flex;
     align-items: center;

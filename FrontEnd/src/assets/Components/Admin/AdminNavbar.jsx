@@ -13,7 +13,7 @@ import {
   faGlobe
 } from '@fortawesome/free-solid-svg-icons';
 
-const AdminNavbar = ({ activeSection, setActiveSection, adminData }) => {
+const AdminNavbar = ({ activeSection, setActiveSection, adminData, isOpen, onNavigate }) => {
   const navItems = [
     { id: 'stats',         label: 'Estadísticas', icon: faChartBar },
     { id: 'clients',       label: 'Clientes',     icon: faPeopleGroup },
@@ -28,13 +28,16 @@ const AdminNavbar = ({ activeSection, setActiveSection, adminData }) => {
   ];
 
   return (
-    <nav className="admin-navbar">
+    <nav className={`admin-navbar ${isOpen ? 'open' : ''}`}>
       <div className="nav-items">
         {navItems.map(item => (
           <button
             key={item.id}
             className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
-            onClick={() => setActiveSection(item.id)}
+            onClick={() => {
+              setActiveSection(item.id);
+              onNavigate && onNavigate();
+            }}
           >
             <span className="nav-icon">
               <FontAwesomeIcon icon={item.icon} className='item-icon' />

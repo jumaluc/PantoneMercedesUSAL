@@ -4,7 +4,7 @@ import {
     faVideo, faDownload, faPlay, faPause, faClock,
     faSpinner, faCheckCircle, faEdit, faHourglassHalf,
     faSearch, faFileVideo, faHistory, faCalendarCheck,
-    faExpand, faTimes
+    faExpand, faTimes, faImages
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import './ClientVideosSection.css';
@@ -187,10 +187,15 @@ const ClientVideosSection = ({ user }) => {
                                         </div>
                                     ) : isAvailable ? (
                                         <div className="cvs-thumbnail cvs-thumbnail--ready" onClick={() => setPlayingId(video.id)}>
-                                            <div className="cvs-play-circle">
-                                                <FontAwesomeIcon icon={faPlay} />
+                                            {video.thumbnail_url && (
+                                                <img src={video.thumbnail_url} alt={video.title} className="cvs-thumbnail-img" />
+                                            )}
+                                            <div className="cvs-thumbnail-overlay">
+                                                <div className="cvs-play-circle">
+                                                    <FontAwesomeIcon icon={faPlay} />
+                                                </div>
+                                                <span className="cvs-play-label">Reproducir</span>
                                             </div>
-                                            <span className="cvs-play-label">Reproducir</span>
                                         </div>
                                     ) : (
                                         <div className="cvs-thumbnail cvs-thumbnail--pending">
@@ -212,6 +217,13 @@ const ClientVideosSection = ({ user }) => {
                                             {statusInfo.text}
                                         </span>
                                     </div>
+
+                                    {video.gallery_title && (
+                                        <div className="cvs-gallery-tag">
+                                            <FontAwesomeIcon icon={faImages} />
+                                            {video.gallery_title}
+                                        </div>
+                                    )}
 
                                     {video.description && (
                                         <p className="cvs-description">{video.description}</p>

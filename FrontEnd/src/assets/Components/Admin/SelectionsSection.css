@@ -67,6 +67,54 @@
   color: var(--sel-muted);
 }
 
+/* Filters */
+.sel-filters {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.sel-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid var(--sel-border);
+  border-radius: 8px;
+  color: var(--sel-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sel-filter-btn:hover {
+  border-color: #6b7280;
+  color: var(--sel-text);
+}
+
+.sel-filter-btn.active {
+  background: linear-gradient(135deg, var(--sel-accent), var(--sel-accent-light));
+  border-color: var(--sel-accent);
+  color: #000;
+  font-weight: 600;
+}
+
+.sel-filter-count {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.sel-filter-btn.active .sel-filter-count {
+  background: rgba(0, 0, 0, 0.25);
+}
+
 /* Empty */
 .sel-empty {
   text-align: center;
@@ -116,6 +164,18 @@
 
 .sel-card.expanded {
   border-color: rgba(255, 140, 0, 0.4);
+}
+
+.sel-card--delivered {
+  opacity: 0.6;
+}
+
+.sel-card--delivered:hover {
+  opacity: 0.85;
+}
+
+.sel-card--delivered.expanded {
+  opacity: 1;
 }
 
 .sel-card-header {
@@ -220,7 +280,22 @@
   white-space: nowrap;
 }
 
-.sel-btn-cancel {
+.sel-delivered-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #10b981;
+  border-radius: 20px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sel-btn-cancel,
+.sel-btn-ready {
   width: 36px;
   height: 36px;
   border-radius: 8px;
@@ -238,7 +313,28 @@
   background: rgba(239, 68, 68, 0.2);
 }
 
-.sel-btn-cancel:disabled { opacity: 0.5; cursor: not-allowed; }
+.sel-btn-cancel:disabled,
+.sel-btn-ready:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.sel-btn-ready {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.sel-btn-ready:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.sel-btn-ready--active {
+  border-color: rgba(255, 140, 0, 0.4);
+  background: rgba(255, 140, 0, 0.1);
+  color: var(--sel-accent);
+}
+
+.sel-btn-ready--active:hover:not(:disabled) {
+  background: rgba(255, 140, 0, 0.2);
+}
 
 .sel-chevron {
   color: var(--sel-muted);

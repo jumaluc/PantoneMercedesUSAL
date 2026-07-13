@@ -38,14 +38,14 @@ const LazyImage = ({ src, alt, imageId, onOrientationDetected }) => {
   );
 };
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faEdit, faEraser, faTrash, faSpinner, faImages, faCheckCircle, faSearchPlus, faArrowUp, faTimes, faEye, faComment, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faEdit, faEraser, faTrash, faSpinner, faImages, faCheckCircle, faSearchPlus, faArrowUp, faTimes, faEye, faComment, faChevronLeft, faChevronRight, faVideo } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import './Gallery.css';
 import ImageCommentsOverlay from './ImageCommentsOverlay';
 import SongSelectionModal from './SongSelectionModal';
 
-const Gallery = ({ user }) => {
+const Gallery = ({ user, setActiveSection }) => {
   const [galleriesData, setGalleriesData] = useState([]);
   // Usar localStorage para persistir el índice de galería
   const [currentGalleryIndex, setCurrentGalleryIndex] = useState(() => {
@@ -78,6 +78,7 @@ const Gallery = ({ user }) => {
   const currentGallery = galleriesData[currentGalleryIndex] || null;
   const currentGalleryId = currentGallery?.gallery?.id;
   const selectionLocked = currentGallery?.selection_locked || false;
+  const videoReady = currentGallery?.video_ready || false;
 
   // Guardar el índice actual en localStorage cuando cambie
   useEffect(() => {
@@ -205,6 +206,7 @@ const Gallery = ({ user }) => {
 
   const toggleImageSelection = (imageId, event) => {
     if (event) event.stopPropagation();
+    if (selectionLocked) return;
     const newSelected = new Set(selectedImages);
     if (newSelected.has(imageId)) {
       newSelected.delete(imageId);
@@ -535,16 +537,31 @@ const Gallery = ({ user }) => {
 
           {/* Estado de selección dentro del header */}
           {selectionLocked ? (
-            <div className="ghs-locked">
+            <div className={`ghs-locked ${videoReady ? 'ghs-locked--ready' : ''}`}>
               <div className="ghs-row">
-                <div className="ghs-info">
-                  <FontAwesomeIcon icon={faCheckCircle} className="ghs-icon ghs-icon--green" />
-                  <span className="ghs-label">Selección confirmada</span>
-                  <span className="ghs-desc">Tu fotógrafo ya recibió tu elección de fotos</span>
-                </div>
-                <button className="sel-btn sel-btn--danger" onClick={cancelSelectionByClient}>
-                  <FontAwesomeIcon icon={faTrash} /> Borrar selección
-                </button>
+                {videoReady ? (
+                  <>
+                    <div className="ghs-info">
+                      <FontAwesomeIcon icon={faVideo} className="ghs-icon ghs-icon--green" />
+                      <span className="ghs-label">¡Tu video ya está disponible!</span>
+                      <span className="ghs-desc">Podés verlo y descargarlo en la sección Mis Videos</span>
+                    </div>
+                    <button className="sel-btn sel-btn--primary" onClick={() => setActiveSection?.('videos')}>
+                      <FontAwesomeIcon icon={faVideo} /> Ver Mis Videos
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="ghs-info">
+                      <FontAwesomeIcon icon={faCheckCircle} className="ghs-icon ghs-icon--green" />
+                      <span className="ghs-label">Selección confirmada</span>
+                      <span className="ghs-desc">Tu fotógrafo ya recibió tu elección de fotos</span>
+                    </div>
+                    <button className="sel-btn sel-btn--danger" onClick={cancelSelectionByClient}>
+                      <FontAwesomeIcon icon={faTrash} /> Borrar selección
+                    </button>
+                  </>
+                )}
               </div>
               {songSelection && (
                 <div className="ghs-row ghs-row--songs">
@@ -765,10 +782,10 @@ const Gallery = ({ user }) => {
 
               <div className="overlay-navigation">
                 <button onClick={() => navigateOverlay(-1)} className="nav-btn prev">
-                  ‹
+                  <FontAwesomeIcon icon={faChevronLeft} />
                 </button>
                 <button onClick={() => navigateOverlay(1)} className="nav-btn next">
-                  ›
+                  <FontAwesomeIcon icon={faChevronRight} />
                 </button>
               </div>
             </div>

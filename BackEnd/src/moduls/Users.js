@@ -29,15 +29,24 @@ class User {
         return result[0];
     }
     static async tokenSave(reserToken, id){
-        const [result] = await pool.execute('UPDATE users SET resetToken=? WHERE id=?',[reserToken, id]);
+        const [result] = await pool.execute(
+            'UPDATE users SET resetToken=?, resetTokenExpires = DATE_ADD(NOW(), INTERVAL 2 MINUTE) WHERE id=?',
+            [reserToken, id]
+        );
         return result.affectedRows;
     }
     static async verifyToken(email, resetToken){
-        const [result] = await pool.execute('SELECT id FROM users WHERE email=? and resetToken',[email, resetToken]);
-        return result[0];
+        const [result] = await pool.execute(
+            'SELECT id FROM users WHERE email = ? AND resetToken = ? AND resetTokenExpires > NOW()',
+            [email, resetToken]
+        );
+        return result[0] || null;
     }
     static async resetPassword(email, idResetPassword, newPassword){
-        const [result] = await pool.execute('UPDATE users SET password = ? WHERE email = ? and id = ?', [newPassword, email, idResetPassword]);
+        const [result] = await pool.execute(
+            'UPDATE users SET password = ?, resetToken = NULL, resetTokenExpires = NULL WHERE email = ? and id = ?',
+            [newPassword, email, idResetPassword]
+        );
         return result.affectedRows;
     }
     static async equalPassword(email){

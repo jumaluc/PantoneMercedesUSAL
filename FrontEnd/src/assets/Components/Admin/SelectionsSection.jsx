@@ -3,7 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCheckCircle, faImages, faUser, faDownload,
   faTimes, faSpinner, faChevronDown, faChevronUp,
-  faTrash, faEye, faCalendar, faLayerGroup, faMusic
+  faTrash, faEye, faCalendar, faLayerGroup, faMusic,
+  faCheck, faVideo, faRotateLeft
 } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
@@ -18,6 +19,8 @@ const SelectionsSection = () => {
   const [lightboxImage, setLightboxImage] = useState(null);
   const [cancelling, setCancelling] = useState(null);
   const [downloadingZip, setDownloadingZip] = useState(null);
+  const [markingReady, setMarkingReady] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('pending');
 
   useEffect(() => {
     fetchSelections();
@@ -90,6 +93,25 @@ const SelectionsSection = () => {
     }
   };
 
+  const toggleVideoReady = async (galleryId, isReady) => {
+    setMarkingReady(galleryId);
+    try {
+      const res = await fetch(`http://localhost:3000/admin/client-selections/${galleryId}/video-ready`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ ready: !isReady })
+      });
+      if (!res.ok) throw new Error();
+      toast.success(isReady ? 'Selección marcada como pendiente' : 'Selección marcada como entregada');
+      await fetchSelections();
+    } catch {
+      toast.error('Error al actualizar el estado de entrega');
+    } finally {
+      setMarkingReady(null);
+    }
+  };
+
   const downloadAll = async (galleryId, galleryTitle) => {
     const images = galleryImages[galleryId];
     if (!images || images.length === 0) return;
@@ -136,6 +158,13 @@ const SelectionsSection = () => {
     </div>
   );
 
+  const pendingSelections = selections.filter(s => !s.video_ready_at);
+  const deliveredSelections = selections.filter(s => s.video_ready_at);
+  const filteredSelections =
+    statusFilter === 'pending' ? pendingSelections :
+    statusFilter === 'delivered' ? deliveredSelections :
+    selections;
+
   return (
     <div className="sel-container">
       <div className="sel-header">
@@ -144,21 +173,56 @@ const SelectionsSection = () => {
           <p>Imágenes confirmadas por los clientes desde sus galerías</p>
         </div>
         <div className="sel-header-badge">
-          <span>{selections.length}</span>
-          <label>{selections.length === 1 ? 'selección' : 'selecciones'} pendiente{selections.length !== 1 ? 's' : ''}</label>
+          <span>{pendingSelections.length}</span>
+          <label>
+            {pendingSelections.length === 1 ? 'selección' : 'selecciones'} pendiente
+            {pendingSelections.length !== 1 ? 's' : ''}
+          </label>
         </div>
       </div>
 
-      {selections.length === 0 ? (
+      <div className="sel-filters">
+        <button
+          className={`sel-filter-btn ${statusFilter === 'pending' ? 'active' : ''}`}
+          onClick={() => setStatusFilter('pending')}
+        >
+          Pendientes <span className="sel-filter-count">{pendingSelections.length}</span>
+        </button>
+        <button
+          className={`sel-filter-btn ${statusFilter === 'delivered' ? 'active' : ''}`}
+          onClick={() => setStatusFilter('delivered')}
+        >
+          Entregadas <span className="sel-filter-count">{deliveredSelections.length}</span>
+        </button>
+        <button
+          className={`sel-filter-btn ${statusFilter === 'all' ? 'active' : ''}`}
+          onClick={() => setStatusFilter('all')}
+        >
+          Todas <span className="sel-filter-count">{selections.length}</span>
+        </button>
+      </div>
+
+      {filteredSelections.length === 0 ? (
         <div className="sel-empty">
           <FontAwesomeIcon icon={faImages} size="3x" />
-          <h3>Sin selecciones confirmadas</h3>
-          <p>Cuando un cliente confirme su selección de fotos, aparecerá aquí.</p>
+          <h3>
+            {statusFilter === 'pending' && 'Sin selecciones pendientes'}
+            {statusFilter === 'delivered' && 'Sin selecciones entregadas'}
+            {statusFilter === 'all' && 'Sin selecciones confirmadas'}
+          </h3>
+          <p>
+            {selections.length === 0
+              ? 'Cuando un cliente confirme su selección de fotos, aparecerá aquí.'
+              : 'No hay selecciones que coincidan con este filtro.'}
+          </p>
         </div>
       ) : (
         <div className="sel-list">
-          {selections.map(sel => (
-            <div key={sel.gallery_id} className={`sel-card ${expandedGallery === sel.gallery_id ? 'expanded' : ''}`}>
+          {filteredSelections.map(sel => (
+            <div
+              key={sel.gallery_id}
+              className={`sel-card ${expandedGallery === sel.gallery_id ? 'expanded' : ''} ${sel.video_ready_at ? 'sel-card--delivered' : ''}`}
+            >
               <div className="sel-card-header" onClick={() => toggleGallery(sel.gallery_id)}>
                 <div className="sel-card-client">
                   <div className="sel-avatar">
@@ -183,6 +247,12 @@ const SelectionsSection = () => {
                 </div>
 
                 <div className="sel-card-actions">
+                  {sel.video_ready_at && (
+                    <span className="sel-delivered-badge" title={`Entregada el ${formatDate(sel.video_ready_at)}`}>
+                      <FontAwesomeIcon icon={faVideo} />
+                      Entregada
+                    </span>
+                  )}
                   <span className="sel-count-badge">
                     <FontAwesomeIcon icon={faCheckCircle} />
                     {sel.selected_count} foto{sel.selected_count !== 1 ? 's' : ''}
@@ -193,6 +263,16 @@ const SelectionsSection = () => {
                       {sel.let_admin_choose ? 'A elección' : [sel.song_1, sel.song_2, sel.song_3].filter(Boolean).length + ' canción' + ([sel.song_1, sel.song_2, sel.song_3].filter(Boolean).length !== 1 ? 'es' : '')}
                     </span>
                   )}
+                  <button
+                    className={`sel-btn-ready ${sel.video_ready_at ? 'sel-btn-ready--active' : ''}`}
+                    onClick={e => { e.stopPropagation(); toggleVideoReady(sel.gallery_id, !!sel.video_ready_at); }}
+                    disabled={markingReady === sel.gallery_id}
+                    title={sel.video_ready_at ? 'Marcar como pendiente' : 'Marcar como entregada (video subido)'}
+                  >
+                    {markingReady === sel.gallery_id
+                      ? <FontAwesomeIcon icon={faSpinner} spin />
+                      : <FontAwesomeIcon icon={sel.video_ready_at ? faRotateLeft : faCheck} />}
+                  </button>
                   <button
                     className="sel-btn-cancel"
                     onClick={e => { e.stopPropagation(); cancelSelection(sel.gallery_id, sel.title); }}

@@ -466,8 +466,12 @@ const StatsSection = () => {
                                             </div>
                                             
                                             <div className="stats-section__table-col stats-section__table-col--action">
+                                                {stat.action_descripcion || 'Sin descripción'}
+                                            </div>
+
+                                            <div className="stats-section__table-col stats-section__table-col--description">
                                                 <div className="stats-section__action-type">
-                                                    <div 
+                                                    <div
                                                         className="stats-section__action-icon"
                                                         style={{ color: getActionColor(stat.action_type) }}
                                                     >
@@ -475,10 +479,6 @@ const StatsSection = () => {
                                                     </div>
                                                     <span>{translateActionType(stat.action_type)}</span>
                                                 </div>
-                                            </div>
-                                            
-                                            <div className="stats-section__table-col stats-section__table-col--description">
-                                                {stat.action_descripcion || 'Sin descripción'}
                                             </div>
                                             
                                             <div className="stats-section__table-col stats-section__table-col--date">

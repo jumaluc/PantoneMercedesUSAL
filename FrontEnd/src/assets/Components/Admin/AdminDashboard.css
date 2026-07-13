@@ -65,6 +65,16 @@
   color: var(--white);
 }
 
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
 .navBarLogo {
   width: 42px;
   height: 42px;
@@ -187,4 +197,50 @@
   overflow-y: auto;
   background: var(--bg-darkest);
   padding: 1.5rem;
+}
+
+/* Overlay para cerrar el sidebar en mobile */
+.sidebar-overlay {
+  display: none;
+}
+
+/* Responsive: sidebar off-canvas con menú hamburguesa */
+@media (max-width: 768px) {
+  .hamburger-btn {
+    display: flex;
+    align-items: center;
+  }
+
+  .user-info {
+    display: none;
+  }
+
+  .admin-navbar {
+    position: fixed;
+    top: 58px;
+    left: 0;
+    height: calc(100vh - 58px);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 200;
+  }
+
+  .admin-navbar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 58px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 150;
+  }
+
+  .admin-main {
+    padding: 1rem;
+  }
 }

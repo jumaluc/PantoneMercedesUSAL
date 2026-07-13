@@ -1,5 +1,6 @@
 const crypto = require("crypto");
-const User = require('../moduls/Users'); 
+const bcrypt = require("bcrypt");
+const User = require('../moduls/Users');
 const sendPasswordResetEmail = require("../utils/emailService.js");
 
 
@@ -37,22 +38,19 @@ const recoverPasswController = {
             const { email, code } = req.body;
             
             const result = await User.verifyToken(email, code);
-            
-            console.log("🔍 Resultado de verifyToken:", result);
-            
-            if (result.length === 0) {
-            return res.status(400).json({ 
+
+            if (!result) {
+            return res.status(400).json({
                 valid: false,
-                message: "Código de recuperación incorrecto o expirado" 
+                message: "Código de recuperación incorrecto o expirado"
             });
             }
             else {
             const id = result.id;
-            console.log("✅ ID del cliente:", id);
-            
-            return res.status(200).json({ 
+
+            return res.status(200).json({
                 valid: true,
-                message: "Código de recuperación verificado con éxito", 
+                message: "Código de recuperación verificado con éxito",
                 id: id
             });
             }
@@ -67,11 +65,11 @@ const recoverPasswController = {
     },
     reset_password: async (req, res) =>{
        try{
-          const {email, id ,newPassword} = req.body;
+          const {email, idResetPassword, newPassword} = req.body;
 
-          console.log('BODY RESET PASSWORD : ', req.body)
-          const result = await User.resetPassword(email, id ,newPassword);
-        
+          const hashedPassword = await bcrypt.hash(newPassword, 10);
+          const result = await User.resetPassword(email, idResetPassword, hashedPassword);
+
           if (result === 1 ){
               return res.status(200).json({ message : "Contraseña actualizada correctamente"} )
           }

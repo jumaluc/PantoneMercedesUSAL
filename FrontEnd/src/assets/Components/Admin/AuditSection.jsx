@@ -23,6 +23,8 @@ const ACTION_LABELS = {
     COMMENT_SEEN:           'Comentario Visto',
     REQUEST_UPDATE:         'Actualizar Solicitud',
     SELECTION_CANCEL:       'Cancelar Selección',
+    SELECTION_VIDEO_READY:  'Entrega de Video',
+    REVIEW_DELETE:          'Eliminar Reseña',
 };
 
 const ACTION_COLORS = {
@@ -40,6 +42,8 @@ const ACTION_COLORS = {
     COMMENT_SEEN:           '#10b981',
     REQUEST_UPDATE:         '#FF8C00',
     SELECTION_CANCEL:       '#ef4444',
+    SELECTION_VIDEO_READY:  '#10b981',
+    REVIEW_DELETE:          '#dc3545',
     CLIENT_VIEW:            '#374151',
     GALLERY_VIEW:           '#374151',
 };

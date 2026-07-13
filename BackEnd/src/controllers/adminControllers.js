@@ -3,6 +3,7 @@ const User = require('../moduls/Users');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 const { uploadFile, getFileUrls, deleteFile, checkCredentials, uploadVideoToGCS, uploadThumbnailToGCS, bucket} = require('../utils/googleStorageService');
+const { extractVideoThumbnail } = require('../utils/videoThumbnail');
 const archiver = require('archiver');
 const Gallery = require('../moduls/Galleries');
 const Gallery_images = require('../moduls/Gallery_images');
@@ -613,7 +614,7 @@ createVideo: async (req, res) => {
         return res.status(401).json({ message: 'Acceso no autorizado' });
       }
 
-      const { client_id, title, description, estimated_delivery, status } = req.body;
+      const { client_id, gallery_id, title, description, estimated_delivery, status } = req.body;
       if (!client_id || !title) {
         return res.status(400).json({
           success: false,
@@ -621,21 +622,57 @@ createVideo: async (req, res) => {
         });
       }
 
+      let linkedGallery = null;
+      if (gallery_id) {
+        linkedGallery = await Gallery.getGalleryById(gallery_id);
+        if (!linkedGallery || linkedGallery.client_id !== parseInt(client_id)) {
+          return res.status(400).json({
+            success: false,
+            message: 'La galería seleccionada no pertenece a este cliente'
+          });
+        }
+      }
+
       const videoFile = req.files?.video?.[0];
       const thumbnailFile = req.files?.thumbnail?.[0];
 
-      let videoUploadResult = null;
-      if (videoFile) {
-        videoUploadResult = await uploadVideoToGCS(videoFile, 'videos', client_id);
-      }
+      // El video y la miniatura son independientes entre sí: subirlos en paralelo
+      const videoUploadPromise = videoFile
+        ? uploadVideoToGCS(videoFile, 'videos', client_id)
+        : Promise.resolve(null);
 
-      let thumbnailUploadResult = null;
-      if (thumbnailFile) {
-        thumbnailUploadResult = await uploadThumbnailToGCS(thumbnailFile, 'thumbnails', client_id);
-      }
+      const thumbnailUploadPromise = (async () => {
+        if (thumbnailFile) {
+          return uploadThumbnailToGCS(thumbnailFile, 'thumbnails', client_id);
+        }
+        if (videoFile) {
+          // Sin miniatura manual: extraer un frame del video automáticamente
+          try {
+            const frameBuffer = await extractVideoThumbnail(videoFile);
+            return await uploadThumbnailToGCS(
+              { buffer: frameBuffer, originalname: 'auto-thumbnail.jpg', mimetype: 'image/jpeg' },
+              'thumbnails',
+              client_id
+            );
+          } catch (err) {
+            console.error('No se pudo generar la miniatura automática:', err.message);
+            return null;
+          }
+        }
+        return null;
+      })();
+
+      const [videoUploadResult, thumbnailUploadResult] = await Promise.all([
+        videoUploadPromise,
+        thumbnailUploadPromise
+      ]);
+
+      // Si no hay miniatura propia ni auto-generada, usar la foto principal de la galería vinculada
+      const useGalleryCover = !thumbnailUploadResult && !!linkedGallery?.cover_image_url;
 
       const videoData = {
         user_id: parseInt(client_id),
+        gallery_id: linkedGallery?.id || null,
         title: title.trim(),
         description: description?.trim() || '',
         estimated_delivery: estimated_delivery || null,
@@ -645,7 +682,8 @@ createVideo: async (req, res) => {
         original_filename: videoFile?.originalname || null,
         file_size: videoFile?.size || null,
         format: videoFile?.mimetype || null,
-        thumbnail_url: thumbnailUploadResult?.url || null,
+        thumbnail_url: thumbnailUploadResult?.url || (useGalleryCover ? linkedGallery.cover_image_url : null),
+        thumbnail_is_gallery_cover: useGalleryCover,
         created_by: user.id,
       };
 
@@ -746,7 +784,23 @@ createVideo: async (req, res) => {
         await deleteFile(video.file_name);
       }
 
+      // No borrar la miniatura si es la foto principal de una galería (archivo compartido, no le pertenece al video)
+      if (video.thumbnail_url && !video.thumbnail_is_gallery_cover) {
+        try {
+          const thumbnailPath = new URL(video.thumbnail_url).pathname.split('/').slice(2).join('/');
+          if (thumbnailPath) await deleteFile(thumbnailPath);
+        } catch (err) {
+          console.error('Error eliminando miniatura de GCS:', err.message);
+        }
+      }
+
       const result = await Video.deleteVideo(videoId);
+
+      // Si la galería vinculada estaba marcada como "entregada", ese estado ya no aplica sin el video
+      if (video.gallery_id) {
+        Gallery.setVideoReady(video.gallery_id, false).catch(err => console.error('Error limpiando video_ready_at:', err));
+      }
+
             Stats.addStat(req.session.user.id, 'admin', 'delete', 'eliminó un video', 'complete').catch(err => console.error('Stats error:', err));
       if (result) {
         res.json({
@@ -960,6 +1014,7 @@ getClientSelections: async (req, res) => {
                 g.title,
                 g.service_type,
                 g.client_id,
+                g.video_ready_at,
                 u.first_name,
                 u.last_name,
                 u.email,
@@ -974,14 +1029,31 @@ getClientSelections: async (req, res) => {
             JOIN users u ON g.client_id = u.id
             JOIN gallery_images gi ON g.id = gi.gallery_id AND gi.is_selected = 1
             LEFT JOIN song_selections ss ON ss.gallery_id = g.id AND ss.user_id = g.client_id
-            GROUP BY g.id, g.title, g.service_type, g.client_id, u.first_name, u.last_name, u.email,
+            GROUP BY g.id, g.title, g.service_type, g.client_id, g.video_ready_at, u.first_name, u.last_name, u.email,
                      ss.song_1, ss.song_2, ss.song_3, ss.let_admin_choose, ss.notes
-            ORDER BY confirmed_at DESC
+            ORDER BY (g.video_ready_at IS NOT NULL) ASC, confirmed_at DESC
         `);
 
         return res.status(200).json({ data: rows });
     } catch (err) {
         console.error('Error en getClientSelections:', err);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+},
+
+setSelectionVideoReady: async (req, res) => {
+    try {
+        const user = req.session.user;
+        if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
+
+        const { galleryId } = req.params;
+        const { ready } = req.body;
+        const result = await Gallery.setVideoReady(galleryId, !!ready);
+        if (!result) return res.status(404).json({ message: 'Galería no encontrada' });
+
+        return res.status(200).json({ message: ready ? 'Selección marcada como entregada' : 'Selección marcada como pendiente' });
+    } catch (err) {
+        console.error('Error en setSelectionVideoReady:', err);
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 },
@@ -1201,8 +1273,23 @@ deleteGalleryImage: async (req, res) => {
         const user = req.session.user;
         if (!user || user.role !== 'admin') return res.status(401).json({ message: 'Acceso no autorizado' });
         const { imageId } = req.params;
+
+        const image = await Gallery_images.getById(imageId);
+        if (!image) return res.status(404).json({ success: false, message: 'Imagen no encontrada' });
+
+        // No borrar el archivo físico si es la portada de la galería o la miniatura heredada de un video
+        const gallery = await Gallery.getGalleryById(image.gallery_id);
+        const isGalleryCover = gallery?.cover_image_url === image.image_url;
+        const isVideoThumbnail = await Video.isUrlUsedAsGalleryCoverThumbnail(image.image_url);
+        const fileIsShared = isGalleryCover || isVideoThumbnail;
+
         const result = await Gallery_images.deleteImage(imageId);
         if (!result) return res.status(404).json({ success: false, message: 'Imagen no encontrada' });
+
+        if (image.file_path && !fileIsShared) {
+            deleteFile(image.file_path).catch(err => console.error('Error eliminando imagen de GCS:', err));
+        }
+
         res.json({ success: true, message: 'Imagen eliminada' });
     } catch (error) {
         console.error('Error en deleteGalleryImage:', error);

@@ -79,7 +79,8 @@ getGallery: async (req, res) => {
                 return {
                     gallery: gallery,
                     images: images || [],
-                    selection_locked: selectionLocked
+                    selection_locked: selectionLocked,
+                    video_ready: !!gallery.video_ready_at
                 };
             })
         );
@@ -411,8 +412,7 @@ downloadVideo: async (req, res) => {
         if (!user) return res.status(401).json({ message: 'Acceso denegado' });
 
         const { videoId } = req.params;
-        const videos = await Video.getById(videoId);
-        const video = videos?.[0];
+        const video = await Video.getById(videoId);
 
         if (!video || video.user_id !== user.id)
             return res.status(403).json({ message: 'Sin acceso a este video' });

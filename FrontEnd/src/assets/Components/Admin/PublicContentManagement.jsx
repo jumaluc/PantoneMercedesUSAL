@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faBuilding,
-    faImages,
     faCommentDots,
     faQuestionCircle,
     faFileContract,
     faStar,
     faEdit,
     faTrash,
-    faPlus,
-    faImage
+    faPlus
 } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
+import { toast } from 'react-toastify';
 import './PublicContentManagement.css';
 
 const PublicContentManagement = () => {
@@ -19,7 +19,6 @@ const PublicContentManagement = () => {
 
     const tabs = [
         { id: 'company', label: 'Información Empresa', icon: faBuilding },
-        { id: 'galleries', label: 'Galerías Públicas', icon: faImages },
         { id: 'reviews', label: 'Reseñas', icon: faCommentDots },
         { id: 'faqs', label: 'Preguntas Frecuentes', icon: faQuestionCircle },
         { id: 'policies', label: 'Políticas', icon: faFileContract }
@@ -29,8 +28,6 @@ const PublicContentManagement = () => {
         switch (activeTab) {
             case 'company':
                 return <CompanyInfoManagement />;
-            case 'galleries':
-                return <PublicGalleriesManagement />;
             case 'reviews':
                 return <ReviewsManagement />;
             case 'faqs':
@@ -84,6 +81,7 @@ const CompanyInfoManagement = () => {
         social_media: {
             facebook: '',
             instagram: '',
+            whatsapp: '',
             twitter: ''
         }
     });
@@ -106,6 +104,7 @@ const CompanyInfoManagement = () => {
                         social_media: data.data.social_media || {
                             facebook: '',
                             instagram: '',
+                            whatsapp: '',
                             twitter: ''
                         }
                     });
@@ -130,13 +129,13 @@ const CompanyInfoManagement = () => {
             });
 
             if (response.ok) {
-                alert('Información actualizada correctamente');
+                toast.success('Información actualizada correctamente');
             } else {
-                alert('Error al actualizar la información');
+                toast.error('Error al actualizar la información');
             }
         } catch (error) {
             console.error('Error updating company info:', error);
-            alert('Error al actualizar la información');
+            toast.error('Error al actualizar la información');
         } finally {
             setLoading(false);
         }
@@ -246,6 +245,16 @@ const CompanyInfoManagement = () => {
                                 />
                             </div>
                             <div className="company-info-management__social-input">
+                                <label>WhatsApp</label>
+                                <input
+                                    type="url"
+                                    value={companyInfo.social_media.whatsapp}
+                                    onChange={(e) => handleSocialMediaChange('whatsapp', e.target.value)}
+                                    className="company-info-management__input"
+                                    placeholder="https://wa.me/54..."
+                                />
+                            </div>
+                            <div className="company-info-management__social-input">
                                 <label>Twitter</label>
                                 <input
                                     type="url"
@@ -271,427 +280,6 @@ const CompanyInfoManagement = () => {
             </form>
         </div>
     );
-};
-
-// Componente para Galerías Públicas
-const PublicGalleriesManagement = () => {
-    const [galleries, setGalleries] = useState([]);
-    const [showForm, setShowForm] = useState(false);
-    const [editingGallery, setEditingGallery] = useState(null);
-    const [formData, setFormData] = useState({
-        title: '',
-        service_type: 'public-casamientos',
-        description: '',
-        images: []
-    });
-    const [loading, setLoading] = useState(false);
-    const [uploading, setUploading] = useState(false);
-
-    const serviceTypes = [
-        { value: 'public-casamientos', label: 'Casamientos' },
-        { value: 'public-xv', label: 'XV Años' },
-        { value: 'public-bautizos', label: 'Bautizos' }
-    ];
-
-    useEffect(() => {
-        fetchPublicGalleries();
-    }, []);
-
-    const fetchPublicGalleries = async () => {
-        try {
-            setLoading(true);
-            const response = await fetch('http://localhost:3000/admin/public-content/getPublicGalleries', {
-                credentials: 'include'
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setGalleries(data.data || []);
-            }
-        } catch (error) {
-            console.error('Error fetching public galleries:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-const handleImageUpload = async (files) => {
-    setUploading(true);
-    const uploadedImages = [];
-
-    try {
-        for (let file of files) {
-            // Guardar el archivo File para enviarlo después
-            uploadedImages.push({
-                file: file, // Guardar el objeto File
-                image_url: URL.createObjectURL(file), // Para previsualización
-                original_filename: file.name,
-                storage_filename: file.name,
-                file_path: file.name,
-                is_primary: uploadedImages.length === 0
-            });
-        }
-
-        setFormData(prev => ({
-            ...prev,
-            images: [...prev.images, ...uploadedImages]
-        }));
-    } catch (error) {
-        console.error('Error processing images:', error);
-    } finally {
-        setUploading(false);
-    }
-};
-
-    const handleRemoveImage = (index) => {
-        setFormData(prev => ({
-            ...prev,
-            images: prev.images.filter((_, i) => i !== index)
-        }));
-    };
-
-const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-        const url = editingGallery 
-            ? `http://localhost:3000/api/admin/public-content/public-galleries/${editingGallery.id}`
-            : 'http://localhost:3000/admin/public-content/createPublicGallery';
-
-        const method = editingGallery ? 'PUT' : 'POST';
-
-        // Usar FormData en lugar de JSON
-        const formDataToSend = new FormData();
-        formDataToSend.append('title', formData.title);
-        formDataToSend.append('service_type', formData.service_type);
-        formDataToSend.append('description', formData.description);
-        formDataToSend.append('status', 'active');
-
-        // Agregar las imágenes como archivos
-        formData.images.forEach((image, index) => {
-            // Si la imagen ya es un File (recién seleccionada)
-            if (image.file) {
-                formDataToSend.append('images', image.file);
-            }
-            // Si es una imagen existente con URL, necesitarías un approach diferente
-        });
-
-        console.log("Enviando FormData con:", {
-            title: formData.title,
-            service_type: formData.service_type,
-            imagesCount: formData.images.length
-        });
-
-        const response = await fetch(url, {
-            method,
-            credentials: 'include',
-            body: formDataToSend // NO establecer Content-Type header, el browser lo hará automáticamente
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            alert(editingGallery ? 'Galería actualizada' : 'Galería creada');
-            setShowForm(false);
-            setEditingGallery(null);
-            setFormData({
-                title: '',
-                service_type: 'public-casamientos',
-                description: '',
-                images: []
-            });
-            fetchPublicGalleries();
-        } else {
-            const error = await response.json();
-            alert(error.message || 'Error al guardar la galería');
-        }
-    } catch (error) {
-        console.error('Error saving gallery:', error);
-        alert('Error al guardar la galería');
-    }
-};
-
-    const handleEdit = (gallery) => {
-        setEditingGallery(gallery);
-        setFormData({
-            title: gallery.title,
-            service_type: gallery.service_type,
-            description: gallery.description || '',
-            images: gallery.images || []
-        });
-        setShowForm(true);
-    };
-
-    const handleDelete = async (id) => {
-        if (confirm('¿Estás seguro de eliminar esta galería pública?')) {
-            try {
-                const response = await fetch(`http://localhost:3000/api/admin/public-content/public-galleries/${id}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-
-                if (response.ok) {
-                    alert('Galería eliminada');
-                    fetchPublicGalleries();
-                }
-            } catch (error) {
-                console.error('Error deleting gallery:', error);
-                alert('Error al eliminar la galería');
-            }
-        }
-    };
-
-    const handleFormChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    const getServiceTypeLabel = (serviceType) => {
-        const type = serviceTypes.find(t => t.value === serviceType);
-        return type ? type.label : serviceType;
-    };
-
-    if (loading) {
-        return (
-            <div className="public-content-management__loading">
-                <div className="public-content-management__loading-spinner"></div>
-                <p>Cargando galerías públicas...</p>
-            </div>
-        );
-    }
-
-return (
-    <div className="public-galleries-management">
-        <div className="public-galleries-management__header">
-            <h2 className="public-galleries-management__title">Gestión de Galerías Públicas</h2>
-            <button 
-                className="public-galleries-management__add-btn"
-                onClick={() => {
-                    setShowForm(true);
-                    setEditingGallery(null);
-                    setFormData({
-                        title: '',
-                        service_type: 'public-casamientos',
-                        description: '',
-                        images: []
-                    });
-                }}
-            >
-                <FontAwesomeIcon icon={faPlus} />
-                Agregar Galería
-            </button>
-        </div>
-
-        {showForm && (
-            <div className="public-galleries-management__form-overlay">
-                <div className="public-galleries-management__form">
-                    <h3>{editingGallery ? 'Editar Galería Pública' : 'Nueva Galería Pública'}</h3>
-                    <form onSubmit={handleSubmit}>
-                        <div className="company-info-management__form-grid">
-
-                            {/* Título */}
-                            <div className="company-info-management__form-group company-info-management__form-group--full">
-                                <label className="company-info-management__label">Título</label>
-                                <input
-                                    type="text"
-                                    name="title"
-                                    value={formData.title}
-                                    onChange={handleFormChange}
-                                    className="company-info-management__input"
-                                    required
-                                    placeholder="Ej: Casamiento de María y Juan"
-                                />
-                            </div>
-
-                            {/* Tipo de galería */}
-                            <div className="company-info-management__form-group">
-                                <label className="company-info-management__label">Tipo de Galería</label>
-                                <select
-                                    name="service_type"
-                                    value={formData.service_type}
-                                    onChange={handleFormChange}
-                                    className="company-info-management__input"
-                                    required
-                                >
-                                    {serviceTypes.map(type => (
-                                        <option key={type.value} value={type.value}>
-                                            {type.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Descripción */}
-                            <div className="company-info-management__form-group company-info-management__form-group--full">
-                                <label className="company-info-management__label">Descripción</label>
-                                <textarea
-                                    name="description"
-                                    value={formData.description}
-                                    onChange={handleFormChange}
-                                    className="company-info-management__textarea"
-                                    rows="3"
-                                    placeholder="Descripción de la galería..."
-                                />
-                            </div>
-
-                            {/* Imágenes */}
-                            <div className="company-info-management__form-group company-info-management__form-group--full">
-                                <label className="company-info-management__label">
-                                    Imágenes ({formData.images.length} seleccionadas)
-                                    {uploading && (
-                                        <span style={{ color: '#e88f01', marginLeft: '10px' }}>
-                                            Subiendo...
-                                        </span>
-                                    )}
-                                </label>
-
-                                {/* Input mejorado */}
-                                <div className="public-galleries-management__file-upload-area">
-                                    <input
-                                        type="file"
-                                        multiple
-                                        accept="image/*"
-                                        onChange={(e) => {
-                                            if (e.target.files.length > 0) {
-                                                handleImageUpload(Array.from(e.target.files));
-                                            }
-                                            e.target.value = ''; // reset input
-                                        }}
-                                        className="public-galleries-management__file-input"
-                                        disabled={uploading}
-                                        id="gallery-images-upload"
-                                    />
-                                    <label 
-                                        htmlFor="gallery-images-upload" 
-                                        className="public-galleries-management__file-upload-label"
-                                    >
-                                        <FontAwesomeIcon icon={faPlus} />
-                                        Seleccionar Imágenes
-                                    </label>
-                                    <p className="public-galleries-management__file-help">
-                                        Puedes seleccionar múltiples imágenes (JPG, PNG, etc.)
-                                    </p>
-                                </div>
-
-                                {/* Previsualizaciones */}
-                                {formData.images.length > 0 && (
-                                    <div className="public-galleries-management__image-previews">
-                                        {formData.images.map((image, index) => (
-                                            <div key={index} className="public-galleries-management__image-item">
-                                                <img src={image.image_url} alt={image.original_filename} />
-                                                <button
-                                                    type="button"
-                                                    className="public-galleries-management__remove-image"
-                                                    onClick={() => handleRemoveImage(index)}
-                                                >
-                                                    ×
-                                                </button>
-                                                {image.is_primary && (
-                                                    <span className="public-galleries-management__primary-badge">
-                                                        Principal
-                                                    </span>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Botones */}
-                        <div className="public-galleries-management__form-actions">
-                            <button 
-                                type="submit" 
-                                className="public-galleries-management__save-btn"
-                                disabled={uploading || formData.images.length === 0}
-                            >
-                                {editingGallery ? 'Actualizar' : 'Crear'} Galería
-                            </button>
-                            <button 
-                                type="button" 
-                                className="public-galleries-management__cancel-btn"
-                                onClick={() => setShowForm(false)}
-                            >
-                                Cancelar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        )}
-
-        {/* Listado de galerías */}
-        {galleries.length === 0 ? (
-            <div className="public-content-management__empty">
-                <FontAwesomeIcon icon={faImages} className="public-content-management__empty-icon" />
-                <p className="public-content-management__empty-text">
-                    No hay galerías públicas registradas
-                </p>
-                <button 
-                    className="public-galleries-management__add-btn"
-                    onClick={() => setShowForm(true)}
-                >
-                    <FontAwesomeIcon icon={faPlus} />
-                    Agregar Primera Galería
-                </button>
-            </div>
-        ) : (
-            <div className="public-galleries-management__grid">
-                {galleries.map(gallery => (
-                    <div key={gallery.id} className="public-galleries-management__card">
-                        <div className="public-galleries-management__card-image">
-                            {gallery.cover_image_url ? (
-                                <img src={gallery.cover_image_url} alt={gallery.title} />
-                            ) : (
-                                <div className="public-galleries-management__no-image">
-                                    <FontAwesomeIcon icon={faImage} />
-                                    <span>Sin imagen</span>
-                                </div>
-                            )}
-                            <span className="public-galleries-management__type-badge">
-                                {getServiceTypeLabel(gallery.service_type)}
-                            </span>
-                        </div>
-
-                        <div className="public-galleries-management__card-content">
-                            <h3 className="public-galleries-management__card-title">{gallery.title}</h3>
-                            <p className="public-galleries-management__card-description">
-                                {gallery.description || 'Sin descripción'}
-                            </p>
-
-                            <div className="public-galleries-management__card-meta">
-                                <div className="public-galleries-management__card-images">
-                                    <FontAwesomeIcon icon={faImage} />
-                                    {gallery.photos_count || 0} imágenes
-                                </div>
-                                <div className="public-galleries-management__card-date">
-                                    {new Date(gallery.created_at).toLocaleDateString('es-ES')}
-                                </div>
-                            </div>
-
-                            <div className="public-galleries-management__card-actions">
-                                <button 
-                                    onClick={() => handleEdit(gallery)}
-                                    className="public-galleries-management__edit-btn"
-                                >
-                                    <FontAwesomeIcon icon={faEdit} />
-                                    Editar
-                                </button>
-                                <button 
-                                    onClick={() => handleDelete(gallery.id)}
-                                    className="public-galleries-management__delete-btn"
-                                >
-                                    <FontAwesomeIcon icon={faTrash} />
-                                    Eliminar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        )}
-    </div>
-);
-
 };
 
 // Componente para Reseñas (admin)
@@ -738,7 +326,20 @@ const ReviewsManagement = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm('¿Eliminar esta reseña definitivamente?')) return;
+        const result = await Swal.fire({
+            title: '¿Eliminar reseña?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            background: '#1f2937',
+            color: '#d1d5db'
+        });
+        if (!result.isConfirmed) return;
+
         try {
             const res = await fetch(`http://localhost:3000/admin/reviews/${id}`, {
                 method: 'DELETE',
@@ -897,7 +498,7 @@ const FAQsManagement = () => {
             });
 
             if (response.ok) {
-                alert(editingFaq ? 'FAQ actualizado' : 'FAQ creado');
+                toast.success(editingFaq ? 'FAQ actualizado' : 'FAQ creado');
                 setShowForm(false);
                 setEditingFaq(null);
                 setFormData({
@@ -908,10 +509,12 @@ const FAQsManagement = () => {
                     status: 'active'
                 });
                 fetchFAQs();
+            } else {
+                toast.error('Error al guardar el FAQ');
             }
         } catch (error) {
             console.error('Error saving FAQ:', error);
-            alert('Error al guardar el FAQ');
+            toast.error('Error al guardar el FAQ');
         }
     };
 
@@ -928,21 +531,35 @@ const FAQsManagement = () => {
     };
 
     const handleDelete = async (id) => {
-        if (confirm('¿Estás seguro de eliminar este FAQ?')) {
-            try {
-                const response = await fetch(`http://localhost:3000/api/admin/public-content/faqs/${id}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
+        const result = await Swal.fire({
+            title: '¿Eliminar FAQ?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            background: '#1f2937',
+            color: '#d1d5db'
+        });
+        if (!result.isConfirmed) return;
 
-                if (response.ok) {
-                    alert('FAQ eliminado');
-                    fetchFAQs();
-                }
-            } catch (error) {
-                console.error('Error deleting FAQ:', error);
-                alert('Error al eliminar el FAQ');
+        try {
+            const response = await fetch(`http://localhost:3000/api/admin/public-content/faqs/${id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                toast.success('FAQ eliminado');
+                fetchFAQs();
+            } else {
+                toast.error('Error al eliminar el FAQ');
             }
+        } catch (error) {
+            console.error('Error deleting FAQ:', error);
+            toast.error('Error al eliminar el FAQ');
         }
     };
 
@@ -1162,7 +779,7 @@ const PoliciesManagement = () => {
             });
 
             if (response.ok) {
-                alert(editingPolicy ? 'Política actualizada' : 'Política creada');
+                toast.success(editingPolicy ? 'Política actualizada' : 'Política creada');
                 setShowForm(false);
                 setEditingPolicy(null);
                 setFormData({
@@ -1173,10 +790,12 @@ const PoliciesManagement = () => {
                     status: 'active'
                 });
                 fetchPolicies();
+            } else {
+                toast.error('Error al guardar la política');
             }
         } catch (error) {
             console.error('Error saving policy:', error);
-            alert('Error al guardar la política');
+            toast.error('Error al guardar la política');
         }
     };
 
@@ -1193,21 +812,35 @@ const PoliciesManagement = () => {
     };
 
     const handleDelete = async (id) => {
-        if (confirm('¿Estás seguro de eliminar esta política?')) {
-            try {
-                const response = await fetch(`http://localhost:3000/api/admin/public-content/service-policies/${id}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
+        const result = await Swal.fire({
+            title: '¿Eliminar política?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            background: '#1f2937',
+            color: '#d1d5db'
+        });
+        if (!result.isConfirmed) return;
 
-                if (response.ok) {
-                    alert('Política eliminada');
-                    fetchPolicies();
-                }
-            } catch (error) {
-                console.error('Error deleting policy:', error);
-                alert('Error al eliminar la política');
+        try {
+            const response = await fetch(`http://localhost:3000/api/admin/public-content/service-policies/${id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                toast.success('Política eliminada');
+                fetchPolicies();
+            } else {
+                toast.error('Error al eliminar la política');
             }
+        } catch (error) {
+            console.error('Error deleting policy:', error);
+            toast.error('Error al eliminar la política');
         }
     };
 

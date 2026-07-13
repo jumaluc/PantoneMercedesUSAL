@@ -1,8 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faExpand, faHome, faImages } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faImages, faChevronLeft, faChevronRight, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import './PublicGallery.css';
+
+// Renderiza el <img> solo cuando el item entra al viewport
+const LazyGalleryImage = ({ src, alt, onClick }) => {
+    const [inView, setInView] = useState(false);
+    const [loaded, setLoaded] = useState(false);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        const obs = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
+            { rootMargin: '600px 0px' }
+        );
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
+
+    return (
+        <div ref={containerRef} className="public-gallery__item" onClick={onClick}>
+            {!loaded && <div className="public-gallery__img-skeleton" />}
+            {inView && (
+                <img
+                    src={src}
+                    alt={alt}
+                    className="public-gallery__image"
+                    style={loaded
+                        ? { opacity: 1 }
+                        : { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0 }}
+                    onLoad={() => setLoaded(true)}
+                    onError={(e) => { e.target.src = '/default-image.jpg'; setLoaded(true); }}
+                />
+            )}
+        </div>
+    );
+};
+
+// Cantidad de columnas del masonry según el ancho de pantalla (coincide con los breakpoints del CSS)
+const getColumnCount = () => {
+    if (typeof window === 'undefined') return 3;
+    if (window.innerWidth <= 480) return 1;
+    if (window.innerWidth <= 1024) return 2;
+    return 3;
+};
+
+const useColumnCount = () => {
+    const [count, setCount] = useState(getColumnCount);
+    useEffect(() => {
+        const onResize = () => setCount(getColumnCount());
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
+    return count;
+};
 
 const PublicGallery = () => {
     const { category } = useParams();
@@ -11,6 +65,8 @@ const PublicGallery = () => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+    const columnCount = useColumnCount();
 
     // Mapeo de categorías a service_types del backend
     const categoryToServiceType = {
@@ -40,6 +96,16 @@ const PublicGallery = () => {
     useEffect(() => {
         fetchGalleriesData();
     }, [currentCategory]);
+
+    useEffect(() => {
+        const handleScroll = () => setShowScrollTop(window.scrollY > 300);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const fetchGalleriesData = async () => {
         try {
@@ -124,11 +190,10 @@ const PublicGallery = () => {
     };
 
     const openLightbox = (image, index) => {
-        setSelectedImage({ 
-            ...image, 
+        setSelectedImage({
+            ...image,
             index,
-            url: image.image_url || image.url,
-            title: image.original_filename || image.title || `Imagen ${index + 1}`
+            url: image.image_url || image.url
         });
     };
 
@@ -141,11 +206,10 @@ const PublicGallery = () => {
         
         const newIndex = selectedImage.index + direction;
         if (newIndex >= 0 && newIndex < allImages.length) {
-            const newImage = { 
-                ...allImages[newIndex], 
+            const newImage = {
+                ...allImages[newIndex],
                 index: newIndex,
-                url: allImages[newIndex].image_url || allImages[newIndex].url,
-                title: allImages[newIndex].original_filename || allImages[newIndex].title || `Imagen ${newIndex + 1}`
+                url: allImages[newIndex].image_url || allImages[newIndex].url
             };
             setSelectedImage(newImage);
         }
@@ -220,40 +284,18 @@ const PublicGallery = () => {
                             <FontAwesomeIcon icon={faHome} />
                             Volver al Inicio
                         </Link>
-                        {currentCategory !== 'general' && (
-                            <Link to="/public/gallery" className="public-gallery__back-to-gallery">
-                                <FontAwesomeIcon icon={faArrowLeft} />
-                                Volver a Galería General
-                            </Link>
-                        )}
                     </div>
-                    
+
                     <h1 className="public-gallery__title">
                         {categoryTitles[currentCategory]}
                     </h1>
                     <p className="public-gallery__subtitle">
-                        {categoryDescriptions[currentCategory]}
+                        {galleries[0]?.description || categoryDescriptions[currentCategory]}
                     </p>
                     <div className="public-gallery__count">
                         <FontAwesomeIcon icon={faImages} />
-                        {galleries.length} {galleries.length === 1 ? 'galería' : 'galerías'} • 
                         {allImages.length} {allImages.length === 1 ? 'imagen' : 'imágenes'}
                     </div>
-
-                    {/* Mostrar títulos de las galerías si hay más de una */}
-                    {galleries.length > 1 && (
-                        <div className="public-gallery__galleries-list">
-                            <h3>Galerías en esta categoría:</h3>
-                            <div className="public-gallery__galleries-titles">
-                                {galleries.map((gallery, index) => (
-                                    <span key={gallery.id} className="public-gallery__gallery-title">
-                                        {gallery.title}
-                                        {index < galleries.length - 1 && ', '}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
 
@@ -261,34 +303,19 @@ const PublicGallery = () => {
             <div className="public-gallery__container">
                 {allImages.length > 0 ? (
                     <div className="public-gallery__grid">
-                        {allImages.map((image, index) => (
-                            <div 
-                                key={image.id || `${image.gallery_id}-${index}`} 
-                                className="public-gallery__item"
-                                onClick={() => openLightbox(image, index)}
-                            >
-                                <img 
-                                    src={image.image_url || image.url} 
-                                    alt={image.original_filename || image.title || `Imagen ${index + 1}`}
-                                    className="public-gallery__image"
-                                    onError={(e) => {
-                                        e.target.src = '/default-image.jpg';
-                                    }}
-                                    loading="lazy"
-                                />
-                                <div className="public-gallery__overlay">
-                                    <FontAwesomeIcon icon={faExpand} className="public-gallery__zoom-icon" />
-                                </div>
-                                <div className="public-gallery__info">
-                                    <div className="public-gallery__image-title">
-                                        {image.original_filename || image.title || `Imagen ${index + 1}`}
-                                    </div>
-                                    {image.is_primary && (
-                                        <div className="public-gallery__primary-badge">
-                                            Principal
-                                        </div>
-                                    )}
-                                </div>
+                        {Array.from({ length: columnCount }, (_, colIndex) => (
+                            <div className="public-gallery__column" key={colIndex}>
+                                {allImages
+                                    .map((image, index) => ({ image, index }))
+                                    .filter((_, index) => index % columnCount === colIndex)
+                                    .map(({ image, index }) => (
+                                        <LazyGalleryImage
+                                            key={image.id || `${image.gallery_id}-${index}`}
+                                            src={image.image_url || image.url}
+                                            alt={image.original_filename || image.title || `Imagen ${index + 1}`}
+                                            onClick={() => openLightbox(image, index)}
+                                        />
+                                    ))}
                             </div>
                         ))}
                     </div>
@@ -320,13 +347,13 @@ const PublicGallery = () => {
                             disabled={selectedImage.index === 0}
                             aria-label="Imagen anterior"
                         >
-                            ‹
+                            <FontAwesomeIcon icon={faChevronLeft} />
                         </button>
 
                         <div className="public-gallery__lightbox-image-container">
-                            <img 
-                                src={selectedImage.url} 
-                                alt={selectedImage.title}
+                            <img
+                                src={selectedImage.url}
+                                alt={`Imagen ${selectedImage.index + 1}`}
                                 className="public-gallery__lightbox-image"
                             />
                         </div>
@@ -337,15 +364,12 @@ const PublicGallery = () => {
                             disabled={selectedImage.index === allImages.length - 1}
                             aria-label="Imagen siguiente"
                         >
-                            ›
+                            <FontAwesomeIcon icon={faChevronRight} />
                         </button>
 
                         <div className="public-gallery__lightbox-info">
                             <div className="public-gallery__lightbox-counter">
                                 {selectedImage.index + 1} / {allImages.length}
-                            </div>
-                            <div className="public-gallery__lightbox-title">
-                                {selectedImage.title}
                             </div>
                             {selectedImage.file_size && (
                                 <div className="public-gallery__lightbox-meta">
@@ -355,6 +379,12 @@ const PublicGallery = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showScrollTop && (
+                <button className="scroll-top-btn" onClick={scrollToTop} aria-label="Volver arriba">
+                    <FontAwesomeIcon icon={faArrowUp} />
+                </button>
             )}
         </div>
     );

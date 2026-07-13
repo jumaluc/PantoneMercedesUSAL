@@ -160,14 +160,36 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
 
     return (
         <div className="video-card">
+            <div className="video-thumbnail">
+                {video.thumbnail_url ? (
+                    <img src={video.thumbnail_url} alt={video.title} className="video-thumbnail-img" />
+                ) : (
+                    <div className="video-thumbnail-placeholder">
+                        <FontAwesomeIcon icon={faVideo} />
+                    </div>
+                )}
+
+                {video.video_url && (
+                    <button
+                        className="video-thumbnail-play"
+                        onClick={() => setShowVideoModal(true)}
+                        title="Ver video"
+                    >
+                        <FontAwesomeIcon icon={faPlay} />
+                    </button>
+                )}
+
+                <div className={`video-status video-status-overlay ${statusInfo.class}`}>
+                    <FontAwesomeIcon icon={statusInfo.icon} />
+                    {statusInfo.text}
+                </div>
+            </div>
+
+            <div className="video-card-body">
             <div className="video-card-header">
                 <div className="video-title-section">
                     <FontAwesomeIcon icon={faVideo} />
                     <h3>{video.title}</h3>
-                </div>
-                <div className={`video-status ${statusInfo.class}`}>
-                    <FontAwesomeIcon icon={statusInfo.icon} />
-                    {statusInfo.text}
                 </div>
             </div>
 
@@ -191,7 +213,7 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
                 <div className="video-meta-item">
                     <FontAwesomeIcon icon={faCalendar} />
                     <span>
-                        {video.estimated_delivery 
+                        {video.estimated_delivery
                             ? `Entrega: ${formatDate(video.estimated_delivery)}`
                             : 'Sin fecha de entrega'
                         }
@@ -232,15 +254,6 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
                 </div>
 
                 <div className="video-action-buttons">
-                    {video.video_url && (
-                        <button 
-                            className="btn-preview"
-                            onClick={() => setShowVideoModal(true)}
-                            title="Ver video"
-                        >
-                            <FontAwesomeIcon icon={faPlay} />
-                        </button>
-                    )}
                     <button
                         className="btn-edit"
                         onClick={() => {
@@ -266,41 +279,57 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
                 </div>
             </div>
 
+            </div>
+
+            {/* Modal de edición de video */}
             {isEditing && (
-                <div className="video-edit-panel">
-                    <div className="video-edit-field">
-                        <label>Título</label>
-                        <input
-                            type="text"
-                            value={editData.title}
-                            onChange={e => setEditData(prev => ({ ...prev, title: e.target.value }))}
-                            placeholder="Título del video"
-                        />
-                    </div>
-                    <div className="video-edit-field">
-                        <label>Descripción</label>
-                        <textarea
-                            value={editData.description}
-                            onChange={e => setEditData(prev => ({ ...prev, description: e.target.value }))}
-                            placeholder="Descripción..."
-                            rows={2}
-                        />
-                    </div>
-                    <div className="video-edit-field">
-                        <label>Entrega estimada</label>
-                        <input
-                            type="date"
-                            value={editData.estimated_delivery}
-                            onChange={e => setEditData(prev => ({ ...prev, estimated_delivery: e.target.value }))}
-                        />
-                    </div>
-                    <div className="video-edit-actions">
-                        <button className="btn-cancel-edit" onClick={() => setIsEditing(false)} disabled={loading}>
-                            Cancelar
-                        </button>
-                        <button className="btn-save-edit" onClick={handleEditSave} disabled={loading}>
-                            {loading ? 'Guardando...' : 'Guardar'}
-                        </button>
+                <div className="video-edit-overlay" onClick={() => !loading && setIsEditing(false)}>
+                    <div className="video-edit-panel" onClick={e => e.stopPropagation()}>
+                        <div className="video-edit-header">
+                            <h3>Editar video</h3>
+                            <button
+                                className="video-edit-close"
+                                onClick={() => setIsEditing(false)}
+                                disabled={loading}
+                                title="Cerrar"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className="video-edit-field">
+                            <label>Título</label>
+                            <input
+                                type="text"
+                                value={editData.title}
+                                onChange={e => setEditData(prev => ({ ...prev, title: e.target.value }))}
+                                placeholder="Título del video"
+                            />
+                        </div>
+                        <div className="video-edit-field">
+                            <label>Descripción</label>
+                            <textarea
+                                value={editData.description}
+                                onChange={e => setEditData(prev => ({ ...prev, description: e.target.value }))}
+                                placeholder="Descripción..."
+                                rows={3}
+                            />
+                        </div>
+                        <div className="video-edit-field">
+                            <label>Entrega estimada</label>
+                            <input
+                                type="date"
+                                value={editData.estimated_delivery}
+                                onChange={e => setEditData(prev => ({ ...prev, estimated_delivery: e.target.value }))}
+                            />
+                        </div>
+                        <div className="video-edit-actions">
+                            <button className="btn-cancel-edit" onClick={() => setIsEditing(false)} disabled={loading}>
+                                Cancelar
+                            </button>
+                            <button className="btn-save-edit" onClick={handleEditSave} disabled={loading}>
+                                {loading ? 'Guardando...' : 'Guardar'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

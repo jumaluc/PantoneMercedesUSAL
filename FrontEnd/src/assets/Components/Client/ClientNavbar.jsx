@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,13 +10,21 @@ import {
     faEnvelope,
     faHome,
     faVideo,
-    faStar
+    faStar,
+    faBars,
+    faTimes
 } from '@fortawesome/free-solid-svg-icons';
 import NotificationBell from '../Shared/NotificationBell';
 
 const Navbar = ({ user, activeSection, setActiveSection }) => {
   const navigate = useNavigate();
-  
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleNavClick = (section) => {
+    setActiveSection(section);
+    setMenuOpen(false);
+  };
+
   const handleLogout = async () => {
     try {
       const response = await fetch('http://localhost:3000/auth/logout', {
@@ -42,57 +50,66 @@ const Navbar = ({ user, activeSection, setActiveSection }) => {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
+        <button
+          className="navbar-hamburger"
+          onClick={() => setMenuOpen(prev => !prev)}
+          aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+        >
+          <FontAwesomeIcon icon={menuOpen ? faTimes : faBars} />
+        </button>
         <img src="logoPantone.jpg" className='navBarLogo' alt="logo" />
         <h2>Pantone Mercedes</h2>
       </div>
-              
-      <div className="navbar-menu">
-          <button 
-          className={`nav-btn-client ${activeSection === 'home' ? 'active' : ''}`}
-          onClick={() => setActiveSection('home')}
-        >
-          <FontAwesomeIcon icon={faHome} />
-          Home
-        </button>
-        <button 
-          className={`nav-btn-client ${activeSection === 'gallery' ? 'active' : ''}`}
-          onClick={() => setActiveSection('gallery')}
-        >
-          <FontAwesomeIcon icon={faImages} />
-          Mi Galería
-        </button>
-        
-        <button 
-          className={`nav-btn-client ${activeSection === 'videos' ? 'active' : ''}`}
-          onClick={() => setActiveSection('videos')}
-        >
-          <FontAwesomeIcon icon={faVideo} />
-          Mis Videos
-        </button>
-        
-        <button 
-          className={`nav-btn-client ${activeSection === 'comments' ? 'active' : ''}`}
-          onClick={() => setActiveSection('comments')}
-        >
-          <FontAwesomeIcon icon={faComment} />
-          Comentarios & Solicitudes
-        </button>
-        
-        <button
-          className={`nav-btn-client ${activeSection === 'reviews' ? 'active' : ''}`}
-          onClick={() => setActiveSection('reviews')}
-        >
-          <FontAwesomeIcon icon={faStar} />
-          Reseñas
-        </button>
 
-        <button
-          className={`nav-btn-client ${activeSection === 'profile' ? 'active' : ''}`}
-          onClick={() => setActiveSection('profile')}
-        >
-          <FontAwesomeIcon icon={faUser} />
-          Mi Perfil
-        </button>
+      <div className={`navbar-collapse ${menuOpen ? 'open' : ''}`}>
+        <div className="navbar-menu">
+            <button
+            className={`nav-btn-client ${activeSection === 'home' ? 'active' : ''}`}
+            onClick={() => handleNavClick('home')}
+          >
+            <FontAwesomeIcon icon={faHome} />
+            Home
+          </button>
+          <button
+            className={`nav-btn-client ${activeSection === 'gallery' ? 'active' : ''}`}
+            onClick={() => handleNavClick('gallery')}
+          >
+            <FontAwesomeIcon icon={faImages} />
+            Mi Galería
+          </button>
+
+          <button
+            className={`nav-btn-client ${activeSection === 'videos' ? 'active' : ''}`}
+            onClick={() => handleNavClick('videos')}
+          >
+            <FontAwesomeIcon icon={faVideo} />
+            Mis Videos
+          </button>
+
+          <button
+            className={`nav-btn-client ${activeSection === 'comments' ? 'active' : ''}`}
+            onClick={() => handleNavClick('comments')}
+          >
+            <FontAwesomeIcon icon={faComment} />
+            Comentarios & Solicitudes
+          </button>
+
+          <button
+            className={`nav-btn-client ${activeSection === 'reviews' ? 'active' : ''}`}
+            onClick={() => handleNavClick('reviews')}
+          >
+            <FontAwesomeIcon icon={faStar} />
+            Reseñas
+          </button>
+
+          <button
+            className={`nav-btn-client ${activeSection === 'profile' ? 'active' : ''}`}
+            onClick={() => handleNavClick('profile')}
+          >
+            <FontAwesomeIcon icon={faUser} />
+            Mi Perfil
+          </button>
+        </div>
       </div>
 
       <div className="navbar-user">

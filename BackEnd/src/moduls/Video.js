@@ -5,17 +5,19 @@ class Video {
     static async create(videoData) {
         try {
             const {
-                user_id, title, description, estimated_delivery, status, video_url, file_name, original_filename, file_size, format, thumbnail_url, created_by} = videoData;
+                user_id, gallery_id, title, description, estimated_delivery, status, video_url, file_name,
+                original_filename, file_size, format, thumbnail_url, thumbnail_is_gallery_cover, created_by} = videoData;
 
             const query = `
                 INSERT INTO client_videos
-                (user_id, description, title, estimated_delivery, status, video_url,
-                 file_name, original_filename, file_size, format, thumbnail_url, created_by)
-                VALUES (?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (user_id, gallery_id, description, title, estimated_delivery, status, video_url,
+                 file_name, original_filename, file_size, format, thumbnail_url, thumbnail_is_gallery_cover, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
 
             const [result] = await pool.execute(query, [
                 user_id,
+                gallery_id || null,
                 description,
                 title,
                 estimated_delivery,
@@ -26,6 +28,7 @@ class Video {
                 file_size,
                 format,
                 thumbnail_url,
+                thumbnail_is_gallery_cover ? 1 : 0,
                 created_by
             ]);
 
@@ -62,13 +65,29 @@ class Video {
     static async getById(videoId){
         try{
             const [result] = await pool.execute('SELECT * FROM client_videos WHERE id = ? ', [videoId])
-            return result;
+            return result[0] || null;
         }
         catch(err){console.log(err)}
     }
+    static async isUrlUsedAsGalleryCoverThumbnail(imageUrl){
+        try{
+            const [result] = await pool.execute(
+                'SELECT id FROM client_videos WHERE thumbnail_url = ? AND thumbnail_is_gallery_cover = 1 LIMIT 1',
+                [imageUrl]
+            );
+            return result.length > 0;
+        }
+        catch(err){console.log(err); return false;}
+    }
     static async getMyVideos(userId){
         try{
-            const [result] = await pool.execute('SELECT * FROM client_videos WHERE user_id = ? ', [userId])
+            const [result] = await pool.execute(
+                `SELECT cv.*, g.title AS gallery_title
+                 FROM client_videos cv
+                 LEFT JOIN galleries g ON g.id = cv.gallery_id
+                 WHERE cv.user_id = ?`,
+                [userId]
+            )
             return result;
         }
         catch(err){console.log(err)}

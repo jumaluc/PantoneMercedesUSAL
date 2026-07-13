@@ -127,6 +127,14 @@ router.post('/client-selections/:galleryId/cancel',
   })),
   adminController.cancelSelection
 );
+router.post('/client-selections/:galleryId/video-ready',
+  withAdminLog('SELECTION_VIDEO_READY', (req) => ({
+    resource_type: 'SELECTION',
+    resource_id: req.params.galleryId,
+    resource_name: req.body.ready ? 'Marcada como entregada' : 'Marcada como pendiente'
+  })),
+  adminController.setSelectionVideoReady
+);
 
 router.get('/comments', adminController.getAllComments);
 router.post('/comments/:id/seen',

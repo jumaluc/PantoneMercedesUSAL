@@ -6,7 +6,15 @@ class PublicContent {
     static async getCompanyInfo() {
         try {
             const [result] = await pool.execute('SELECT * FROM company_info ORDER BY id DESC LIMIT 1');
-            return result[0] || null;
+            const companyInfo = result[0] || null;
+            if (companyInfo && typeof companyInfo.social_media === 'string') {
+                try {
+                    companyInfo.social_media = JSON.parse(companyInfo.social_media);
+                } catch {
+                    companyInfo.social_media = null;
+                }
+            }
+            return companyInfo;
         } catch (err) {
             console.log(err);
             return null;
@@ -16,8 +24,8 @@ class PublicContent {
     static async updateCompanyInfo(data) {
         try {
             const {
-                company_name, description, email, phone, address, 
-                social_media, logo_url
+                company_name, description = null, email = null, phone = null, address = null,
+                social_media = null, logo_url = null
             } = data;
 
             const [existing] = await pool.execute('SELECT id FROM company_info LIMIT 1');

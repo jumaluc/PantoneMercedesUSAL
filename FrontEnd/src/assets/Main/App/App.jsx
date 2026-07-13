@@ -21,9 +21,7 @@ function App() {
             
             {/* Rutas públicas para galerías */}
             <Route path="/public/gallery" element={<PublicGallery />} />
-            <Route path="/public/gallery/casamientos" element={<PublicGallery category="casamientos" />} />
-            <Route path="/public/gallery/xv-anos" element={<PublicGallery category="xv-anos" />} />
-            <Route path="/public/gallery/bautizos" element={<PublicGallery category="bautizos" />} />
+            <Route path="/public/gallery/:category" element={<PublicGallery />} />
             
             {/* Ruta de login */}
             <Route path="/login" element={<Login />} />
