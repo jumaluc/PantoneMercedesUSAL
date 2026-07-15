@@ -29,3 +29,4 @@ Thumbs.db
 *.json.key
 service-account*.json
 credentials*.json
+.run/

@@ -213,6 +213,28 @@
 
 .egm-image-item:hover .egm-delete-img { opacity: 1; }
 
+.egm-load-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: rgba(255, 140, 0, 0.1);
+    border: 1px solid rgba(255, 140, 0, 0.35);
+    color: #FF8C00;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.egm-load-more:hover {
+    background: rgba(255, 140, 0, 0.2);
+}
+
 .egm-no-images {
     color: #6b7280;
     font-size: 0.875rem;

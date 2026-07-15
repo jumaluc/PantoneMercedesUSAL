@@ -5,6 +5,7 @@ import {
     faChevronLeft, faChevronRight
 } from '@fortawesome/free-solid-svg-icons';
 import './AuditSection.css';
+import { API_URL } from '../../../config/api';
 
 const ACTION_LABELS = {
     CLIENT_VIEW:            'Ver Clientes',
@@ -66,7 +67,7 @@ const AuditSection = () => {
             if (filters.start_date)  params.append('start_date', filters.start_date);
             if (filters.end_date)    params.append('end_date', filters.end_date);
 
-            const res = await fetch(`http://localhost:3000/admin/activity-logs?${params}`, {
+            const res = await fetch(`${API_URL}/admin/activity-logs?${params}`, {
                 credentials: 'include'
             });
             if (res.ok) {

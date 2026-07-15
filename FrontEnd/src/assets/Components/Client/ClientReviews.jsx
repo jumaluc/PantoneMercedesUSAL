@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import './ClientReviews.css';
+import { API_URL } from '../../../config/api';
 
 const StarRating = ({ value, onChange, readOnly = false }) => {
   const [hovered, setHovered] = useState(0);
@@ -69,8 +70,8 @@ const ClientReviews = ({ user }) => {
   const fetchData = async () => {
     try {
       const [allRes, myRes] = await Promise.all([
-        fetch('http://localhost:3000/user/getAllReviews', { credentials: 'include' }),
-        fetch('http://localhost:3000/user/getMyReview', { credentials: 'include' })
+        fetch(`${API_URL}/user/getAllReviews`, { credentials: 'include' }),
+        fetch(`${API_URL}/user/getMyReview`, { credentials: 'include' })
       ]);
       const allData = await allRes.json();
       const myData = await myRes.json();
@@ -89,7 +90,7 @@ const ClientReviews = ({ user }) => {
 
   const handleToggleLike = async (reviewId) => {
     try {
-      const res = await fetch(`http://localhost:3000/user/toggleLike/${reviewId}`, {
+      const res = await fetch(`${API_URL}/user/toggleLike/${reviewId}`, {
         method: 'POST',
         credentials: 'include'
       });
@@ -115,7 +116,7 @@ const ClientReviews = ({ user }) => {
     if (!message.trim()) { toast.error('Escribí un mensaje'); return; }
     setSubmitting(true);
     try {
-      const res = await fetch('http://localhost:3000/user/submitReview', {
+      const res = await fetch(`${API_URL}/user/submitReview`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

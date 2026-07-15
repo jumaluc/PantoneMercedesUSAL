@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './PoliciesModal.css';
+import { API_URL } from '../../../config/api';
 
 const PoliciesModal = ({ onClose }) => {
     const [policies, setPolicies] = useState([]);
@@ -7,7 +8,7 @@ const PoliciesModal = ({ onClose }) => {
     const [activeIndex, setActiveIndex] = useState(0);
 
     useEffect(() => {
-        fetch('http://localhost:3000/api/public/service-policies')
+        fetch(`${API_URL}/api/public/service-policies`)
             .then(r => r.json())
             .then(data => setPolicies(data.data || []))
             .catch(() => {})

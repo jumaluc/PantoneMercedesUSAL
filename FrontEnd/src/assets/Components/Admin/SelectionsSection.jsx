@@ -9,6 +9,7 @@ import {
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
 import './SelectionsSection.css';
+import { API_URL } from '../../../config/api';
 
 const SelectionsSection = () => {
   const [selections, setSelections] = useState([]);
@@ -29,7 +30,7 @@ const SelectionsSection = () => {
   const fetchSelections = async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:3000/admin/client-selections', { credentials: 'include' });
+      const res = await fetch(`${API_URL}/admin/client-selections`, { credentials: 'include' });
       if (!res.ok) throw new Error();
       const data = await res.json();
       setSelections(data.data || []);
@@ -50,7 +51,7 @@ const SelectionsSection = () => {
 
     setLoadingImages(prev => ({ ...prev, [galleryId]: true }));
     try {
-      const res = await fetch(`http://localhost:3000/admin/client-selections/${galleryId}/images`, { credentials: 'include' });
+      const res = await fetch(`${API_URL}/admin/client-selections/${galleryId}/images`, { credentials: 'include' });
       if (!res.ok) throw new Error();
       const data = await res.json();
       setGalleryImages(prev => ({ ...prev, [galleryId]: data.data || [] }));
@@ -77,7 +78,7 @@ const SelectionsSection = () => {
     if (!result.isConfirmed) return;
     setCancelling(galleryId);
     try {
-      const res = await fetch(`http://localhost:3000/admin/client-selections/${galleryId}/cancel`, {
+      const res = await fetch(`${API_URL}/admin/client-selections/${galleryId}/cancel`, {
         method: 'POST',
         credentials: 'include'
       });
@@ -96,7 +97,7 @@ const SelectionsSection = () => {
   const toggleVideoReady = async (galleryId, isReady) => {
     setMarkingReady(galleryId);
     try {
-      const res = await fetch(`http://localhost:3000/admin/client-selections/${galleryId}/video-ready`, {
+      const res = await fetch(`${API_URL}/admin/client-selections/${galleryId}/video-ready`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -119,7 +120,7 @@ const SelectionsSection = () => {
     setDownloadingZip(galleryId);
     toast.loading('Comprimiendo imágenes...', { id: 'dl-all' });
     try {
-      const res = await fetch(`http://localhost:3000/admin/client-selections/${galleryId}/download-zip`, {
+      const res = await fetch(`${API_URL}/admin/client-selections/${galleryId}/download-zip`, {
         credentials: 'include'
       });
       if (!res.ok) {

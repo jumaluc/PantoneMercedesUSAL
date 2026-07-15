@@ -14,6 +14,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
+import { API_URL } from '../../../config/api';
 
 const VideoCard = ({ video, onUpdate, onDelete }) => {
     const [loading, setLoading] = useState(false);
@@ -48,7 +49,7 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
     const handleStatusChange = async (newStatus) => {
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:3000/admin/updateVideoStatus/${video.id}`, {
+            const response = await fetch(`${API_URL}/admin/updateVideoStatus/${video.id}`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {
@@ -97,7 +98,7 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
         if (result.isConfirmed) {
             setLoading(true);
             try {
-                const response = await fetch(`http://localhost:3000/admin/deleteVideo/${video.id}`, {
+                const response = await fetch(`${API_URL}/admin/deleteVideo/${video.id}`, {
                     method: 'DELETE',
                     credentials: 'include'
                 });
@@ -124,7 +125,7 @@ const VideoCard = ({ video, onUpdate, onDelete }) => {
         }
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:3000/admin/updateVideo/${video.id}`, {
+            const res = await fetch(`${API_URL}/admin/updateVideo/${video.id}`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },

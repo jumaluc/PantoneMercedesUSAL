@@ -24,11 +24,13 @@ const LazyImage = ({ src, alt, imageId, onOrientationDetected }) => {
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
-      {!loaded && <div className="img-skeleton" />}
+      <div className="img-skeleton" style={{ opacity: loaded ? 0 : 1, transition: 'opacity 0.35s ease', pointerEvents: 'none' }} />
       {inView && (
         <img
           src={src}
           alt={alt}
+          loading="lazy"
+          decoding="async"
           onLoad={handleLoad}
           onError={(e) => { e.target.src = '/placeholder-image.jpg'; setLoaded(true); }}
           style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: loaded ? 1 : 0, transition: 'opacity 0.35s ease', display: 'block' }}
@@ -44,6 +46,9 @@ import Swal from 'sweetalert2';
 import './Gallery.css';
 import ImageCommentsOverlay from './ImageCommentsOverlay';
 import SongSelectionModal from './SongSelectionModal';
+import { API_URL, thumbUrl } from '../../../config/api';
+
+const FEATURE_INTERVAL = 8;
 
 const Gallery = ({ user, setActiveSection }) => {
   const [galleriesData, setGalleriesData] = useState([]);
@@ -63,6 +68,7 @@ const Gallery = ({ user, setActiveSection }) => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const imageOrientations = useRef(new Map());
   const [orientationTick, setOrientationTick] = useState(0);
+  const orientationUpdateTimer = useRef(null);
   const [downloading, setDownloading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showCommentsOverlay, setShowCommentsOverlay] = useState(false);
@@ -99,7 +105,7 @@ const Gallery = ({ user, setActiveSection }) => {
       setSongSelection(null);
       return;
     }
-    fetch(`http://localhost:3000/user/getSongSelection?gallery_id=${currentGalleryId}`, {
+    fetch(`${API_URL}/user/getSongSelection?gallery_id=${currentGalleryId}`, {
       credentials: 'include'
     })
       .then(r => r.json())
@@ -139,11 +145,20 @@ const Gallery = ({ user, setActiveSection }) => {
   useEffect(() => {
     imageOrientations.current = new Map();
     setOrientationTick(0);
+    return () => {
+      if (orientationUpdateTimer.current) clearTimeout(orientationUpdateTimer.current);
+    };
   }, [currentGalleryId]);
 
   const handleOrientationDetected = useCallback((imageId, isVertical) => {
     imageOrientations.current.set(imageId, isVertical);
-    setOrientationTick(t => t + 1);
+    // Agrupa varias detecciones simultáneas (scroll rápido) en un solo re-render
+    // para no repaquetizar el grid una vez por cada imagen que termina de cargar.
+    if (orientationUpdateTimer.current) return;
+    orientationUpdateTimer.current = setTimeout(() => {
+      orientationUpdateTimer.current = null;
+      setOrientationTick(t => t + 1);
+    }, 120);
   }, []);
 
   // Las imágenes de la galería actual (sin pre-carga masiva)
@@ -160,7 +175,7 @@ const Gallery = ({ user, setActiveSection }) => {
   const fetchGalleries = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/user/getGallery', {
+      const response = await fetch(`${API_URL}/user/getGallery`, {
         credentials: 'include'
       });
 
@@ -275,7 +290,7 @@ const Gallery = ({ user, setActiveSection }) => {
     }
     setDownloading(true);
     try {
-      const response = await fetch('http://localhost:3000/user/downloadImages', {
+      const response = await fetch(`${API_URL}/user/downloadImages`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -316,7 +331,7 @@ const Gallery = ({ user, setActiveSection }) => {
 
   const downloadSingleImage = async (imageId, imageUrl, filename) => {
     try {
-      const response = await fetch('http://localhost:3000/user/downloadSingleImage', {
+      const response = await fetch(`${API_URL}/user/downloadSingleImage`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -367,13 +382,13 @@ const Gallery = ({ user, setActiveSection }) => {
     setConfirmingSelection(true);
     try {
       const [imagesRes, songsRes] = await Promise.all([
-        fetch('http://localhost:3000/user/confirmSelection', {
+        fetch(`${API_URL}/user/confirmSelection`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ imageIds: Array.from(selectedImages), galleryId: currentGalleryId })
         }),
-        fetch('http://localhost:3000/user/saveSongSelection', {
+        fetch(`${API_URL}/user/saveSongSelection`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -432,7 +447,7 @@ const Gallery = ({ user, setActiveSection }) => {
     });
     if (!result.isConfirmed) return;
     try {
-      const response = await fetch('http://localhost:3000/user/cancelSelection', {
+      const response = await fetch(`${API_URL}/user/cancelSelection`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -649,12 +664,15 @@ const Gallery = ({ user, setActiveSection }) => {
       <main className="galeria-main">
         <div className="galeria-grid">
           {displayedImages.length > 0 ? (
-            displayedImages.map((image, index) => (
-              <div key={image.id} className={`galeriaFotos-container-imagen ${imageOrientations.current.get(image.id) === true ? 'vertical' : 'horizontal'}${selectedImages.has(image.id) ? ' selected-container' : ''}`}>
+            displayedImages.map((image, index) => {
+              const isVertical = imageOrientations.current.get(image.id) === true;
+              const isFeatured = !isVertical && index % FEATURE_INTERVAL === 4;
+              return (
+              <div key={image.id} className={`galeriaFotos-container-imagen ${isVertical ? 'vertical' : 'horizontal'}${isFeatured ? ' featured' : ''}${selectedImages.has(image.id) ? ' selected-container' : ''}`}>
                 <div className={`galeria-item ${selectedImages.has(image.id) ? 'selected' : ''}`} onClick={(e) => handleImageClick(image, index, e)}>
                   <LazyImage
                     imageId={image.id}
-                    src={image.image_url}
+                    src={thumbUrl(image.image_url)}
                     alt={image.original_filename}
                     onOrientationDetected={handleOrientationDetected}
                   />
@@ -684,7 +702,8 @@ const Gallery = ({ user, setActiveSection }) => {
                   )}
                 </div>
               </div>
-            ))
+              );
+            })
           ) : (
             <div className="no-images-message">
               <FontAwesomeIcon icon={faImages} size="3x" />
@@ -716,7 +735,7 @@ const Gallery = ({ user, setActiveSection }) => {
               {filteredImages.map((image) => (
                 <div key={image.id} className="preview-item">
                   <div className="preview-image-container">
-                    <img src={image.image_url} alt={image.original_filename} className="preview-img" onClick={() => {
+                    <img src={thumbUrl(image.image_url)} alt={image.original_filename} className="preview-img" loading="lazy" decoding="async" onClick={() => {
                       setOverlayImage(image);
                       setOverlayIndex(displayedImages.findIndex(img => img.id === image.id));
                       setOverlayVisible(true);

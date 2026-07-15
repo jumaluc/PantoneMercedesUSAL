@@ -17,6 +17,7 @@ import {
 import { faInstagram, faFacebook, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import './PublicHome.css';
 import PoliciesModal from './PoliciesModal';
+import { API_URL } from '../../../config/api';
 
 const PublicHome = ({ hideLogin = false }) => {
     const [companyInfo, setCompanyInfo] = useState(null);
@@ -69,7 +70,7 @@ const PublicHome = ({ hideLogin = false }) => {
 
     const checkUserSession = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/auth/check-session', {
+            const response = await fetch(`${API_URL}/api/auth/check-session`, {
                 credentials: 'include' // Importante para enviar cookies
             });
             
@@ -94,9 +95,9 @@ const PublicHome = ({ hideLogin = false }) => {
         try {
             setLoading(true);
             const [companyRes, reviewsRes, faqsRes] = await Promise.all([
-                fetch('http://localhost:3000/api/public/company-info'),
-                fetch('http://localhost:3000/api/public/reviews'),
-                fetch('http://localhost:3000/api/public/faqs')
+                fetch(`${API_URL}/api/public/company-info`),
+                fetch(`${API_URL}/api/public/reviews`),
+                fetch(`${API_URL}/api/public/faqs`)
             ]);
 
             if (companyRes.ok) {

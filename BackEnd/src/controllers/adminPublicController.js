@@ -1,4 +1,6 @@
 const PublicContent = require('../moduls/PublicContent');
+const AdminLog = require('../moduls/AdminLog');
+const User = require('../moduls/Users');
 
 const adminPublicController = {
 
@@ -31,9 +33,33 @@ const adminPublicController = {
                 return res.status(401).json({ message: 'Acceso no autorizado' });
             }
 
+            const previousInfo = await PublicContent.getCompanyInfo();
             const result = await PublicContent.updateCompanyInfo(req.body);
-            
+
             if (result) {
+                try {
+                    const adminUser = await User.getUser(user.id);
+                    const adminName = adminUser
+                        ? `${adminUser.first_name} ${adminUser.last_name}`
+                        : `Admin #${user.id}`;
+
+                    await AdminLog.createLog({
+                        admin_id: user.id,
+                        admin_name: adminName,
+                        action_type: 'COMPANY_INFO_UPDATE',
+                        action_description: `Actualizó la información de la empresa: ${req.body.company_name || previousInfo?.company_name || ''}`,
+                        resource_type: 'COMPANY_INFO',
+                        resource_id: previousInfo?.id || null,
+                        resource_name: req.body.company_name || previousInfo?.company_name || null,
+                        ip_address: req.ip || req.connection.remoteAddress,
+                        user_agent: req.get('User-Agent'),
+                        old_values: previousInfo,
+                        new_values: req.body
+                    });
+                } catch (logError) {
+                    console.error('Error logging company info update:', logError);
+                }
+
                 res.status(200).json({
                     success: true,
                     message: 'Información de la empresa actualizada correctamente'

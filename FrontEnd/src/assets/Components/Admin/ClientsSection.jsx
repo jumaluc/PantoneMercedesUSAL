@@ -8,6 +8,7 @@ import { useSearchFilter } from '../../hooks/useSearchFilter';
 import SearchFilter from './SearchFilter'; 
 import { toast } from "react-toastify";
 import Swal from 'sweetalert2';
+import { API_URL } from '../../../config/api';
 
 const ClientsSection = () => {
   const [allClients, setAllClients] = useState([]);
@@ -56,7 +57,7 @@ const ClientsSection = () => {
   const fetchClients = async () => {
     try {
       console.log
-      const response = await fetch('http://localhost:3000/admin/getAllClients', {
+      const response = await fetch(`${API_URL}/admin/getAllClients`, {
         credentials: 'include'
       });
       const data = await response.json();
@@ -121,7 +122,7 @@ const handleDeleteClick = async (clientId, e) => {
 
   if (result.isConfirmed) {
     try {
-      const response = await fetch(`http://localhost:3000/admin/deleteClient/${clientId}`, {
+      const response = await fetch(`${API_URL}/admin/deleteClient/${clientId}`, {
         method: 'DELETE',
         credentials: 'include'
       });

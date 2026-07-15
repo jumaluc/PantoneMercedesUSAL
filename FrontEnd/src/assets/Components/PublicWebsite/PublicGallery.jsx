@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faImages, faChevronLeft, faChevronRight, faArrowUp } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faImages, faChevronLeft, faChevronRight, faArrowUp, faLayerGroup } from '@fortawesome/free-solid-svg-icons';
 import './PublicGallery.css';
+import { API_URL } from '../../../config/api';
 
 // Renderiza el <img> solo cuando el item entra al viewport
 const LazyGalleryImage = ({ src, alt, onClick }) => {
@@ -60,13 +61,24 @@ const useColumnCount = () => {
 
 const PublicGallery = () => {
     const { category } = useParams();
-    const [galleries, setGalleries] = useState([]); // Cambié a array de galerías
-    const [allImages, setAllImages] = useState([]); // Todas las imágenes de todas las galerías
+    const [galleries, setGalleries] = useState([]); // Array de galerías de la categoría
+    const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0); // Se navega de a una galería, como en la galería de clientes
     const [selectedImage, setSelectedImage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
     const columnCount = useColumnCount();
+
+    const currentGallery = galleries[currentGalleryIndex] || null;
+    const currentImages = currentGallery?.images || [];
+
+    const navigateGallery = (direction) => {
+        if (galleries.length <= 1) return;
+        let newIndex = currentGalleryIndex + direction;
+        if (newIndex < 0) newIndex = galleries.length - 1;
+        if (newIndex >= galleries.length) newIndex = 0;
+        setCurrentGalleryIndex(newIndex);
+    };
 
     // Mapeo de categorías a service_types del backend
     const categoryToServiceType = {
@@ -97,6 +109,11 @@ const PublicGallery = () => {
         fetchGalleriesData();
     }, [currentCategory]);
 
+    // Cerrar el lightbox al cambiar de galería para no arrastrar un índice inválido
+    useEffect(() => {
+        setSelectedImage(null);
+    }, [currentGalleryIndex]);
+
     useEffect(() => {
         const handleScroll = () => setShowScrollTop(window.scrollY > 300);
         window.addEventListener('scroll', handleScroll);
@@ -112,7 +129,7 @@ const PublicGallery = () => {
             setLoading(true);
             setError(null);
             setGalleries([]);
-            setAllImages([]);
+            setCurrentGalleryIndex(0);
 
             if (currentCategory === 'general') {
                 await fetchGeneralGalleries();
@@ -130,7 +147,7 @@ const PublicGallery = () => {
     const fetchCategoryGalleries = async () => {
         try {
             // Cambiar el endpoint para obtener TODAS las galerías del tipo
-            const response = await fetch(`http://localhost:3000/api/public/galleries/category/${serviceType}`);
+            const response = await fetch(`${API_URL}/api/public/galleries/category/${serviceType}`);
             
             if (!response.ok) {
                 throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -142,13 +159,6 @@ const PublicGallery = () => {
                 // Ahora data.data es un array de galerías
                 const galleriesData = Array.isArray(data.data) ? data.data : [data.data];
                 setGalleries(galleriesData);
-                
-                // Extraer todas las imágenes de todas las galerías
-                const allImagesFromGalleries = galleriesData.flatMap(gallery => 
-                    gallery.images || []
-                );
-                setAllImages(allImagesFromGalleries);
-                
             } else {
                 setError('No se encontraron galerías para esta categoría');
             }
@@ -163,18 +173,13 @@ const PublicGallery = () => {
     const fetchGeneralGalleries = async () => {
         try {
             // Para la galería general, obtener todas las galerías públicas
-            const response = await fetch('http://localhost:3000/api/public/galleries');
+            const response = await fetch(`${API_URL}/api/public/galleries`);
             
             if (response.ok) {
                 const data = await response.json();
                 if (data.success && data.data) {
                     const galleriesData = Array.isArray(data.data) ? data.data : [data.data];
                     setGalleries(galleriesData);
-                    
-                    const allImagesFromGalleries = galleriesData.flatMap(gallery => 
-                        gallery.images || []
-                    );
-                    setAllImages(allImagesFromGalleries);
                 } else {
                     setError('No hay galerías disponibles');
                 }
@@ -205,11 +210,11 @@ const PublicGallery = () => {
         if (!selectedImage) return;
         
         const newIndex = selectedImage.index + direction;
-        if (newIndex >= 0 && newIndex < allImages.length) {
+        if (newIndex >= 0 && newIndex < currentImages.length) {
             const newImage = {
-                ...allImages[newIndex],
+                ...currentImages[newIndex],
                 index: newIndex,
-                url: allImages[newIndex].image_url || allImages[newIndex].url
+                url: currentImages[newIndex].image_url || currentImages[newIndex].url
             };
             setSelectedImage(newImage);
         }
@@ -290,22 +295,45 @@ const PublicGallery = () => {
                         {categoryTitles[currentCategory]}
                     </h1>
                     <p className="public-gallery__subtitle">
-                        {galleries[0]?.description || categoryDescriptions[currentCategory]}
+                        {currentGallery?.description || categoryDescriptions[currentCategory]}
                     </p>
                     <div className="public-gallery__count">
                         <FontAwesomeIcon icon={faImages} />
-                        {allImages.length} {allImages.length === 1 ? 'imagen' : 'imágenes'}
+                        {currentImages.length} {currentImages.length === 1 ? 'imagen' : 'imágenes'}
                     </div>
+
+                    {galleries.length > 1 && (
+                        <div className="public-gallery__switcher">
+                            <button
+                                className="public-gallery__switcher-arrow"
+                                onClick={() => navigateGallery(-1)}
+                                aria-label="Galería anterior"
+                            >
+                                <FontAwesomeIcon icon={faChevronLeft} />
+                            </button>
+                            <span className="public-gallery__switcher-label">
+                                <FontAwesomeIcon icon={faLayerGroup} />
+                                {currentGallery?.title || `Galería ${currentGalleryIndex + 1}`} · {currentGalleryIndex + 1} de {galleries.length}
+                            </span>
+                            <button
+                                className="public-gallery__switcher-arrow"
+                                onClick={() => navigateGallery(1)}
+                                aria-label="Siguiente galería"
+                            >
+                                <FontAwesomeIcon icon={faChevronRight} />
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Gallery Grid */}
             <div className="public-gallery__container">
-                {allImages.length > 0 ? (
+                {currentImages.length > 0 ? (
                     <div className="public-gallery__grid">
                         {Array.from({ length: columnCount }, (_, colIndex) => (
                             <div className="public-gallery__column" key={colIndex}>
-                                {allImages
+                                {currentImages
                                     .map((image, index) => ({ image, index }))
                                     .filter((_, index) => index % columnCount === colIndex)
                                     .map(({ image, index }) => (
@@ -361,7 +389,7 @@ const PublicGallery = () => {
                         <button 
                             className="public-gallery__lightbox-nav public-gallery__lightbox-next"
                             onClick={() => navigateImage(1)}
-                            disabled={selectedImage.index === allImages.length - 1}
+                            disabled={selectedImage.index === currentImages.length - 1}
                             aria-label="Imagen siguiente"
                         >
                             <FontAwesomeIcon icon={faChevronRight} />
@@ -369,7 +397,7 @@ const PublicGallery = () => {
 
                         <div className="public-gallery__lightbox-info">
                             <div className="public-gallery__lightbox-counter">
-                                {selectedImage.index + 1} / {allImages.length}
+                                {selectedImage.index + 1} / {currentImages.length}
                             </div>
                             {selectedImage.file_size && (
                                 <div className="public-gallery__lightbox-meta">

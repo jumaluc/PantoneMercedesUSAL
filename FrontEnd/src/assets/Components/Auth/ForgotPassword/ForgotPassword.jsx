@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../Login/Login.css';
+import { API_URL } from '../../../../config/api';
 
 const ForgotPassword = ({ onClose }) => {
   const [email, setEmail] = useState('');
@@ -40,7 +41,7 @@ const ForgotPassword = ({ onClose }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/recover/forgot-password', {
+      const response = await fetch(`${API_URL}/recover/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +71,7 @@ const ForgotPassword = ({ onClose }) => {
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:3000/recover/forgot-password', {
+      const response = await fetch(`${API_URL}/recover/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ const ForgotPassword = ({ onClose }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/recover/verify-reset-code', {
+      const response = await fetch(`${API_URL}/recover/verify-reset-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +135,7 @@ const ForgotPassword = ({ onClose }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/recover/reset-password', {
+      const response = await fetch(`${API_URL}/recover/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

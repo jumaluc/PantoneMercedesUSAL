@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComment, faTimes, faEdit, faTrash, faPaperPlane, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
+import { API_URL } from '../../../config/api';
 
 const CommentsSection = ({ user, galleryId }) => {
   const [comments, setComments] = useState([]);
@@ -24,7 +25,7 @@ const CommentsSection = ({ user, galleryId }) => {
 
   const fetchComments = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/user/getComments?gallery_id=${galleryId}`, {
+      const response = await fetch(`${API_URL}/user/getComments?gallery_id=${galleryId}`, {
         credentials: 'include'
       });
       
@@ -39,7 +40,7 @@ const CommentsSection = ({ user, galleryId }) => {
 
   const fetchGeneralRequests = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/user/getGeneralRequests?gallery_id=${galleryId}`, {
+      const response = await fetch(`${API_URL}/user/getGeneralRequests?gallery_id=${galleryId}`, {
         credentials: 'include'
       });
       
@@ -64,7 +65,7 @@ const CommentsSection = ({ user, galleryId }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/user/addComment', {
+      const response = await fetch(`${API_URL}/user/addComment`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -101,7 +102,7 @@ const CommentsSection = ({ user, galleryId }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/user/addGeneralRequest', {
+      const response = await fetch(`${API_URL}/user/addGeneralRequest`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -138,7 +139,7 @@ const CommentsSection = ({ user, galleryId }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/user/updateComment', {
+      const response = await fetch(`${API_URL}/user/updateComment`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -175,7 +176,7 @@ const CommentsSection = ({ user, galleryId }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/user/updateGeneralRequest', {
+      const response = await fetch(`${API_URL}/user/updateGeneralRequest`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -214,7 +215,7 @@ const CommentsSection = ({ user, galleryId }) => {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch('http://localhost:3000/user/deleteComment', {
+        const response = await fetch(`${API_URL}/user/deleteComment`, {
           method: 'DELETE',
           credentials: 'include',
           headers: {
@@ -250,7 +251,7 @@ const CommentsSection = ({ user, galleryId }) => {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch('http://localhost:3000/user/deleteGeneralRequest', {
+        const response = await fetch(`${API_URL}/user/deleteGeneralRequest`, {
           method: 'DELETE',
           credentials: 'include',
           headers: {

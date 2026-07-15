@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRightFromBracket, faBars } from '@fortawesome/free-solid-svg-icons';
 import NotificationBell from '../Shared/NotificationBell';
 import './AdminDashboard.css';
+import { API_URL } from '../../../config/api';
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('clients');
@@ -25,7 +26,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        const response = await fetch('http://localhost:3000/user/getUser', {
+        const response = await fetch(`${API_URL}/user/getUser`, {
           credentials: 'include'
         });
         const data = await response.json();
@@ -44,7 +45,7 @@ const AdminDashboard = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const response = await fetch('http://localhost:3000/admin/dashboard-stats', {
+      const response = await fetch(`${API_URL}/admin/dashboard-stats`, {
         credentials: 'include'
       });
       if (response.ok) {
@@ -69,14 +70,14 @@ const AdminDashboard = () => {
       case 'requests': return <RequestsSection />;
       case 'audit': return <AuditSection />;
       case 'publicContent': return <PublicContent/> 
-      case 'profile': return <ProfileSection adminData={adminData} />;
+      case 'profile': return <ProfileSection adminData={adminData} onUpdated={(updated) => setAdminData(prev => ({ ...prev, ...updated }))} />;
       default: return <StatsSection />;
     }
   };
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:3000/auth/logout', {
+      await fetch(`${API_URL}/auth/logout`, {
         method: 'POST',
         credentials: 'include'
       });

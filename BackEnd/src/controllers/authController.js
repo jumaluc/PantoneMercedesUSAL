@@ -24,15 +24,18 @@ const authController = {
                 process.env.REFRESH_TOKEN_SECRET,
                 { expiresIn: '30d' }
             );
+                const isProd = process.env.NODE_ENV === 'production';
                 return res
                 .cookie('access_token', accessToken, {
                     httpOnly: true,
-                    sameSite: 'strict',
+                    sameSite: isProd ? 'none' : 'strict',
+                    secure: isProd,
                     maxAge: 1000 * 60 * 60  // 1 hora
                 })
                 .cookie('refresh_token', refreshToken, {
                     httpOnly: true,
-                    sameSite: 'strict',
+                    sameSite: isProd ? 'none' : 'strict',
+                    secure: isProd,
                     maxAge: 1000 * 60 * 60 * 24 * 30  // 30 días
                 })
                 .status(200).json({role: result.role})

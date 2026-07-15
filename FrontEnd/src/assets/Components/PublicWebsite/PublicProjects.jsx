@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
 import './PublicProjects.css';
+import { API_URL } from '../../../config/api';
 
 const PublicProjects = () => {
     const [projects, setProjects] = useState([]);
@@ -31,7 +32,7 @@ const PublicProjects = () => {
     const fetchProjects = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:3000/api/public/projects');
+            const response = await fetch(`${API_URL}/api/public/projects`);
             if (response.ok) {
                 const data = await response.json();
                 setProjects(data.data || []);

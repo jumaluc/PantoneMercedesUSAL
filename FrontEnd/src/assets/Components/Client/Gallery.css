@@ -331,6 +331,7 @@
     height: 100%;
     padding-bottom: 20px;
     grid-auto-rows: 250px;
+    grid-auto-flow: dense;
 }
 
 .galeriaFotos-container-imagen {
@@ -341,6 +342,8 @@
     overflow: hidden;
     border: 3px solid transparent;
     transition: border-color 0.2s ease, border-radius 0.2s ease;
+    content-visibility: auto;
+    contain-intrinsic-size: 300px 250px;
 }
 
 .galeriaFotos-container-imagen.selected-container {
@@ -373,6 +376,12 @@
 /* Estilos para imágenes horizontales */
 .galeriaFotos-container-imagen.horizontal {
     grid-column-end: span 1;
+}
+
+/* Foto horizontal destacada: ocupa el espacio de 4 fotos horizontales normales */
+.galeriaFotos-container-imagen.horizontal.featured {
+    grid-column-end: span 2;
+    grid-row-end: span 2;
 }
 
 .galeria-item img {
@@ -425,7 +434,6 @@
   cursor: pointer;
   transition: var(--transition);
   font-size: 14px;
-  backdrop-filter: blur(4px);
 }
 
 .check-btn:hover, .zoom-btn:hover {
@@ -828,6 +836,11 @@
     grid-auto-rows: 120px;
     gap: 8px;
   }
+
+  .galeriaFotos-container-imagen.horizontal.featured {
+    grid-column-end: span 2;
+    grid-row-end: span 1;
+  }
   
   .check-btn, .zoom-btn {
     width: 32px;
@@ -875,7 +888,6 @@
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 14px;
-  backdrop-filter: blur(4px);
 }
 
 .download-single-btn:hover {

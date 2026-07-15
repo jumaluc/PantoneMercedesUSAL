@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path');
 const app = express();
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -13,21 +14,36 @@ const authRoutes = require('./src/routes/authRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const publicRoutes = require('./src/routes/publicRoutes');
 const adminPublicRoutes = require('./src/routes/adminPublicRoutes');
+const thumbRoutes = require('./src/routes/thumbRoutes');
 
 //MIDDLEWARE
-app.use(helmet());
-app.use(cors({
-  origin: (origin, callback) => {
-    const allowed = [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:5175',
-      'http://localhost:5199',
-    ];
-    if (!origin || allowed.includes(origin)) callback(null, true);
-    else callback(new Error('Not allowed by CORS'));
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "img-src": ["'self'", "data:", "https://storage.googleapis.com"],
+      "media-src": ["'self'", "https://storage.googleapis.com"],
+    },
   },
-  credentials: true
+}));
+const defaultOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+  'http://localhost:5199',
+];
+const envOrigins = (process.env.CORS_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean);
+const allowedOrigins = [...defaultOrigins, ...envOrigins];
+
+app.use(cors((req, callback) => {
+  const origin = req.header('Origin');
+  let allow = !origin || allowedOrigins.includes(origin);
+  if (!allow && origin) {
+    // Mismo origen (front y API serviditos por el mismo host, ej. detrás de un túnel):
+    // el navegador igual manda Origin, así que lo comparamos contra el Host de la request.
+    try { allow = new URL(origin).host === req.headers.host; } catch { /* origin inválido */ }
+  }
+  callback(null, { origin: allow, credentials: true });
 }));
 app.use(morgan('combined'));
 app.use(express.json());
@@ -56,7 +72,8 @@ app.use((req, res, next) => {
                 );
                 res.cookie('access_token', newAccessToken, {
                     httpOnly: true,
-                    sameSite: 'strict',
+                    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+                    secure: process.env.NODE_ENV === 'production',
                     maxAge: 1000 * 60 * 60
                 });
                 req.session.user = { id: refreshData.id, role: refreshData.role };
@@ -71,6 +88,7 @@ app.use((req, res, next) => {
 
 // Rutas públicas
 app.use('/api/public', publicRoutes);
+app.use('/api/thumb', thumbRoutes);
 
 // Rutas administrativas para contenido público
 app.use('/api/admin/public-content', adminPublicRoutes);
@@ -78,6 +96,13 @@ app.use('/user',userRoutes);
 app.use('/auth',authRoutes);
 app.use('/recover',recoverPasswRoutes);
 app.use('/admin', adminRoutes)
+
+// Frontend build (mismo origen que la API, sin CORS entre sitio y backend)
+const FRONTEND_DIST = path.join(__dirname, '..', 'FrontEnd', 'dist');
+app.use(express.static(FRONTEND_DIST));
+app.get(/^\/(?!api|user|auth|recover|admin).*/, (req, res) => {
+    res.sendFile(path.join(FRONTEND_DIST, 'index.html'));
+});
 
 // Manejador de errores global: evita devolver stack traces crudos al cliente
 app.use((err, req, res, next) => {

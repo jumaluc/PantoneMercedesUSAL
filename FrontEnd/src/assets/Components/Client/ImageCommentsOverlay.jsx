@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faPaperPlane, faComment, faEdit, faTrash, faSave, faUndo } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
+import { API_URL } from '../../../config/api';
 
 const ImageCommentsOverlay = ({ image, isOpen, onClose, galleryId }) => {
   const [comments, setComments] = useState([]);
@@ -22,7 +23,7 @@ const ImageCommentsOverlay = ({ image, isOpen, onClose, galleryId }) => {
 
   const fetchImageComments = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/user/getImageComments?image_id=${image.id}`, {
+      const response = await fetch(`${API_URL}/user/getImageComments?image_id=${image.id}`, {
         credentials: 'include'
       });
       
@@ -55,7 +56,7 @@ const addImageComment = async () => {
       comment: newComment.trim()
     });
     
-    const response = await fetch('http://localhost:3000/user/addComment', {
+    const response = await fetch(`${API_URL}/user/addComment`, {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -122,7 +123,7 @@ const addImageComment = async () => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/user/updateImageComment', {
+      const response = await fetch(`${API_URL}/user/updateImageComment`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -172,7 +173,7 @@ const addImageComment = async () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch('http://localhost:3000/user/deleteImageComment', {
+        const response = await fetch(`${API_URL}/user/deleteImageComment`, {
           method: 'DELETE',
           credentials: 'include',
           headers: {

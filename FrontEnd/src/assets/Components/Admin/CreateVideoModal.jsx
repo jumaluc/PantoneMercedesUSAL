@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faUpload, faVideo, faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import './VideoSection.css'
+import { API_URL } from '../../../config/api';
 
 const fmtTime = (secs) => {
     if (secs == null || !isFinite(secs)) return '...';
@@ -49,7 +50,7 @@ const CreateVideoModal = ({ isOpen, onClose, onVideoCreated, clients }) => {
 
     useEffect(() => {
         if (!isOpen) return;
-        fetch('http://localhost:3000/admin/getAllGalleries', { credentials: 'include' })
+        fetch(`${API_URL}/admin/getAllGalleries`, { credentials: 'include' })
             .then(res => res.ok ? res.json() : [])
             .then(data => setGalleries(data || []))
             .catch(() => setGalleries([]));
@@ -175,7 +176,7 @@ const CreateVideoModal = ({ isOpen, onClose, onVideoCreated, clients }) => {
                 submitData.append('thumbnail', thumbnailFile);
             }
 
-            await uploadWithProgress('http://localhost:3000/admin/createVideo', submitData);
+            await uploadWithProgress(`${API_URL}/admin/createVideo`, submitData);
 
             toast.success('Video creado exitosamente');
             resetForm();

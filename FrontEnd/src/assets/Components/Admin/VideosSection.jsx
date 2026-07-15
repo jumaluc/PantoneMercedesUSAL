@@ -6,6 +6,7 @@ import VideoCard from './VideoCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faVideo } from '@fortawesome/free-solid-svg-icons';
 import './VideoSection.css';
+import { API_URL } from '../../../config/api';
 
 const VideosSection = () => {
   const [allVideos, setAllVideos] = useState([]);
@@ -36,7 +37,7 @@ const VideosSection = () => {
 
   const fetchVideos = async () => {
     try {
-      const response = await fetch('http://localhost:3000/admin/getAllVideos', {
+      const response = await fetch(`${API_URL}/admin/getAllVideos`, {
         credentials: 'include'
       });
       
@@ -57,7 +58,7 @@ const VideosSection = () => {
 
   const fetchClients = async () => {
     try {
-      const response = await fetch('http://localhost:3000/admin/getAllClients', {
+      const response = await fetch(`${API_URL}/admin/getAllClients`, {
         credentials: 'include'
       });
       const data = await response.json();

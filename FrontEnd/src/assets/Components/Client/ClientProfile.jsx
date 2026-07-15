@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import { API_URL } from '../../../config/api';
 
 const ClientProfile = ({ user, setUser }) => {
   const [profileData, setProfileData] = useState({
@@ -23,7 +24,7 @@ const ClientProfile = ({ user, setUser }) => {
     e.preventDefault();
     
     try {
-      const response = await fetch("http://localhost:3000/user/editProfile", {
+      const response = await fetch("${API_URL}/user/editProfile", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import ForgotPassword from "../ForgotPassword/ForgotPassword";
 import PoliciesModal from '../../PublicWebsite/PoliciesModal';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_URL } from '../../../../config/api';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ const Login = () => {
   const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:3000/auth/me', { credentials: 'include' })
+    fetch(`${API_URL}/auth/me`, { credentials: 'include' })
       .then(res => {
         if (!res.ok) throw new Error('No autenticado');
         return res.json();
@@ -153,7 +154,7 @@ const login = () => {
     return;
   }
 
-  fetch('http://localhost:3000/auth/login', {
+  fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(loginData),
@@ -186,7 +187,7 @@ const login = () => {
       return;
     }
 
-    fetch('http://localhost:3000/auth/register', {
+    fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(registerData),

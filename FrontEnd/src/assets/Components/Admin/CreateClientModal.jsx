@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import './CreateClientModal.css';
 import { toast } from "react-toastify";
+import { API_URL } from '../../../config/api';
 
 const CreateClientModal = ({ isOpen, onClose, onClientCreated }) => {
   const [formData, setFormData] = useState({
@@ -17,15 +18,10 @@ const CreateClientModal = ({ isOpen, onClose, onClientCreated }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const serviceTypes = [
-    'Fotografía de Bodas',
-    'Fotografía de Retrato',
-    'Fotografía de Producto',
-    'Fotografía de Eventos',
-    'Fotografía de Moda',
-    'Fotografía Arquitectónica',
-    'Video Corporativo',
-    'Video Musical',
-    'Video de Eventos'
+    'XV años',
+    'Casamiento',
+    'Bautismo',
+    'Otro'
   ];
 
   const handleInputChange = (e) => {
@@ -82,7 +78,7 @@ const CreateClientModal = ({ isOpen, onClose, onClientCreated }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/admin/createClient', {
+      const response = await fetch(`${API_URL}/admin/createClient`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faTimes, faSave, faTrash, faPlus, faSpinner, faImages, faCloudUploadAlt
+    faTimes, faSave, faTrash, faPlus, faSpinner, faImages, faCloudUploadAlt, faChevronDown
 } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import './EditGalleryModal.css';
+import { API_URL } from '../../../../config/api';
+
+const INITIAL_PREVIEW_COUNT = 20;
+const PREVIEW_LOAD_MORE_COUNT = 30;
 
 const fmtTime = (secs) => {
     if (secs == null || !isFinite(secs)) return '...';
@@ -22,6 +26,7 @@ const EditGalleryModal = ({ gallery, isOpen, onClose, onUpdated }) => {
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(null);
     const [elapsed, setElapsed] = useState(0);
+    const [visibleCount, setVisibleCount] = useState(INITIAL_PREVIEW_COUNT);
     const fileInputRef = useRef(null);
     const startTimeRef = useRef(null);
     const timerRef = useRef(null);
@@ -47,13 +52,14 @@ const EditGalleryModal = ({ gallery, isOpen, onClose, onUpdated }) => {
                 status: gallery.status || 'active'
             });
             fetchImages();
+            setVisibleCount(INITIAL_PREVIEW_COUNT);
         }
     }, [isOpen, gallery]);
 
     const fetchImages = async () => {
         setLoadingImages(true);
         try {
-            const res = await fetch(`http://localhost:3000/admin/getGalleryImages/${gallery.id}`, { credentials: 'include' });
+            const res = await fetch(`${API_URL}/admin/getGalleryImages/${gallery.id}`, { credentials: 'include' });
             if (!res.ok) throw new Error();
             const data = await res.json();
             setImages(data.data || []);
@@ -68,7 +74,7 @@ const EditGalleryModal = ({ gallery, isOpen, onClose, onUpdated }) => {
         if (!formData.title.trim()) { toast.error('El título es obligatorio'); return; }
         setSaving(true);
         try {
-            const res = await fetch(`http://localhost:3000/admin/updateGallery/${gallery.id}`, {
+            const res = await fetch(`${API_URL}/admin/updateGallery/${gallery.id}`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
@@ -88,7 +94,7 @@ const EditGalleryModal = ({ gallery, isOpen, onClose, onUpdated }) => {
     const handleDeleteImage = async (imageId) => {
         setDeletingImage(imageId);
         try {
-            const res = await fetch(`http://localhost:3000/admin/deleteGalleryImage/${imageId}`, {
+            const res = await fetch(`${API_URL}/admin/deleteGalleryImage/${imageId}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
@@ -117,7 +123,7 @@ const EditGalleryModal = ({ gallery, isOpen, onClose, onUpdated }) => {
             const form = new FormData();
             form.append('images', file);
             try {
-                const res = await fetch(`http://localhost:3000/admin/addImagesToGallery/${gallery.id}`, {
+                const res = await fetch(`${API_URL}/admin/addImagesToGallery/${gallery.id}`, {
                     method: 'POST',
                     credentials: 'include',
                     body: form,
@@ -176,7 +182,6 @@ const EditGalleryModal = ({ gallery, isOpen, onClose, onUpdated }) => {
                             <select value={formData.status} onChange={e => setFormData(p => ({ ...p, status: e.target.value }))}>
                                 <option value="active">Activa</option>
                                 <option value="inactive">Inactiva</option>
-                                <option value="draft">Borrador</option>
                             </select>
                         </div>
                     </div>
@@ -241,27 +246,39 @@ const EditGalleryModal = ({ gallery, isOpen, onClose, onUpdated }) => {
                                 <span>Cargando imágenes...</span>
                             </div>
                         ) : (
-                            <div className="egm-images-grid">
-                                {images.map(img => (
-                                    <div key={img.id} className="egm-image-item">
-                                        <img src={img.image_url} alt={img.original_filename || 'foto'} />
-                                        <button
-                                            className="egm-delete-img"
-                                            onClick={() => handleDeleteImage(img.id)}
-                                            disabled={deletingImage === img.id}
-                                            title="Eliminar imagen"
-                                        >
-                                            {deletingImage === img.id
-                                                ? <FontAwesomeIcon icon={faSpinner} spin />
-                                                : <FontAwesomeIcon icon={faTrash} />
-                                            }
-                                        </button>
-                                    </div>
-                                ))}
-                                {images.length === 0 && (
-                                    <p className="egm-no-images">No hay imágenes en esta galería</p>
+                            <>
+                                <div className="egm-images-grid">
+                                    {images.slice(0, visibleCount).map(img => (
+                                        <div key={img.id} className="egm-image-item">
+                                            <img src={img.image_url} alt={img.original_filename || 'foto'} />
+                                            <button
+                                                className="egm-delete-img"
+                                                onClick={() => handleDeleteImage(img.id)}
+                                                disabled={deletingImage === img.id}
+                                                title="Eliminar imagen"
+                                            >
+                                                {deletingImage === img.id
+                                                    ? <FontAwesomeIcon icon={faSpinner} spin />
+                                                    : <FontAwesomeIcon icon={faTrash} />
+                                                }
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {images.length === 0 && (
+                                        <p className="egm-no-images">No hay imágenes en esta galería</p>
+                                    )}
+                                </div>
+                                {images.length > visibleCount && (
+                                    <button
+                                        type="button"
+                                        className="egm-load-more"
+                                        onClick={() => setVisibleCount(prev => prev + PREVIEW_LOAD_MORE_COUNT)}
+                                    >
+                                        <FontAwesomeIcon icon={faChevronDown} />
+                                        Cargar más ({images.length - visibleCount} restantes)
+                                    </button>
                                 )}
-                            </div>
+                            </>
                         )}
                     </div>
                 </div>

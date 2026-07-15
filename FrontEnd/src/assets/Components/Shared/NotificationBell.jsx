@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './NotificationBell.css';
+import { API_URL } from '../../../config/api';
 
 const ICONS = {
   gallery_created:  '🖼️',
@@ -31,7 +32,7 @@ const NotificationBell = ({ role }) => {
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-  const baseUrl = role === 'admin' ? 'http://localhost:3000/admin' : 'http://localhost:3000/user';
+  const baseUrl = role === 'admin' ? `${API_URL}/admin` : `${API_URL}/user`;
 
   const fetchNotifications = useCallback(async () => {
     try {

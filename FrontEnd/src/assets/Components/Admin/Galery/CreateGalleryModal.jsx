@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faUpload, faTrash, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import UploadProgressModal from './UploadProgressModal';
+import { API_URL } from '../../../../config/api';
 
 const BATCH_SIZE = 5;
 const INITIAL_PREVIEW_COUNT = 20;
@@ -77,7 +78,7 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
   const cleanupGallery = async (galleryId) => {
     if (!galleryId) return;
     try {
-      await fetch(`http://localhost:3000/admin/deleteGallery/${galleryId}`, {
+      await fetch(`${API_URL}/admin/deleteGallery/${galleryId}`, {
         method: 'DELETE',
         credentials: 'include'
       });
@@ -127,7 +128,7 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
     if (isPrimary) formPayload.append('isPrimary', 'true');
 
     const t0 = Date.now();
-    const res = await fetch(`http://localhost:3000/admin/addImagesToGallery/${galleryId}`, {
+    const res = await fetch(`${API_URL}/admin/addImagesToGallery/${galleryId}`, {
       method: 'POST',
       credentials: 'include',
       body: formPayload
@@ -166,7 +167,7 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
 
     try {
       // Step 1: create gallery metadata
-      const metaRes = await fetch('http://localhost:3000/admin/createGalleryMeta', {
+      const metaRes = await fetch(`${API_URL}/admin/createGalleryMeta`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -221,7 +222,7 @@ const CreateGalleryModal = ({ isOpen, onClose, onGalleryCreated, clients }) => {
 
       // Step 3: finalize
       setProgressPhase('finalizing');
-      await fetch(`http://localhost:3000/admin/finalizeGallery/${galleryId}`, {
+      await fetch(`${API_URL}/admin/finalizeGallery/${galleryId}`, {
         method: 'POST',
         credentials: 'include'
       });

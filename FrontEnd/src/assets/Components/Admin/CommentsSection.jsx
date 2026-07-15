@@ -6,6 +6,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import './CommentsSection.css';
+import { API_URL } from '../../../config/api';
 
 const CommentsSection = () => {
     const [comments, setComments] = useState([]);
@@ -27,7 +28,7 @@ const CommentsSection = () => {
     const fetchComments = async () => {
         try {
             setLoading(true);
-            const res = await fetch('http://localhost:3000/admin/comments', { credentials: 'include' });
+            const res = await fetch(`${API_URL}/admin/comments`, { credentials: 'include' });
             if (!res.ok) throw new Error();
             const data = await res.json();
             const list = data.data || [];
@@ -43,7 +44,7 @@ const CommentsSection = () => {
     const markAsSeen = async (id) => {
         setMarking(id);
         try {
-            const res = await fetch(`http://localhost:3000/admin/comments/${id}/seen`, {
+            const res = await fetch(`${API_URL}/admin/comments/${id}/seen`, {
                 method: 'POST',
                 credentials: 'include'
             });

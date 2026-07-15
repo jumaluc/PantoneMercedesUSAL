@@ -3,8 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faSave, faPen, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import './ProfileSection.css';
+import { API_URL } from '../../../config/api';
 
-const ProfileSection = ({ adminData }) => {
+const ProfileSection = ({ adminData, onUpdated }) => {
     const [editing, setEditing] = useState(false);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState({
@@ -47,7 +48,7 @@ const ProfileSection = ({ adminData }) => {
         }
         setSaving(true);
         try {
-            const res = await fetch('http://localhost:3000/user/editProfile', {
+            const res = await fetch(`${API_URL}/user/editProfile`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
@@ -57,6 +58,7 @@ const ProfileSection = ({ adminData }) => {
             if (res.ok) {
                 toast.success('Perfil actualizado correctamente');
                 setEditing(false);
+                onUpdated?.(data.data || form);
             } else {
                 toast.error(data.message || 'Error al actualizar perfil');
             }

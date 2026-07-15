@@ -5,6 +5,7 @@ import './GalleriesSection.css';
 import Swal from 'sweetalert2';
 import EditGalleryModal from './EditGalleryModal';
 import ViewGalleryModal from './ViewGalleryModal';
+import { API_URL } from '../../../../config/api';
 
 const GalleryCard = ({ gallery, onUpdate }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -41,7 +42,7 @@ const GalleryCard = ({ gallery, onUpdate }) => {
       })
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`http://localhost:3000/admin/deleteGallery/${gallery.id}`, {
+        const response = await fetch(`${API_URL}/admin/deleteGallery/${gallery.id}`, {
           method: 'DELETE',
           credentials: 'include'
         });

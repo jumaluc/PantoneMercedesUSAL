@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
+import { API_URL } from '../../config/api';
 
 export const PrivateRoute = ({ children, allowedRoles }) => {
   const [role, setRole] = useState(null);
@@ -11,7 +12,7 @@ export const PrivateRoute = ({ children, allowedRoles }) => {
 
     const checkAuth = async () => {
       try {
-        const response = await fetch('http://localhost:3000/auth/me', {
+        const response = await fetch(`${API_URL}/auth/me`, {
           credentials: 'include'
         });
 

@@ -1,27 +1,33 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faTimes, faSpinner, faImages, faChevronLeft, faChevronRight
+    faTimes, faSpinner, faImages, faChevronLeft, faChevronRight, faChevronDown
 } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import './ViewGalleryModal.css';
+import { API_URL } from '../../../../config/api';
+
+const INITIAL_PREVIEW_COUNT = 20;
+const PREVIEW_LOAD_MORE_COUNT = 30;
 
 const ViewGalleryModal = ({ gallery, isOpen, onClose }) => {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(null);
+    const [visibleCount, setVisibleCount] = useState(INITIAL_PREVIEW_COUNT);
 
     useEffect(() => {
         if (isOpen && gallery) {
             fetchImages();
             setSelectedIndex(null);
+            setVisibleCount(INITIAL_PREVIEW_COUNT);
         }
     }, [isOpen, gallery]);
 
     const fetchImages = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:3000/admin/getGalleryImages/${gallery.id}`, { credentials: 'include' });
+            const res = await fetch(`${API_URL}/admin/getGalleryImages/${gallery.id}`, { credentials: 'include' });
             if (!res.ok) throw new Error();
             const data = await res.json();
             setImages(data.data || []);
@@ -78,17 +84,29 @@ const ViewGalleryModal = ({ gallery, isOpen, onClose }) => {
                     ) : images.length === 0 ? (
                         <p className="vgm-no-images">Esta galería no tiene imágenes</p>
                     ) : (
-                        <div className="vgm-grid">
-                            {images.map((img, index) => (
-                                <div
-                                    key={img.id}
-                                    className="vgm-thumb"
-                                    onClick={() => setSelectedIndex(index)}
+                        <>
+                            <div className="vgm-grid">
+                                {images.slice(0, visibleCount).map((img, index) => (
+                                    <div
+                                        key={img.id}
+                                        className="vgm-thumb"
+                                        onClick={() => setSelectedIndex(index)}
+                                    >
+                                        <img src={img.image_url} alt={img.original_filename || 'foto'} loading="lazy" />
+                                    </div>
+                                ))}
+                            </div>
+                            {images.length > visibleCount && (
+                                <button
+                                    type="button"
+                                    className="vgm-load-more"
+                                    onClick={() => setVisibleCount(prev => prev + PREVIEW_LOAD_MORE_COUNT)}
                                 >
-                                    <img src={img.image_url} alt={img.original_filename || 'foto'} loading="lazy" />
-                                </div>
-                            ))}
-                        </div>
+                                    <FontAwesomeIcon icon={faChevronDown} />
+                                    Cargar más ({images.length - visibleCount} restantes)
+                                </button>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

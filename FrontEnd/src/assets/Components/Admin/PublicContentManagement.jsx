@@ -13,6 +13,7 @@ import {
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
 import './PublicContentManagement.css';
+import { API_URL } from '../../../config/api';
 
 const PublicContentManagement = () => {
     const [activeTab, setActiveTab] = useState('company');
@@ -93,7 +94,7 @@ const CompanyInfoManagement = () => {
 
     const fetchCompanyInfo = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/admin/public-content/company-info', {
+            const response = await fetch(`${API_URL}/api/admin/public-content/company-info`, {
                 credentials: 'include'
             });
             if (response.ok) {
@@ -119,7 +120,7 @@ const CompanyInfoManagement = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/api/admin/public-content/company-info', {
+            const response = await fetch(`${API_URL}/api/admin/public-content/company-info`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -292,7 +293,7 @@ const ReviewsManagement = () => {
     const fetchReviews = async () => {
         try {
             setLoading(true);
-            const res = await fetch('http://localhost:3000/admin/reviews', { credentials: 'include' });
+            const res = await fetch(`${API_URL}/admin/reviews`, { credentials: 'include' });
             if (res.ok) {
                 const data = await res.json();
                 setReviews(data.reviews || []);
@@ -306,7 +307,7 @@ const ReviewsManagement = () => {
 
     const handleToggleLike = async (id) => {
         try {
-            const res = await fetch(`http://localhost:3000/user/toggleLike/${id}`, {
+            const res = await fetch(`${API_URL}/user/toggleLike/${id}`, {
                 method: 'POST',
                 credentials: 'include'
             });
@@ -341,7 +342,7 @@ const ReviewsManagement = () => {
         if (!result.isConfirmed) return;
 
         try {
-            const res = await fetch(`http://localhost:3000/admin/reviews/${id}`, {
+            const res = await fetch(`${API_URL}/admin/reviews/${id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
@@ -465,7 +466,7 @@ const FAQsManagement = () => {
     const fetchFAQs = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:3000/api/admin/public-content/faqs', {
+            const response = await fetch(`${API_URL}/api/admin/public-content/faqs`, {
                 credentials: 'include'
             });
             if (response.ok) {
@@ -483,8 +484,8 @@ const FAQsManagement = () => {
         e.preventDefault();
         try {
             const url = editingFaq 
-                ? `http://localhost:3000/api/admin/public-content/faqs/${editingFaq.id}`
-                : 'http://localhost:3000/api/admin/public-content/faqs';
+                ? `${API_URL}/api/admin/public-content/faqs/${editingFaq.id}`
+                : `${API_URL}/api/admin/public-content/faqs`;
             
             const method = editingFaq ? 'PUT' : 'POST';
 
@@ -546,7 +547,7 @@ const FAQsManagement = () => {
         if (!result.isConfirmed) return;
 
         try {
-            const response = await fetch(`http://localhost:3000/api/admin/public-content/faqs/${id}`, {
+            const response = await fetch(`${API_URL}/api/admin/public-content/faqs/${id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
@@ -746,7 +747,7 @@ const PoliciesManagement = () => {
     const fetchPolicies = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:3000/api/admin/public-content/service-policies', {
+            const response = await fetch(`${API_URL}/api/admin/public-content/service-policies`, {
                 credentials: 'include'
             });
             if (response.ok) {
@@ -764,8 +765,8 @@ const PoliciesManagement = () => {
         e.preventDefault();
         try {
             const url = editingPolicy 
-                ? `http://localhost:3000/api/admin/public-content/service-policies/${editingPolicy.id}`
-                : 'http://localhost:3000/api/admin/public-content/service-policies';
+                ? `${API_URL}/api/admin/public-content/service-policies/${editingPolicy.id}`
+                : `${API_URL}/api/admin/public-content/service-policies`;
             
             const method = editingPolicy ? 'PUT' : 'POST';
 
@@ -827,7 +828,7 @@ const PoliciesManagement = () => {
         if (!result.isConfirmed) return;
 
         try {
-            const response = await fetch(`http://localhost:3000/api/admin/public-content/service-policies/${id}`, {
+            const response = await fetch(`${API_URL}/api/admin/public-content/service-policies/${id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });

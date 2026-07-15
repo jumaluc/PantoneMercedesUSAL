@@ -7,6 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import './RequestsSection.css';
+import { API_URL } from '../../../config/api';
 
 const PRIORITY_MAP = {
     urgent: { label: 'Urgente',  color: '#ef4444' },
@@ -44,7 +45,7 @@ const RequestsSection = () => {
     const fetchRequests = async () => {
         try {
             setLoading(true);
-            const res = await fetch('http://localhost:3000/admin/requests', { credentials: 'include' });
+            const res = await fetch(`${API_URL}/admin/requests`, { credentials: 'include' });
             if (!res.ok) throw new Error();
             const data = await res.json();
             const list = data.data || [];
@@ -61,7 +62,7 @@ const RequestsSection = () => {
         const { status, admin_response } = editing[id] || {};
         setSaving(id);
         try {
-            const res = await fetch(`http://localhost:3000/admin/requests/${id}`, {
+            const res = await fetch(`${API_URL}/admin/requests/${id}`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },

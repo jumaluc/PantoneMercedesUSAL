@@ -7,6 +7,7 @@ import ClientReviews from './ClientReviews';
 import './Dashboard.css';
 import React, { useState, useEffect } from 'react';
 import PublicContent from '../PublicWebsite/PublicLayout'
+import { API_URL } from '../../../config/api';
 const Dashboard = () => {
   const [activeSection, setActiveSection] = useState('gallery');
   const [user, setUser] = useState(null);
@@ -16,7 +17,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch('http://localhost:3000/user/getUser', {
+        const response = await fetch(`${API_URL}/user/getUser`, {
           method: 'GET',
           credentials: 'include'
         });

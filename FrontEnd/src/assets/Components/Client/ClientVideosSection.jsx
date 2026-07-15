@@ -8,6 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import './ClientVideosSection.css';
+import { API_URL } from '../../../config/api';
 
 const STATUS_MAP = {
     waiting_selection: {
@@ -50,7 +51,7 @@ const ClientVideosSection = ({ user }) => {
     const fetchVideos = async () => {
         try {
             setLoading(true);
-            const res = await fetch('http://localhost:3000/user/getMyVideos', { credentials: 'include' });
+            const res = await fetch(`${API_URL}/user/getMyVideos`, { credentials: 'include' });
             if (!res.ok) throw new Error();
             const data = await res.json();
             setVideos(data.videos || []);
@@ -65,7 +66,7 @@ const ClientVideosSection = ({ user }) => {
     const handleDownload = async (video) => {
         setDownloadingId(video.id);
         try {
-            const res = await fetch(`http://localhost:3000/user/downloadVideo/${video.id}`, {
+            const res = await fetch(`${API_URL}/user/downloadVideo/${video.id}`, {
                 credentials: 'include'
             });
             if (!res.ok) {

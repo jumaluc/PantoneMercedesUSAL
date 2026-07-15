@@ -15,6 +15,7 @@ import {
     faTimes
 } from '@fortawesome/free-solid-svg-icons';
 import NotificationBell from '../Shared/NotificationBell';
+import { API_URL } from '../../../config/api';
 
 const Navbar = ({ user, activeSection, setActiveSection }) => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Navbar = ({ user, activeSection, setActiveSection }) => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://localhost:3000/auth/logout', {
+      const response = await fetch(`${API_URL}/auth/logout`, {
         method: 'GET',
         credentials: 'include'
       });

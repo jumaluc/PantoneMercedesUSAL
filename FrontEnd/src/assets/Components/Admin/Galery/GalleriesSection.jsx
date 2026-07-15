@@ -6,6 +6,7 @@ import GalleryCard from './GalleryCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faImages } from '@fortawesome/free-solid-svg-icons';
 import './GalleriesSection.css';
+import { API_URL } from '../../../../config/api';
 
 const GalleriesSection = () => {
   const [allGalleries, setAllGalleries] = useState([]);
@@ -40,7 +41,7 @@ const GalleriesSection = () => {
   
   const fetchGalleries = async () => {
     try {
-      const response = await fetch('http://localhost:3000/admin/getAllGalleries', {
+      const response = await fetch(`${API_URL}/admin/getAllGalleries`, {
         credentials: 'include'
       });
       
@@ -61,7 +62,7 @@ const GalleriesSection = () => {
 
   const fetchClients = async () => {
     try {
-      const response = await fetch('http://localhost:3000/admin/getAllClients', {
+      const response = await fetch(`${API_URL}/admin/getAllClients`, {
         credentials: 'include'
       });
       const data = await response.json();

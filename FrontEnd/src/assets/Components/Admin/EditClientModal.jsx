@@ -1,6 +1,7 @@
 // EditClientModal.jsx
 import React, { useState, useEffect } from 'react';
 import { toast } from "react-toastify";
+import { API_URL } from '../../../config/api';
 const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
   const [formData, setFormData] = useState({
     id: '',
@@ -14,15 +15,10 @@ const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const serviceTypes = [
-    'Fotografía de Bodas',
-    'Fotografía de Retrato',
-    'Fotografía de Producto',
-    'Fotografía de Eventos',
-    'Fotografía de Moda',
-    'Fotografía Arquitectónica',
-    'Video Corporativo',
-    'Video Musical',
-    'Video de Eventos'
+    'XV años',
+    'Casamiento',
+    'Bautismo',
+    'Otro'
   ];
 
   useEffect(() => {
@@ -80,7 +76,7 @@ const EditClientModal = ({ isOpen, onClose, onClientUpdated, client }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:3000/admin/updateClient`, {
+      const response = await fetch(`${API_URL}/admin/updateClient`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

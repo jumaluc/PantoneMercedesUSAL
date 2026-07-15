@@ -25,6 +25,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import './StatsSection.css'
+import { API_URL } from '../../../config/api';
 
 const StatsSection = () => {
     const [stats, setStats] = useState({
@@ -56,7 +57,7 @@ const StatsSection = () => {
     const fetchDashboardStats = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:3000/admin/dashboard-stats?range=${timeRange}`, {
+            const response = await fetch(`${API_URL}/admin/dashboard-stats?range=${timeRange}`, {
                 credentials: 'include'
             });
             
@@ -81,7 +82,7 @@ const StatsSection = () => {
     const fetchStats = async () => {
         try {
             setStatsLoading(true);
-            const response = await fetch(`http://localhost:3000/admin/getStats`, {
+            const response = await fetch(`${API_URL}/admin/getStats`, {
                 credentials: 'include'
             });
             

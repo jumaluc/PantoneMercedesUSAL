@@ -21,6 +21,7 @@ import {
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import './ClientCommentsAndRequests.css';
+import { API_URL } from '../../../config/api';
 
 const ClientCommentsAndRequests = ({ user }) => {
     const [activeTab, setActiveTab] = useState('comments');
@@ -69,7 +70,7 @@ const ClientCommentsAndRequests = ({ user }) => {
     const fetchComments = async () => {
         console.log("Intentado agarrar los comentarios (fetchComments)")
         try {
-            const response = await fetch('http://localhost:3000/user/getMyComments', {
+            const response = await fetch(`${API_URL}/user/getMyComments`, {
                 credentials: 'include'
             });
             
@@ -88,7 +89,7 @@ const ClientCommentsAndRequests = ({ user }) => {
 
     const fetchRequests = async () => {
         try {
-            const response = await fetch('http://localhost:3000/user/getMyRequests', {
+            const response = await fetch(`${API_URL}/user/getMyRequests`, {
                 credentials: 'include'
             });
             
@@ -150,7 +151,7 @@ const ClientCommentsAndRequests = ({ user }) => {
 
         setDeletingComment(commentId);
         try {
-            const response = await fetch(`http://localhost:3000/user/deleteImageComment`, {
+            const response = await fetch(`${API_URL}/user/deleteImageComment`, {
                 method: 'DELETE',
                 credentials: 'include',
                 headers: {
@@ -219,7 +220,7 @@ const ClientCommentsAndRequests = ({ user }) => {
 
         setSendingRequest(true);
         try {
-            const response = await fetch('http://localhost:3000/user/createRequest', {
+            const response = await fetch(`${API_URL}/user/createRequest`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
